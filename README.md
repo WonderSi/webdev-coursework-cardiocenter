@@ -268,6 +268,20 @@
 5. `PATCH /appointments/{id}/complete` завершение приема.
 6. `GET /appointments` с фильтрами по пациенту, врачу и статусу.
 ```
+```
+# Публичные эндпоинты (пока не понятно, обычные пользователи без авторизации)
+1. GET  /api/glossaries                   — получить все словари (Glossary + GlossaryValue) для отрисовки форм опросника
+2. GET  /api/glossaries/{id}/values       — получить значения конкретного словаря
+3. POST /api/survey                       — отправить заполненный опрос пациента (создаёт Patient + Diagnosis); возвращает результат прогноза
+
+# Авторизация
+4. POST /api/auth/login                   — вход администратора; возвращает JWT-токен
+5. POST /api/auth/logout                  — выход (инвалидация токена)
+
+# Импорт / Экспорт
+9.  POST /api/admin/import/excel          — импорт пациентов из Excel-файла (multipart/form-data)
+10. GET  /api/admin/export/excel          — экспорт всех пациентов в Excel-файл (с фильтрами)
+```
 
 ### Критерии приемки:
 ...
