@@ -11,11 +11,9 @@ import DefaultLayout from '@/layouts/DefaultLayout.vue'
 
 const route = useRoute()
 
-const currentLayout = computed(() =>
-  route.meta.layout === DefaultLayout
-)
-</script>
+const currentLayout = DefaultLayout
 
+</script>
 
 <style scoped>
 
