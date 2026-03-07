@@ -1,15 +1,16 @@
 // const routes = [
-//   { path: '/',         component: HomePage,    meta: { layout: 'default' }   },
-//   { path: '/survey',   component: SurveyPage,  meta: { layout: 'default' } },
-//   { path: '/results',  component: ResultsPage, meta: { layout: 'default' }   },
+//   { path: '/',         component: HomePage },
+//   { path: '/survey',   component: SurveyPage },
+//   { path: '/results',  component: ResultsPage },
 // ]
 
 import { createRouter, createWebHistory } from 'vue-router'
+import HomePage from '@/pages/HomePage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // страницы
+    { path: '/',         component: HomePage },
   ]
 })
 
