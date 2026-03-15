@@ -1,13 +1,11 @@
 package com.example.cardio
 
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
 
-@SpringBootTest
-class CardioApplicationTests {
+class CardioApplicationTests : BaseIntegrationTest() {
 
-	@Test
-	fun contextLoads() {
-	}
+    @Test
+    fun contextLoads() {
 
+    }
 }
