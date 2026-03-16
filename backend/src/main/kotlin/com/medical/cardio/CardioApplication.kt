@@ -1,4 +1,4 @@
-package com.example.cardio
+package com.medical.cardio
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
