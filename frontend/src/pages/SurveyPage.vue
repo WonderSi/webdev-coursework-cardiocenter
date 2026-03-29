@@ -24,14 +24,14 @@
         <div v-if="currentStepIndex === 0" class="form-container">
           <div class="form-group">
             <label class="label">Пол:</label>
-            <div class="radio-group">
+            <div class="radio-group-horizontal">
               <label class="radio-label">
                 <span>Мужской</span>
-                <input type="radio" value="male" v-model="form.gender" />
+                <input type="radio" :value="1" v-model="form.gender" />
               </label>
               <label class="radio-label">
                 <span>Женский</span>
-                <input type="radio" value="female" v-model="form.gender" />
+                <input type="radio" :value="2" v-model="form.gender" />
               </label>
             </div>
           </div>
@@ -67,22 +67,51 @@
               <span class="unit">см</span>
             </div>
           </div>
-
         </div>
 
         <div v-if="currentStepIndex === 1" class="form-container">
-          <p style="text-align: center; color: gray;">Здесь будет следующий вопрос...</p>
+           <div class="radio-group-vertical">
+            <label class="radio-label">
+              <input type="radio" :value="3" v-model="form.alcohol" />
+              <span>Употребляю</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="2" v-model="form.alcohol" />
+              <span>Употреблял ранее</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="1" v-model="form.alcohol" />
+              <span>Никогда не употреблял</span>
+            </label>
+          </div>
         </div>
+
+        <div v-if="currentStepIndex > 1" class="form-container">
+           <p style="text-align: center; color: gray;">Здесь будет следующий вопрос...</p>
+        </div>
+
       </div>
 
-      <button 
-        class="next-btn" 
-        :class="{ disabled: isNextBtnDisabled }"
-        :disabled="isNextBtnDisabled"
-        @click="nextStep"
-      >
-        {{ isLastStep ? 'Завершить' : 'Далее' }}
-      </button>
+      <div class="actions">
+        <button 
+          class="prev-btn" 
+          :class="{ hidden: currentStepIndex === 0 }"
+          @click="prevStep"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Назад
+        </button>
+
+        <button 
+          class="next-btn" 
+          :class="{ disabled: isNextBtnDisabled, expanded: currentStepIndex === 0 }"
+          :disabled="isNextBtnDisabled"
+          @click="nextStep"
+        >
+          {{ isLastStep ? 'Завершить' : 'Далее' }}
+          <svg v-if="!isLastStep" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -90,26 +119,25 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-// Хранилище всех ответов пользователя
 const form = ref<Record<string, any>>({
   gender: null,
   age: null,
   height: null,
   weight: null,
-  hipMeasurement: null
+  hipMeasurement: null,
+  alcohol: null
 })
 
-// Конфигурация шагов
 const stepsMeta = ref([
   {
     id: 1,
     title: 'Укажите, пожалуйста, ваши основные параметры:',
-    requiredFields: ['gender', 'age', 'height', 'weight'] // Эти поля обязательны для перехода
+    requiredFields: ['gender', 'age', 'height', 'weight']
   },
   {
     id: 2,
-    title: 'Дополнительная информация',
-    requiredFields: [] // Шаг без обязательных полей (можно пропустить)
+    title: 'Употребляете ли вы алкоголь?',
+    requiredFields: ['alcohol']
   },
   {
     id: 3,
@@ -123,17 +151,12 @@ const stepsMeta = ref([
   }
 ])
 
-// Управление состоянием шагов
 const currentStepIndex = ref(0)
-
 const currentStepData = computed(() => stepsMeta.value[currentStepIndex.value])
 const isLastStep = computed(() => currentStepIndex.value === stepsMeta.value.length - 1)
 
-// Логика блокировки кнопки
 const isNextBtnDisabled = computed(() => {
   const required = currentStepData.value.requiredFields
-  
-  // Проверяем, есть ли незаполненные обязательные поля
   return required.some(field => {
     const value = form.value[field]
     return value === null || value === undefined || value === ''
@@ -142,12 +165,16 @@ const isNextBtnDisabled = computed(() => {
 
 const nextStep = () => {
   if (isNextBtnDisabled.value) return
-
   if (!isLastStep.value) {
     currentStepIndex.value++
   } else {
-    console.log('Опрос завершен! Собранные данные:', form.value)
-    // добавим вызов API для отправки данных
+    console.log('Опрос завершен! Данные:', form.value)
+  }
+}
+
+const prevStep = () => {
+  if (currentStepIndex.value > 0) {
+    currentStepIndex.value--
   }
 }
 </script>
@@ -189,7 +216,7 @@ const nextStep = () => {
   font-weight: 700;
   text-align: center;
   color: $color-text;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   line-height: 1.4;
 }
 
@@ -205,21 +232,17 @@ const nextStep = () => {
     background-color: $color-accent-lighter; // цвет неактивного шага
     transition: background-color 0.3s ease;
     border-radius: 0;
-
     border-right: 10px solid $color-white;
 
-    // Первый шаг: скруглен только слева
     &:first-child {
       border-radius: 4px 0 0 4px;
     }
 
-    // Последний шаг: скруглен только справа
     &:last-child {
       border-radius: 0 4px 4px 0;
       border-right: none;
     }
 
-    // Закрашиваем пройденные и текущий шаги
     &.active {
       background-color: $color-accent;
     }
@@ -258,10 +281,11 @@ const nextStep = () => {
   width: 116px;
   font-weight: 800;
   color: $color-text;
-  font-size: 1.0 rem;
+  font-size: 1rem;
 }
 
-.radio-group {
+/* Радио-кнопки в ряд (горизонтальные) */
+.radio-group-horizontal {
   display: flex;
   gap: 32px;
   align-items: center;
@@ -279,6 +303,31 @@ const nextStep = () => {
       cursor: pointer;
       width: 16px;
       height: 16px;
+      accent-color: $color-accent;
+    }
+  }
+}
+
+/* Радио-кнопки в столбик (вертикальные) */
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+
+  .radio-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: $color-text;
+
+    input[type="radio"] {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
       accent-color: $color-accent;
     }
   }
@@ -302,6 +351,11 @@ const nextStep = () => {
     transition: border-color 0.2s;
     color: $color-text;
 
+    &::placeholder {
+      color: rgba($color-secondary, 0.8); 
+      font-weight: 400;
+    }
+
     &:focus {
       border-color: $color-accent;
     }
@@ -315,13 +369,62 @@ const nextStep = () => {
 
   .unit {
     color: $color-secondary;
-    font-size: 1 rem;
+    font-size: 1rem;
+  }
+}
+
+/* КОНТЕЙНЕР АНИМИРОВАННЫХ КНОПОК */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 360px; // Общая ширина, которую займет кнопка "Далее" на 1 шаге
+  height: 48px;
+}
+
+.prev-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-right: 12px;
+  width: 130px;
+  height: 100%;
+  background: transparent;
+  color: $color-accent;
+  border: 1.5px solid $color-accent;
+  border-radius: $radius-rect-buttons;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  
+  /* плавное появление */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  white-space: nowrap; // Не дает тексту съезжать при сужении
+
+  &:hover {
+    background: rgba($color-accent, 0.05);
+  }
+
+  /* на первом шаге кпноки нет */
+  &.hidden {
+    width: 0;
+    opacity: 0;
+    padding: 0;
+    border-width: 0;
+    pointer-events: none;
   }
 }
 
 .next-btn {
-  width: 360px;
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-left: 12px;
+  width: 130px;
+  height: 100%;
   background: $color-accent;
   color: $color-white;
   border: none;
@@ -329,15 +432,22 @@ const nextStep = () => {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  
+  /* плавное сужение */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 
   &:hover:not(.disabled) {
     background: $color-accent-lighter;
   }
 
   &.disabled {
-    background: $color-accent-lighter; // Тусклый цвет
+    background: $color-accent-lighter;
     cursor: not-allowed;
+  }
+
+  &.expanded {
+    width: 100%; // всю ширину max-width: 360px
   }
 }
 </style>
