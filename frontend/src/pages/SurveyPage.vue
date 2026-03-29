@@ -60,6 +60,14 @@
             </div>
           </div>
 
+          <div class="form-group">
+            <label class="label">Объём бёдер:</label>
+            <div class="input-group">
+              <input type="number" class="input-field" placeholder="90" v-model="form.hipMeasurement" />
+              <span class="unit">см</span>
+            </div>
+          </div>
+
         </div>
 
         <div v-if="currentStepIndex === 1" class="form-container">
@@ -87,7 +95,8 @@ const form = ref<Record<string, any>>({
   gender: null,
   age: null,
   height: null,
-  weight: null
+  weight: null,
+  hipMeasurement: null
 })
 
 // Конфигурация шагов
@@ -186,7 +195,7 @@ const nextStep = () => {
 
 .progress-bar {
   display: flex;
-  width: 90%;
+  width: 95%;
   margin-bottom: 24px;
   gap: 0;
 
@@ -246,10 +255,10 @@ const nextStep = () => {
 }
 
 .label {
-  width: 80px;
+  width: 116px;
   font-weight: 800;
   color: $color-text;
-  font-size: 0.95rem;
+  font-size: 1.0 rem;
 }
 
 .radio-group {
@@ -282,10 +291,10 @@ const nextStep = () => {
 
   .input-field {
     width: 60px;
-    height: 28px;
+    height: 24px;
     padding: 8px 12px;
     border: 1.5px solid $color-secondary;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
     text-align: center;
