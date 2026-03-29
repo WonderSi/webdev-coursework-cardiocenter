@@ -39,10 +39,27 @@
           <div class="form-group">
             <label class="label">Возраст:</label>
             <div class="input-group">
-              <input type="number" class="age-input" placeholder="27" v-model="form.age" />
+              <input type="number" class="input-field" placeholder="27" v-model="form.age" />
               <span class="unit">лет</span>
             </div>
           </div>
+          
+          <div class="form-group">
+            <label class="label">Рост:</label>
+            <div class="input-group">
+              <input type="number" class="input-field" placeholder="165" v-model="form.height" />
+              <span class="unit">см</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="label">Вес:</label>
+            <div class="input-group">
+              <input type="number" class="input-field" placeholder="60" v-model="form.weight" />
+              <span class="unit">кг</span>
+            </div>
+          </div>
+
         </div>
 
         <div v-if="currentStepIndex === 1" class="form-container">
@@ -69,7 +86,8 @@ import { ref, computed } from 'vue'
 const form = ref<Record<string, any>>({
   gender: null,
   age: null,
-  // сюда будем добавлять новые поля
+  height: null,
+  weight: null
 })
 
 // Конфигурация шагов
@@ -77,7 +95,7 @@ const stepsMeta = ref([
   {
     id: 1,
     title: 'Укажите, пожалуйста, ваш пол и возраст:',
-    requiredFields: ['gender', 'age'] // Эти поля обязательны для перехода
+    requiredFields: ['gender', 'age', 'height', 'weight'] // Эти поля обязательны для перехода
   },
   {
     id: 2,
@@ -262,8 +280,8 @@ const nextStep = () => {
   align-items: center;
   gap: 12px;
 
-  .age-input {
-    width: 50px;
+  .input-field {
+    width: 60px;
     height: 28px;
     padding: 8px 12px;
     border: 1.5px solid $color-secondary;
