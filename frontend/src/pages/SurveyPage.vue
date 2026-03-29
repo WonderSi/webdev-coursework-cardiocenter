@@ -85,9 +85,66 @@
             </label>
           </div>
         </div>
-
-        <div v-if="currentStepIndex > 1" class="form-container">
-           <p style="text-align: center; color: gray;">Здесь будет следующий вопрос...</p>
+        
+        <div v-if="currentStepIndex === 2" class="form-container">
+           <div class="radio-group-vertical">
+            <label class="radio-label">
+              <input type="radio" :value="14" v-model="form.profession" />
+              <span>Представители законодат. органов власти,  высокопосталенные долж. лица, менеджеры и руководители</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="4" v-model="form.profession" />
+              <span>Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="10" v-model="form.profession" />
+              <span>Квалифицированные специалисты сельского хозяйства и рыболовного</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="12" v-model="form.profession" />
+              <span>Ремесленники и представители других отраслей промышленности</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="5" v-model="form.profession" />
+              <span>Операторы и монтажники установок и машинного оборудования</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="6" v-model="form.profession" />
+              <span>Служащие, сфера обслуживания, работники среднего звена</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="8" v-model="form.profession" />
+              <span>Дипломированные специалисты, умственный труд</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="7" v-model="form.profession" />
+              <span>Никогда не работающие домохозяйки</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="13" v-model="form.profession" />
+              <span>Техники и младшие специалисты</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="1" v-model="form.profession" />
+              <span>Ведение домашнего хозяйства</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="3" v-model="form.profession" />
+              <span>Лица свободных профессий</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="2" v-model="form.profession" />
+              <span>Вооруженные силы</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="11" v-model="form.profession" />
+              <span>Пенсионеры</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" :value="9" v-model="form.profession" />
+              <span>Другое</span>
+            </label>
+          </div>
         </div>
 
       </div>
@@ -125,7 +182,8 @@ const form = ref<Record<string, any>>({
   height: null,
   weight: null,
   hipMeasurement: null,
-  alcohol: null
+  alcohol: null,
+  profession: null
 })
 
 const stepsMeta = ref([
@@ -141,8 +199,8 @@ const stepsMeta = ref([
   },
   {
     id: 3,
-    title: 'Медицинские показатели',
-    requiredFields: []
+    title: 'Выберите ваш род деятельности',
+    requiredFields: ['profession']
   },
   {
     id: 4,
@@ -300,6 +358,7 @@ const prevStep = () => {
     color: $color-text;
 
     input[type="radio"] {
+      flex-shrink: 0;
       cursor: pointer;
       width: 16px;
       height: 16px;
@@ -312,22 +371,25 @@ const prevStep = () => {
 .radio-group-vertical {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   align-items: flex-start;
 
   .radio-label {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     cursor: pointer;
     font-size: 1rem;
     color: $color-text;
+    line-height: 1.4;
 
     input[type="radio"] {
+      flex-shrink: 0;
+      margin-top: 3px;
       cursor: pointer;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       accent-color: $color-accent;
     }
   }
