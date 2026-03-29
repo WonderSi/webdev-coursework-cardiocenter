@@ -20,6 +20,7 @@
 
       <div class="step-content">
         <p class="question-text">{{ currentStepData.title }}</p>
+        <div class="divider"></div>
 
         <component 
           :is="stepComponents[currentStepIndex]" 
@@ -139,7 +140,7 @@ const prevStep = () => {
 }
 
 .title {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
   color: $color-text;
@@ -157,7 +158,7 @@ const prevStep = () => {
   .step {
     flex: 1;
     height: 8px;
-    background-color: $color-step-bg;
+    background-color: $color-accent-lighter2;
     transition: background-color 0.3s ease;
     border-radius: 0;
     border-right: 10px solid $color-white;
@@ -172,7 +173,6 @@ const prevStep = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
   margin-bottom: 40px;
 }
 

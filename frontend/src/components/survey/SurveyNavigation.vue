@@ -61,7 +61,7 @@ defineEmits<{
   border-radius: $radius-rect-buttons;
   font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.25px;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -95,7 +95,7 @@ defineEmits<{
   border-radius: $radius-rect-buttons;
   font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.25px;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
