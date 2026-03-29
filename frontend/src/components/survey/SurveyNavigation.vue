@@ -10,13 +10,24 @@
     </button>
 
     <button 
+      v-if="!isLastStep"
       class="next-btn" 
       :class="{ disabled: isNextBtnDisabled, expanded: currentStepIndex === 0 }"
       :disabled="isNextBtnDisabled"
       @click="$emit('next')"
     >
-      {{ isLastStep ? 'Завершить' : 'Далее' }}
-      <svg v-if="!isLastStep" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      Далее
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+
+    <button 
+      v-else
+      class="finish-btn" 
+      :class="{ disabled: isNextBtnDisabled }"
+      :disabled="isNextBtnDisabled"
+      @click="$emit('next')"
+    >
+      Завершить
     </button>
   </div>
 </template>
@@ -66,18 +77,20 @@ defineEmits<{
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   white-space: nowrap;
+  
   &:hover {
     background: $color-accent-lighter;
     border: $color-accent-lighter;
     color: $color-white;
   }
+  
   &.hidden { 
     width: 0;
     opacity: 0;
     padding: 0;
     border-width: 0;
     pointer-events: none; 
-    }
+  }
 }
 
 .next-btn {
@@ -99,8 +112,45 @@ defineEmits<{
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  &:hover:not(.disabled) { background: $color-accent-lighter; }
-  &.disabled { background: $color-accent-lighter; cursor: not-allowed; }
-  &.expanded { width: 100%; }
+
+  &:hover:not(.disabled) {
+    background: $color-accent-lighter;
+  }
+
+  &.disabled {
+    background: $color-accent-lighter;
+    cursor: not-allowed;
+  }
+
+  &.expanded {
+    width: 100%;
+  }
+}
+
+.finish-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 130px;
+  height: 100%;
+  background: $color-accent;
+  color: $color-white;
+  border: none;
+  border-radius: $radius-rect-buttons;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+
+  &:hover:not(.disabled) {
+    background: $color-accent-lighter;
+  }
+
+  &.disabled {
+    background: $color-accent-lighter;
+    cursor: not-allowed;
+  }
 }
 </style>
