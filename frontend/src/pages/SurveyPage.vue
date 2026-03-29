@@ -10,26 +10,28 @@
       </h1>
 
       <div class="progress-bar">
-        <div class="step active"></div>
-        <div class="step"></div>
-        <div class="step"></div>
-        <div class="step"></div>
+        <div
+          v-for="(step, index) in stepsMeta"
+          :key="step.id"
+          class="step"
+          :class="{ active: index <= currentStepIndex }"
+        ></div>
       </div>
 
       <div class="step-content">
-        <p class="question-text">Укажите, пожалуйста, ваш пол и возраст:</p>
+        <p class="question-text">{{ currentStepData.title }}</p>
 
-        <div class="form-container">
+        <div v-if="currentStepIndex === 0" class="form-container">
           <div class="form-group">
             <label class="label">Пол:</label>
             <div class="radio-group">
               <label class="radio-label">
                 <span>Мужской</span>
-                <input type="radio" name="gender" value="male" v-model="form.gender" />
+                <input type="radio" value="male" v-model="form.gender" />
               </label>
               <label class="radio-label">
                 <span>Женский</span>
-                <input type="radio" name="gender" value="female" v-model="form.gender" />
+                <input type="radio" value="female" v-model="form.gender" />
               </label>
             </div>
           </div>
@@ -42,25 +44,84 @@
             </div>
           </div>
         </div>
+
+        <div v-if="currentStepIndex === 1" class="form-container">
+          <p style="text-align: center; color: gray;">Здесь будет следующий вопрос...</p>
+        </div>
       </div>
 
-      <button class="next-btn" @click="nextStep">Далее</button>
+      <button 
+        class="next-btn" 
+        :class="{ disabled: isNextBtnDisabled }"
+        :disabled="isNextBtnDisabled"
+        @click="nextStep"
+      >
+        {{ isLastStep ? 'Завершить' : 'Далее' }}
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-// храним ответы пользователя
-const form = ref({
+// Хранилище всех ответов пользователя
+const form = ref<Record<string, any>>({
   gender: null,
-  age: null
+  age: null,
+  // сюда будем добавлять новые поля
+})
+
+// Конфигурация шагов
+const stepsMeta = ref([
+  {
+    id: 1,
+    title: 'Укажите, пожалуйста, ваш пол и возраст:',
+    requiredFields: ['gender', 'age'] // Эти поля обязательны для перехода
+  },
+  {
+    id: 2,
+    title: 'Дополнительная информация',
+    requiredFields: [] // Шаг без обязательных полей (можно пропустить)
+  },
+  {
+    id: 3,
+    title: 'Медицинские показатели',
+    requiredFields: []
+  },
+  {
+    id: 4,
+    title: 'Образ жизни',
+    requiredFields: []
+  }
+])
+
+// Управление состоянием шагов
+const currentStepIndex = ref(0)
+
+const currentStepData = computed(() => stepsMeta.value[currentStepIndex.value])
+const isLastStep = computed(() => currentStepIndex.value === stepsMeta.value.length - 1)
+
+// Логика блокировки кнопки
+const isNextBtnDisabled = computed(() => {
+  const required = currentStepData.value.requiredFields
+  
+  // Проверяем, есть ли незаполненные обязательные поля
+  return required.some(field => {
+    const value = form.value[field]
+    return value === null || value === undefined || value === ''
+  })
 })
 
 const nextStep = () => {
-  console.log('Данные шага 1:', form.value)
-  // Позже здесь будет логика переключения шагов или вызов стора
+  if (isNextBtnDisabled.value) return
+
+  if (!isLastStep.value) {
+    currentStepIndex.value++
+  } else {
+    console.log('Опрос завершен! Собранные данные:', form.value)
+    // добавим вызов API для отправки данных
+  }
 }
 </script>
 
@@ -90,7 +151,7 @@ const nextStep = () => {
   padding: 40px 60px;
   width: 100%;
   max-width: 700px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(7, 14, 44, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -107,17 +168,31 @@ const nextStep = () => {
 
 .progress-bar {
   display: flex;
-  gap: 8px;
   width: 90%;
   margin-bottom: 24px;
+  gap: 0;
 
   .step {
     flex: 1;
     height: 8px;
-    background-color: $color-accent-lighter; // Светлый для неактивных шагов
-    border-radius: 4px;
+    background-color: $color-accent-lighter; // цвет неактивного шага
     transition: background-color 0.3s ease;
+    border-radius: 0;
 
+    border-right: 10px solid $color-white;
+
+    // Первый шаг: скруглен только слева
+    &:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+
+    // Последний шаг: скруглен только справа
+    &:last-child {
+      border-radius: 0 4px 4px 0;
+      border-right: none;
+    }
+
+    // Закрашиваем пройденные и текущий шаги
     &.active {
       background-color: $color-accent;
     }
@@ -131,6 +206,7 @@ const nextStep = () => {
   align-items: center;
   gap: 32px;
   margin-bottom: 40px;
+  min-height: 150px;
 }
 
 .question-text {
@@ -226,10 +302,15 @@ const nextStep = () => {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 
-  &:hover {
+  &:hover:not(.disabled) {
     background: $color-accent-lighter;
+  }
+
+  &.disabled {
+    background: $color-accent-lighter; // Тусклый цвет
+    cursor: not-allowed;
   }
 }
 </style>
