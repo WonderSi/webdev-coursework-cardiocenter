@@ -51,21 +51,26 @@ import Step1 from '@/components/survey/Step1.vue'
 import Step2 from '@/components/survey/Step2.vue'
 import Step3 from '@/components/survey/Step3.vue'
 import Step4 from '@/components/survey/Step4.vue'
+import Step5 from '@/components/survey/Step5.vue'
 
-const stepComponents = [Step1, Step2, Step3, Step4]
+const stepComponents = [Step1, Step2, Step3, Step4, Step5]
 
 const form = ref<Record<string, any>>({
   gender: null, age: null, height: null, weight: null, hipMeasurement: null,
   alcohol: null,
   profession: null,
-  region: null
+  region: null,
+  glucose: null, cholesterol: null, nonHdlCholesterol: null, vldlCholesterol: null,
+    hdlCholesterol: null, ldlCholesterol: null, apolipoproteinA: null, apolipoproteinB: null,
+    triglycerides: null
 })
 
 const stepsMeta = ref([
   { id: 1, title: 'Укажите, пожалуйста, ваши основные параметры:', requiredFields: ['gender', 'age', 'height', 'weight'] },
   { id: 2, title: 'Употребляете ли вы алкоголь?', requiredFields: ['alcohol'] },
   { id: 3, title: 'Выберите ваш род деятельности', requiredFields: ['profession'] },
-  { id: 4, title: 'Где вы проживаете', requiredFields: ['region'] }
+  { id: 4, title: 'Где вы проживаете', requiredFields: ['region'] },
+  { id: 5, title: 'Ваши лабораторные параметры', requiredFields: [] }
 ])
 
 const currentStepIndex = ref(0)
