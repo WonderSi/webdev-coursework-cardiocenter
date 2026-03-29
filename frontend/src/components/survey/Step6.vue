@@ -55,32 +55,32 @@ const diseasesMeta = ref([
   {
     id: 1,
     name: 'Диагностировался инсульт:',
-    keys: { selected: 'hadStroke', year: 'strokeYear' }
+    keys: { selected: 'stroke', year: 'strokeYear' } // убрали had
   },
   {
     id: 2,
     name: 'Диагностировалась сердечная недостаточность (СН):',
-    keys: { selected: 'hadHeartFailure', year: 'heartFailureYear' }
+    keys: { selected: 'heartFailure', year: 'heartFailureYear' } // убрали had
   },
   {
     id: 3,
     name: 'Диагностировалось нарушение ритма или другие ишемические болезни сердца (ИБС):',
-    keys: { selected: 'hadCad', year: 'cadYear' }
+    keys: { selected: 'cad', year: 'cadYear' } // убрали had
   },
   {
     id: 4,
     name: 'Диагностировалась стенокардия:',
-    keys: { selected: 'hadAngina', year: 'anginaYear' }
+    keys: { selected: 'angina', year: 'anginaYear' } // убрали had
   },
   {
     id: 5,
     name: 'Диагностировался инфаркт миокарда:',
-    keys: { selected: 'hadMyocardialInfarction', year: 'myocardialInfarctionYear' }
+    keys: { selected: 'myocardialInfarction', year: 'myocardialInfarctionYear' } // убрали had
   },
   {
     id: 6,
     name: 'Диагностировалась артериальная гипертензия (АГ):',
-    keys: { selected: 'hadArterialHypertension', year: 'arterialHypertensionYear' }
+    keys: { selected: 'arterialHypertension', year: 'arterialHypertensionYear' } // убрали had
   }
 ])
 </script>
