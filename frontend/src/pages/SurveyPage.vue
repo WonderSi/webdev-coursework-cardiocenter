@@ -103,7 +103,7 @@ const form = ref<Record<string, any>>({
 const stepsMeta = ref([
   {
     id: 1,
-    title: 'Укажите, пожалуйста, ваш пол и возраст:',
+    title: 'Укажите, пожалуйста, ваши основные параметры:',
     requiredFields: ['gender', 'age', 'height', 'weight'] // Эти поля обязательны для перехода
   },
   {
