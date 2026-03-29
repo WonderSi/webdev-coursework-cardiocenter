@@ -176,7 +176,7 @@ const nextStep = () => {
       cursor: pointer;
       width: 16px;
       height: 16px;
-      accent-color: $color-accent; // Красим системный радиобаттон в синий
+      accent-color: $color-accent;
     }
   }
 }
