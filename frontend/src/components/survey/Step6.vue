@@ -171,7 +171,7 @@ const diseasesMeta = ref([
   animation: expandBlock 0.3s cubic-bezier(0.4, 0, 0.2, 1) reverse forwards;
 }
 
-// Анимация самого блока: он плавно "раскрывается" по высоте
+// Анимация блока: он плавно раскрывается по высоте
 @keyframes expandBlock {
   0% {
     opacity: 0;
@@ -185,16 +185,22 @@ const diseasesMeta = ref([
   }
 }
 
-// анимация для  ЛИНИИ (эффект "рисования")
+// анимация появления линии
 .expand-down-enter-active .connecting-line-graphic {
-  animation: drawLine 0.5s ease-out forwards;
+  animation: drawLine 0.5s linear forwards;
+}
+
+// анимация исчезновения линии
+.expand-down-leave-active .connecting-line-graphic {
+  animation: drawLine 0.5s linear reverse forwards;
 }
 
 @keyframes drawLine {
   // Линия спрятана "шторкой" снизу
   0% { clip-path: inset(0 0 100% 0); opacity: 0; }
-  20% { opacity: 1; }
-  // Шторка плавно опускается, обнажая линию сверху вниз
+  20% { opacity: 0.3; }
+  50% { opacity: 0.5; }
+  // Шторка плавно опускается, линия рисуется сверху вниз
   100% { clip-path: inset(0 0 0 0); opacity: 1; }
 }
 </style>
