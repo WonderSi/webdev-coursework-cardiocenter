@@ -121,7 +121,7 @@ const prevStep = () => {
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
   
   &::-webkit-scrollbar { width: 6px; color: $color-accent; }
   &::-webkit-scrollbar-track {
