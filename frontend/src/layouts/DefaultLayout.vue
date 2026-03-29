@@ -22,6 +22,7 @@
     radial-gradient(ellipse at 30% 30%, rgba($color-bg-grad3, 0.2) 0%, transparent 35%),
     radial-gradient(ellipse at 70% 80%, rgba($color-bg-grad4, 0.75) 0%, transparent 40%),
     radial-gradient(ellipse at 60% 60%, rgba($color-bg-grad5, 1.0) 0%, transparent 30%),
-    radial-gradient(ellipse at 10% 90%, rgba($color-bg-grad6, 0.2) 0%, transparent 40%);
+    radial-gradient(ellipse at 10% 90%, rgba($color-bg-grad6, 0.2) 0%, transparent 40%),
+    radial-gradient(ellipse at 10% 80%, rgba($color-bg-grad7, 0.9) 0%, transparent 50%);
 }
 </style>
