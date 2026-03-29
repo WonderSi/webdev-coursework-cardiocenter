@@ -44,7 +44,6 @@ defineEmits<{
   max-width: 360px;
   height: 48px;
   flex-shrink: 0;
-  margin-top: auto; 
 }
 
 .prev-btn {
@@ -52,6 +51,7 @@ defineEmits<{
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding-top: 2px;
   padding-right: 12px;
   width: 130px;
   height: 100%;
@@ -61,11 +61,16 @@ defineEmits<{
   border-radius: $radius-rect-buttons;
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.25px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   white-space: nowrap;
-  &:hover { background: rgba($color-accent, 0.05); }
+  &:hover {
+    background: $color-accent-lighter;
+    border: $color-accent-lighter;
+    color: $color-white;
+  }
   &.hidden { 
     width: 0;
     opacity: 0;
@@ -79,7 +84,9 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px; padding-left: 12px;
+  gap: 8px;
+  padding-top: 2px;
+  padding-left: 12px;
   width: 130px;
   height: 100%;
   background: $color-accent;
@@ -88,6 +95,7 @@ defineEmits<{
   border-radius: $radius-rect-buttons;
   font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.25px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;

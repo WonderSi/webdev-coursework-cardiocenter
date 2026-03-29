@@ -10,4 +10,9 @@ body {
   font-family: $font-main;
   color: $color-text;
   -webkit-font-smoothing: antialiased;
+  overflow-y: scroll; 
+}
+
+html {
+  overflow-y: scroll; 
 }

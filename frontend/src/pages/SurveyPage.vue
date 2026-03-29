@@ -113,21 +113,20 @@ const prevStep = () => {
 .survey-card {
   background: $color-white;
   border-radius: 24px;
-  padding: 40px 60px;
-  width: 100%;
-  max-width: 700px;
+  padding: 32px 60px;
+  width: 750px;
+  max-width: 100%;
   box-shadow: 0 10px 30px rgba(7, 14, 44, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1;
   min-height: 0;
   overflow-y: auto;
   
   &::-webkit-scrollbar { width: 6px; color: $color-accent; }
   &::-webkit-scrollbar-track {
     background: transparent;
-    margin: 20px 10px;
+    margin: 20px 0;
     }
   &::-webkit-scrollbar-thumb {
     background-color: $color-accent;
@@ -155,7 +154,7 @@ const prevStep = () => {
   .step {
     flex: 1;
     height: 8px;
-    background-color: $color-accent-lighter;
+    background-color: $color-step-bg;
     transition: background-color 0.3s ease;
     border-radius: 0;
     border-right: 10px solid $color-white;
