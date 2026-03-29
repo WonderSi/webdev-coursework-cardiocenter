@@ -21,154 +21,23 @@
       <div class="step-content">
         <p class="question-text">{{ currentStepData.title }}</p>
 
-        <div v-if="currentStepIndex === 0" class="form-container">
-          <div class="form-group">
-            <label class="label">Пол:</label>
-            <div class="radio-group-horizontal">
-              <label class="radio-label">
-                <span>Мужской</span>
-                <input type="radio" :value="1" v-model="form.gender" />
-              </label>
-              <label class="radio-label">
-                <span>Женский</span>
-                <input type="radio" :value="2" v-model="form.gender" />
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="label">Возраст:</label>
-            <div class="input-group">
-              <input type="number" class="input-field" placeholder="27" v-model="form.age" />
-              <span class="unit">лет</span>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="label">Рост:</label>
-            <div class="input-group">
-              <input type="number" class="input-field" placeholder="165" v-model="form.height" />
-              <span class="unit">см</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="label">Вес:</label>
-            <div class="input-group">
-              <input type="number" class="input-field" placeholder="60" v-model="form.weight" />
-              <span class="unit">кг</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="label">Объём бёдер:</label>
-            <div class="input-group">
-              <input type="number" class="input-field" placeholder="90" v-model="form.hipMeasurement" />
-              <span class="unit">см</span>
-            </div>
-          </div>
+        <component 
+          :is="stepComponents[currentStepIndex]" 
+          v-if="stepComponents[currentStepIndex]"
+          :form="form" 
+        />
+        <div v-else class="form-container">
+          <p style="text-align: center; color: gray;">Шаг в разработке...</p>
         </div>
-
-        <div v-if="currentStepIndex === 1" class="form-container">
-           <div class="radio-group-vertical">
-            <label class="radio-label">
-              <input type="radio" :value="3" v-model="form.alcohol" />
-              <span>Употребляю</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="2" v-model="form.alcohol" />
-              <span>Употреблял ранее</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="1" v-model="form.alcohol" />
-              <span>Никогда не употреблял</span>
-            </label>
-          </div>
-        </div>
-        
-        <div v-if="currentStepIndex === 2" class="form-container">
-           <div class="radio-group-vertical">
-            <label class="radio-label">
-              <input type="radio" :value="14" v-model="form.profession" />
-              <span>Представители законодат. органов власти,  высокопосталенные долж. лица, менеджеры и руководители</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="4" v-model="form.profession" />
-              <span>Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="10" v-model="form.profession" />
-              <span>Квалифицированные специалисты сельского хозяйства и рыболовного</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="12" v-model="form.profession" />
-              <span>Ремесленники и представители других отраслей промышленности</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="5" v-model="form.profession" />
-              <span>Операторы и монтажники установок и машинного оборудования</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="6" v-model="form.profession" />
-              <span>Служащие, сфера обслуживания, работники среднего звена</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="8" v-model="form.profession" />
-              <span>Дипломированные специалисты, умственный труд</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="7" v-model="form.profession" />
-              <span>Никогда не работающие домохозяйки</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="13" v-model="form.profession" />
-              <span>Техники и младшие специалисты</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="1" v-model="form.profession" />
-              <span>Ведение домашнего хозяйства</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="3" v-model="form.profession" />
-              <span>Лица свободных профессий</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="2" v-model="form.profession" />
-              <span>Вооруженные силы</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="11" v-model="form.profession" />
-              <span>Пенсионеры</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" :value="9" v-model="form.profession" />
-              <span>Другое</span>
-            </label>
-          </div>
-        </div>
-
       </div>
 
-      <div class="actions">
-        <button 
-          class="prev-btn" 
-          :class="{ hidden: currentStepIndex === 0 }"
-          @click="prevStep"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          Назад
-        </button>
-
-        <button 
-          class="next-btn" 
-          :class="{ disabled: isNextBtnDisabled, expanded: currentStepIndex === 0 }"
-          :disabled="isNextBtnDisabled"
-          @click="nextStep"
-        >
-          {{ isLastStep ? 'Завершить' : 'Далее' }}
-          <svg v-if="!isLastStep" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
-      </div>
+      <SurveyNavigation 
+        :current-step-index="currentStepIndex"
+        :is-last-step="isLastStep"
+        :is-next-btn-disabled="isNextBtnDisabled"
+        @next="nextStep"
+        @prev="prevStep"
+      />
     </div>
   </div>
 </template>
@@ -176,37 +45,23 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
+import SurveyNavigation from '@/components/survey/SurveyNavigation.vue'
+import Step1 from '@/components/survey/Step1.vue'
+import Step2 from '@/components/survey/Step2.vue'
+import Step3 from '@/components/survey/Step3.vue'
+
+const stepComponents = [Step1, Step2, Step3]
+
 const form = ref<Record<string, any>>({
-  gender: null,
-  age: null,
-  height: null,
-  weight: null,
-  hipMeasurement: null,
-  alcohol: null,
-  profession: null
+  gender: null, age: null, height: null, weight: null,
+  hipMeasurement: null, alcohol: null, profession: null
 })
 
 const stepsMeta = ref([
-  {
-    id: 1,
-    title: 'Укажите, пожалуйста, ваши основные параметры:',
-    requiredFields: ['gender', 'age', 'height', 'weight']
-  },
-  {
-    id: 2,
-    title: 'Употребляете ли вы алкоголь?',
-    requiredFields: ['alcohol']
-  },
-  {
-    id: 3,
-    title: 'Выберите ваш род деятельности',
-    requiredFields: ['profession']
-  },
-  {
-    id: 4,
-    title: 'Образ жизни',
-    requiredFields: []
-  }
+  { id: 1, title: 'Укажите, пожалуйста, ваши основные параметры:', requiredFields: ['gender', 'age', 'height', 'weight'] },
+  { id: 2, title: 'Употребляете ли вы алкоголь?', requiredFields: ['alcohol'] },
+  { id: 3, title: 'Выберите ваш род деятельности', requiredFields: ['profession'] },
+  { id: 4, title: 'Образ жизни', requiredFields: [] }
 ])
 
 const currentStepIndex = ref(0)
@@ -223,17 +78,12 @@ const isNextBtnDisabled = computed(() => {
 
 const nextStep = () => {
   if (isNextBtnDisabled.value) return
-  if (!isLastStep.value) {
-    currentStepIndex.value++
-  } else {
-    console.log('Опрос завершен! Данные:', form.value)
-  }
+  if (!isLastStep.value) { currentStepIndex.value++ } 
+  else { console.log('Опрос завершен! Данные:', form.value) }
 }
 
 const prevStep = () => {
-  if (currentStepIndex.value > 0) {
-    currentStepIndex.value--
-  }
+  if (currentStepIndex.value > 0) { currentStepIndex.value-- }
 }
 </script>
 
@@ -244,17 +94,20 @@ const prevStep = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  padding: 40px 20px;
+  box-sizing: border-box;
   gap: 24px;
 }
 
 .logo-container {
-  .logo {
+  flex-shrink: 0; 
+  .logo { 
     width: 100px;
     height: 100px;
-    object-fit: contain;
-  }
+    object-fit: contain; 
+    }
 }
 
 .survey-card {
@@ -267,6 +120,20 @@ const prevStep = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar { width: 6px; color: $color-accent; }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 20px 10px;
+    }
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-accent;
+    border-radius: 10px; 
+    }
+  &::-webkit-scrollbar-thumb:hover { background-color: $color-accent; }
 }
 
 .title {
@@ -276,6 +143,7 @@ const prevStep = () => {
   color: $color-text;
   margin-bottom: 32px;
   line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .progress-bar {
@@ -283,27 +151,17 @@ const prevStep = () => {
   width: 95%;
   margin-bottom: 24px;
   gap: 0;
-
+  flex-shrink: 0;
   .step {
     flex: 1;
     height: 8px;
-    background-color: $color-accent-lighter; // цвет неактивного шага
+    background-color: $color-accent-lighter;
     transition: background-color 0.3s ease;
     border-radius: 0;
     border-right: 10px solid $color-white;
-
-    &:first-child {
-      border-radius: 4px 0 0 4px;
-    }
-
-    &:last-child {
-      border-radius: 0 4px 4px 0;
-      border-right: none;
-    }
-
-    &.active {
-      background-color: $color-accent;
-    }
+    &:first-child { border-radius: 4px 0 0 4px; }
+    &:last-child { border-radius: 0 4px 4px 0; border-right: none; }
+    &.active { background-color: $color-accent; }
   }
 }
 
@@ -314,202 +172,11 @@ const prevStep = () => {
   align-items: center;
   gap: 32px;
   margin-bottom: 40px;
-  min-height: 150px;
 }
 
 .question-text {
   text-align: center;
   font-size: 1.1rem;
   color: $color-text;
-}
-
-.form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-group {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.label {
-  width: 116px;
-  font-weight: 800;
-  color: $color-text;
-  font-size: 1rem;
-}
-
-/* Радио-кнопки в ряд (горизонтальные) */
-.radio-group-horizontal {
-  display: flex;
-  gap: 32px;
-  align-items: center;
-
-  .radio-label {
-    display: flex;
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    color: $color-text;
-
-    input[type="radio"] {
-      flex-shrink: 0;
-      cursor: pointer;
-      width: 16px;
-      height: 16px;
-      accent-color: $color-accent;
-    }
-  }
-}
-
-/* Радио-кнопки в столбик (вертикальные) */
-.radio-group-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  align-items: flex-start;
-
-  .radio-label {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 12px;
-    cursor: pointer;
-    font-size: 1rem;
-    color: $color-text;
-    line-height: 1.4;
-
-    input[type="radio"] {
-      flex-shrink: 0;
-      margin-top: 3px;
-      cursor: pointer;
-      width: 16px;
-      height: 16px;
-      accent-color: $color-accent;
-    }
-  }
-}
-
-.input-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  .input-field {
-    width: 60px;
-    height: 24px;
-    padding: 8px 12px;
-    border: 1.5px solid $color-secondary;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: inherit;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s;
-    color: $color-text;
-
-    &::placeholder {
-      color: rgba($color-secondary, 0.8); 
-      font-weight: 400;
-    }
-
-    &:focus {
-      border-color: $color-accent;
-    }
-
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-  }
-
-  .unit {
-    color: $color-secondary;
-    font-size: 1rem;
-  }
-}
-
-/* КОНТЕЙНЕР АНИМИРОВАННЫХ КНОПОК */
-.actions {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 360px; // Общая ширина, которую займет кнопка "Далее" на 1 шаге
-  height: 48px;
-}
-
-.prev-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding-right: 12px;
-  width: 130px;
-  height: 100%;
-  background: transparent;
-  color: $color-accent;
-  border: 1.5px solid $color-accent;
-  border-radius: $radius-rect-buttons;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  
-  /* плавное появление */
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  white-space: nowrap; // Не дает тексту съезжать при сужении
-
-  &:hover {
-    background: rgba($color-accent, 0.05);
-  }
-
-  /* на первом шаге кпноки нет */
-  &.hidden {
-    width: 0;
-    opacity: 0;
-    padding: 0;
-    border-width: 0;
-    pointer-events: none;
-  }
-}
-
-.next-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding-left: 12px;
-  width: 130px;
-  height: 100%;
-  background: $color-accent;
-  color: $color-white;
-  border: none;
-  border-radius: $radius-rect-buttons;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  
-  /* плавное сужение */
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-
-  &:hover:not(.disabled) {
-    background: $color-accent-lighter;
-  }
-
-  &.disabled {
-    background: $color-accent-lighter;
-    cursor: not-allowed;
-  }
-
-  &.expanded {
-    width: 100%; // всю ширину max-width: 360px
-  }
 }
 </style>
