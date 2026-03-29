@@ -45,13 +45,20 @@
                     карту или знать результаты своих обследований.
                     </p>
                 </div>
-                <button class="start-btn">Начать</button>
+                <button class="start-btn" @click="goToSurvey">Начать</button>
                 <button class="enter-as-doctor-btn">Войти как врач</button>
          </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goToSurvey = () => {
+  router.push('/survey')
+}
 </script>
 
 <style scoped lang="scss">
