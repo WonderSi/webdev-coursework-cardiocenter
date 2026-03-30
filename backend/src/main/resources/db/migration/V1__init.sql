@@ -53,7 +53,7 @@ CREATE TABLE patients
     ldl_cholesterol            NUMERIC(6, 2),
     apolipoprotein_a           NUMERIC(6, 2),
     apolipoprotein_b           NUMERIC(6, 2),
-    triglycerides              NUMERIC(6, 2)
+    triglycerides              NUMERIC(6, 2),
     stroke                     BOOLEAN,
     stroke_year                INTEGER,
     heart_failure              BOOLEAN,
