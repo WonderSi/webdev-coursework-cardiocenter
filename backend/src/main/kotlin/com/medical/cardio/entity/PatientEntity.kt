@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "patients")
-class Patient(
+class PatientEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +17,7 @@ class Patient(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", nullable = false)
-    val creator: AdminUser,
+    val creator: AdminUserEntity,
 
     @Column(nullable = false)
     val gender: Short,
@@ -97,5 +97,5 @@ class Patient(
     val arterialHypertensionYear: Int? = null,
 
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
-    val diagnoses: List<Diagnosis> = emptyList()
+    val diagnoses: List<DiagnosisEntity> = emptyList()
 )

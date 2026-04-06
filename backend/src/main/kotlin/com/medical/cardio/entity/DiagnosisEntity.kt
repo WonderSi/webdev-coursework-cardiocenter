@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "diagnoses")
-class Diagnosis(
+class DiagnosisEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,11 +12,11 @@ class Diagnosis(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
-    val patient: Patient,
+    val patient: PatientEntity,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diagnosis_id", nullable = false)
-    val diagnosis: GlossaryValue,
+    val diagnosis: GlossaryValueEntity,
 
     @Column(name = "year_of_diagnosis")
     val yearOfDiagnosis: Short? = null

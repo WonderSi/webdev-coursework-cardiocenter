@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "admin_users")
-class AdminUser(
+class AdminUserEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "glossaries")
-class Glossary(
+class GlossaryEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,5 +14,5 @@ class Glossary(
     val name: String,
 
     @OneToMany(mappedBy = "glossary", fetch = FetchType.LAZY)
-    val values: List<GlossaryValue> = emptyList()
+    val values: List<GlossaryValueEntity> = emptyList()
 )

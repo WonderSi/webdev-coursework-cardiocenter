@@ -4,7 +4,7 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "glossary_values")
-class GlossaryValue(
+class GlossaryValueEntity(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,7 +12,7 @@ class GlossaryValue(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "glossary_id", nullable = false)
-    val glossary: Glossary,
+    val glossary: GlossaryEntity,
 
     @Column(nullable = false)
     val code: Int,
