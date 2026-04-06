@@ -14,5 +14,9 @@ class AdminUser(
     val username: String,
 
     @Column(name = "password_hash", nullable = false, length = 255)
-    val passwordHash: String
+    val passwordHash: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    val role: Role = Role.DOCTOR
 )

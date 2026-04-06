@@ -94,5 +94,8 @@ class Patient(
     val arterialHypertension: Boolean? = null,
 
     @Column(name = "arterial_hypertension_year")
-    val arterialHypertensionYear: Int? = null
+    val arterialHypertensionYear: Int? = null,
+
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+    val diagnoses: List<Diagnosis> = emptyList()
 )
