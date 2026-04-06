@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.Date
 import javax.crypto.SecretKey
-import kotlin.io.encoding.Base64
+import java.util.Base64
+import com.medical.cardio.exception.TokenExpiredException
+import com.medical.cardio.exception.InvalidTokenException
 
 @Service
 class JwtService {
