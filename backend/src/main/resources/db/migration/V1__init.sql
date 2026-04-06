@@ -4,13 +4,13 @@
 
 CREATE TABLE glossaries
 (
-    id   SERIAL PRIMARY KEY,
+    id   BIGSERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE glossary_values
 (
-    id          SERIAL PRIMARY KEY,
+    id          BIGSERIAL PRIMARY KEY,
     glossary_id INTEGER      NOT NULL REFERENCES glossaries (id),
     code        INTEGER      NOT NULL,
     value       VARCHAR(255) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE glossary_values
 
 CREATE TABLE admin_users
 (
-    id            SERIAL PRIMARY KEY,
+    id            BIGSERIAL PRIMARY KEY,
     username      VARCHAR(50)  NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role          VARCHAR(20)  NOT NULL DEFAULT 'DOCTOR'
@@ -35,7 +35,7 @@ CREATE TABLE admin_users
 
 CREATE TABLE patients
 (
-    id                         SERIAL PRIMARY KEY,
+    id                         BIGSERIAL PRIMARY KEY,
     create_date                DATE     NOT NULL DEFAULT CURRENT_DATE,
     creator_id                 INTEGER  NOT NULL REFERENCES admin_users (id),
     gender                     SMALLINT NOT NULL CHECK (gender IN (1, 2)),
@@ -75,7 +75,7 @@ CREATE TABLE patients
 
 CREATE TABLE diagnoses
 (
-    id               SERIAL PRIMARY KEY,
+    id               BIGSERIAL PRIMARY KEY,
     patient_id       INTEGER NOT NULL REFERENCES patients (id) ON DELETE CASCADE,
     diagnosis_id     INTEGER NOT NULL REFERENCES glossary_values (id),
     year_of_diagnosis SMALLINT CHECK (year_of_diagnosis BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE))
