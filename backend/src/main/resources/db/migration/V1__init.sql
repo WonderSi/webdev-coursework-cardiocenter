@@ -4,14 +4,14 @@
 
 CREATE TABLE glossaries
 (
-    id   BIGSERIAL PRIMARY KEY,
+    id   BIGSERIAL    PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE glossary_values
 (
-    id          BIGSERIAL PRIMARY KEY,
-    glossary_id INTEGER      NOT NULL REFERENCES glossaries (id),
+    id          BIGSERIAL    PRIMARY KEY,
+    glossary_id BIGINT       NOT NULL REFERENCES glossaries (id),
     code        INTEGER      NOT NULL,
     value       VARCHAR(255) NOT NULL,
     UNIQUE (glossary_id, code)
@@ -23,7 +23,7 @@ CREATE TABLE glossary_values
 
 CREATE TABLE admin_users
 (
-    id            BIGSERIAL PRIMARY KEY,
+    id            BIGSERIAL    PRIMARY KEY,
     username      VARCHAR(50)  NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role          VARCHAR(20)  NOT NULL DEFAULT 'DOCTOR'
@@ -36,16 +36,16 @@ CREATE TABLE admin_users
 CREATE TABLE patients
 (
     id                         BIGSERIAL PRIMARY KEY,
-    create_date                DATE     NOT NULL DEFAULT CURRENT_DATE,
-    creator_id                 INTEGER  NOT NULL REFERENCES admin_users (id),
-    gender                     SMALLINT NOT NULL CHECK (gender IN (1, 2)),
-    age                        INTEGER  NOT NULL CHECK (age > 0),
+    create_date                DATE      NOT NULL DEFAULT CURRENT_DATE,
+    creator_id                 BIGINT    NOT NULL REFERENCES admin_users (id),
+    gender                     SMALLINT  NOT NULL CHECK (gender IN (1, 2)),
+    age                        INTEGER   NOT NULL CHECK (age > 0),
     height                     NUMERIC(5, 1),
     weight                     NUMERIC(5, 1),
     hip_measurement            NUMERIC(5, 1),
-    alcohol                    SMALLINT CHECK (alcohol IN (1, 2, 3)),
-    profession                 SMALLINT CHECK (profession BETWEEN 1 AND 14),
-    region                     SMALLINT CHECK (region BETWEEN 1 AND 6),
+    alcohol                    SMALLINT  CHECK (alcohol IN (1, 2, 3)),
+    profession                 SMALLINT  CHECK (profession BETWEEN 1 AND 14),
+    region                     SMALLINT  CHECK (region BETWEEN 1 AND 6),
     glucose                    NUMERIC(6, 2),
     cholesterol                NUMERIC(6, 2),
     non_hdl_cholesterol        NUMERIC(6, 2),
@@ -76,7 +76,7 @@ CREATE TABLE patients
 CREATE TABLE diagnoses
 (
     id               BIGSERIAL PRIMARY KEY,
-    patient_id       INTEGER NOT NULL REFERENCES patients (id) ON DELETE CASCADE,
-    diagnosis_id     INTEGER NOT NULL REFERENCES glossary_values (id),
+    patient_id       BIGINT    NOT NULL REFERENCES patients (id) ON DELETE CASCADE,
+    diagnosis_id     BIGINT    NOT NULL REFERENCES glossary_values (id),
     year_of_diagnosis SMALLINT CHECK (year_of_diagnosis BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE))
 );
