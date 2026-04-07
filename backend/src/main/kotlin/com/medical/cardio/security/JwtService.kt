@@ -30,7 +30,7 @@ class JwtService {
     private val signingKey: SecretKey by lazy {
         val keyBytes = Base64.getDecoder().decode(secret)
         require(keyBytes.size >= 32) {
-            "JWT secret must be at least    256 bits (32 bytes)"
+            "JWT secret must be at least 256 bits (32 bytes)"
         }
         Keys.hmacShaKeyFor(keyBytes)
     }
@@ -47,34 +47,15 @@ class JwtService {
 
     fun generateToken(extraClaims: Map<String, Any>, userDetails: UserDetails): String {
         return Jwts.builder()
-            .claims(extraClaims)
-            .subject(userDetails.username)
-            .issuedAt(Date())
-            .expiration(Date(System.currentTimeMillis() + expirationMs))
+            .claims(extraClaims)                                         // Роли
+            .subject(userDetails.username)                               // Username
+            .issuedAt(Date())                                            // Когда выдан
+            .expiration(Date(System.currentTimeMillis() + expirationMs)) // Когда истечет
             .signWith(signingKey)
             .compact()
     }
 
-    fun isTokenValid(token: String, userDetails: UserDetails): Boolean {
-        val username = extractUsername(token)
-        return username == userDetails.username && !isTokenExpired(token)
-    }
-
-    fun extractUsername(token: String): String =
-        extractClaim(token, Claims::getSubject)
-
-    @Suppress("UNCHECKED_CAST")
-    fun extractRoles(token: String): List<String> =
-        extractClaim(token) { claims ->
-            claims["roles"] as? List<String> ?: emptyList()
-        }
-
-    fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T): T =
-        claimsResolver(extractAllClaims(token))
-
-    private fun isTokenExpired(token: String): Boolean =
-        extractClaim(token, Claims::getExpiration).before(Date())
-
+    // Парсинг и оработка ошибок
     private fun extractAllClaims(token: String): Claims {
         return try {
             Jwts.parser()
@@ -89,4 +70,34 @@ class JwtService {
         }
     }
 
+    /*
+        Извлечение данных из токена:
+        - Username (subject)
+        - Роли (claims)
+    */
+    fun <T> extractClaim(token: String, claimsResolver: (Claims) -> T): T =
+        claimsResolver(extractAllClaims(token))
+
+    fun extractUsername(token: String): String =
+        extractClaim(token, Claims::getSubject)
+
+    @Suppress("UNCHECKED_CAST")
+    fun extractRoles(token: String): List<String> =
+        extractClaim(token) { claims ->
+            claims["roles"] as? List<String> ?: emptyList()
+        }
+
+    /*
+        Проверка токена:
+        - Извлекаем username и сравниваем с userDetails
+        - Проверяем, что токен не истек    
+    */
+
+    private fun isTokenExpired(token: String): Boolean =
+        extractClaim(token, Claims::getExpiration).before(Date())
+
+    fun isTokenValid(token: String, userDetails: UserDetails): Boolean {
+        val username = extractUsername(token)
+        return username == userDetails.username && !isTokenExpired(token)
+    }
 }
