@@ -37,7 +37,7 @@ CREATE TABLE patients
 (
     id                         BIGSERIAL PRIMARY KEY,
     create_date                DATE      NOT NULL DEFAULT CURRENT_DATE,
-    creator_id                 BIGINT    NOT NULL REFERENCES admin_users (id),
+    creator_id                 BIGINT    REFERENCES admin_users (id),
     gender                     SMALLINT  NOT NULL CHECK (gender IN (1, 2)),
     age                        INTEGER   NOT NULL CHECK (age > 0),
     height                     NUMERIC(5, 1),
