@@ -16,8 +16,8 @@ class PatientEntity(
     val createDate: LocalDate = LocalDate.now(),
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", nullable = false)
-    val creator: AdminUserEntity,
+    @JoinColumn(name = "creator_id")
+    val creator: AdminUserEntity? = null,
 
     @Column(nullable = false)
     val gender: Short,
