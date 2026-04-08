@@ -31,7 +31,7 @@ class JwtAuthFilter(
 
         // Аутентификация
         try {
-            val username = jwtService.extractUsername(token
+            val username = jwtService.extractUsername(token)
 
             if (username.isNotBlank() && SecurityContextHolder.getContext().authentication == null) {
                 val userDetails = adminUserDetailsService.loadUserByUsername(username)
