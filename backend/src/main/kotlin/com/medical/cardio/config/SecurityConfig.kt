@@ -75,7 +75,7 @@ class SecurityConfig(
         .authorizeHttpRequests { auth ->
             auth.requestMatchers(
                 "/api/auth/**",
-                "/api/survey",
+                "/api/survey/**",
                 "/api/glossaries/**",
                 "/actuator/**",
                 "/swagger-ui",
