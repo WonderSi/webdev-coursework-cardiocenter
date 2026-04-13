@@ -16,11 +16,12 @@ class PatientEntity(
     val createDate: LocalDate = LocalDate.now(),
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id")
-    val creator: AdminUserEntity? = null,
+    @JoinColumn(name = "creator_id", nullable = false)
+    val creator: AdminUserEntity,
 
-    @Column(nullable = false)
-    val gender: Short,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gender_id", nullable = false)
+    val gender: GlossaryValueEntity,
 
     @Column(nullable = false)
     val age: Int,
@@ -32,11 +33,17 @@ class PatientEntity(
     @Column(name = "hip_measurement")
     val hipMeasurement: BigDecimal? = null,
 
-    val alcohol: Short? = null,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "alcohol_id")
+    val alcohol: GlossaryValueEntity? = null,
 
-    val profession: Short? = null,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profession_id")
+    val profession: GlossaryValueEntity? = null,
 
-    val region: Short? = null,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    val region: GlossaryValueEntity? = null,
 
     val glucose: BigDecimal? = null,
 
@@ -61,40 +68,6 @@ class PatientEntity(
     val apolipoproteinB: BigDecimal? = null,
 
     val triglycerides: BigDecimal? = null,
-
-    val stroke: Boolean? = null,
-
-    @Column(name = "stroke_year")
-    val strokeYear: Int? = null,
-
-    @Column(name = "heart_failure")
-    val heartFailure: Boolean? = null,
-
-    @Column(name = "heart_failure_year")
-    val heartFailureYear: Int? = null,
-
-    @Column(name = "cad_chd_ihd")
-    val cadChdIhd: Boolean? = null,
-
-    @Column(name = "cad_chd_ihd_year")
-    val cadChdIhdYear: Int? = null,
-
-    val angina: Boolean? = null,
-
-    @Column(name = "angina_year")
-    val anginaYear: Int? = null,
-
-    @Column(name = "myocardial_infarction")
-    val myocardialInfarction: Boolean? = null,
-
-    @Column(name = "myocardial_infarction_year")
-    val myocardialInfarctionYear: Int? = null,
-
-    @Column(name = "arterial_hypertension")
-    val arterialHypertension: Boolean? = null,
-
-    @Column(name = "arterial_hypertension_year")
-    val arterialHypertensionYear: Int? = null,
 
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     val diagnoses: List<DiagnosisEntity> = emptyList()
