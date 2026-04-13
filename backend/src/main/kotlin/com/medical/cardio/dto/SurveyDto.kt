@@ -1,19 +1,15 @@
 package com.medical.cardio.dto
-
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 
 data class SurveyRequest(
-    @field:NotNull @field:Min(1) @field:Max(2) val gender: Short?,
-    @field:NotNull val age: Int?,
+    val genderId: Long? = null,
+    val age: Int? = null,
     val height: BigDecimal? = null,
     val weight: BigDecimal? = null,
     val hipMeasurement: BigDecimal? = null,
-    val alcohol: Short? = null,
-    val profession: Short? = null,
-    val region: Short? = null,
+    val alcoholId: Long? = null,
+    val professionId: Long? = null,
+    val regionId: Long? = null,
     val glucose: BigDecimal? = null,
     val cholesterol: BigDecimal? = null,
     val nonHdlCholesterol: BigDecimal? = null,
