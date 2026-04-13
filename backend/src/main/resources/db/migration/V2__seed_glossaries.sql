@@ -11,41 +11,42 @@ INSERT INTO glossary_values (glossary_id, code, value) VALUES
 -- ==========================================
 INSERT INTO glossaries (name) VALUES ('alcohol');
 INSERT INTO glossary_values (glossary_id, code, value) VALUES
-    ((SELECT id FROM glossaries WHERE name = 'alcohol'), 1, 'Употреблял'),
+    ((SELECT id FROM glossaries WHERE name = 'alcohol'), 1, 'Никогда не употреблял'),
     ((SELECT id FROM glossaries WHERE name = 'alcohol'), 2, 'Употреблял ранее'),
-    ((SELECT id FROM glossaries WHERE name = 'alcohol'), 3, 'Никогда не употреблял');
+    ((SELECT id FROM glossaries WHERE name = 'alcohol'), 3, 'Употребляю');
+    
 
 -- ==========================================
 -- Профессия
 -- ==========================================
 INSERT INTO glossaries (name) VALUES ('profession');
 INSERT INTO glossary_values (glossary_id, code, value) VALUES
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 1,  'Представители законодательных органов власти, высокопоставленные должностные лица, менеджеры и руководители'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 2,  'Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 3,  'Квалифицированные специалисты сельского хозяйства и рыболовного'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 4,  'Ремесленники и представители других отраслей промышленности'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 5,  'Операторы и монтажники установок и машинного оборудования'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 6,  'Служащие, сфера обслуживания, работники среднего звена'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 7,  'Дипломированные специалисты, умственный труд'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 8,  'Никогда не работающие домохозяйки'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 9,  'Техники и младшие специалисты'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 10, 'Ведение домашнего хозяйства'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 11, 'Лица свободных профессий'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 12, 'Вооруженные силы'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 13, 'Пенсионеры'),
-    ((SELECT id FROM glossaries WHERE name = 'profession'), 14, 'Другое');
+((SELECT id FROM glossaries WHERE name = 'profession'), 1,  'Ведение домашнего хозяйства'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 2,  'Вооруженные силы'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 3,  'Лица свободных профессий'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 4,  'Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 5,  'Операторы и монтажники установок и машинного оборудования'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 6,  'Служащие, сфера обслуживания, работники среднего звена'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 7,  'Никогда не работающие домохозяйки'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 8,  'Дипломированные специалисты, умственный труд'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 9,  'Другое');
+((SELECT id FROM glossaries WHERE name = 'profession'), 10, 'Квалифицированные специалисты сельского хозяйства и рыболовного'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 11, 'Пенсионеры'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 12, 'Ремесленники и представители других отраслей промышленности'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 13, 'Техники и младшие специалисты'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 14, 'Представители законодат. органов власти, высокопост. долж. лица, менеджеры и руководители'),
 
 -- ==========================================
 -- Район / Регион
 -- ==========================================
 INSERT INTO glossaries (name) VALUES ('region');
 INSERT INTO glossary_values (glossary_id, code, value) VALUES
-    ((SELECT id FROM glossaries WHERE name = 'region'), 1, 'Сельская местность'),
+    ((SELECT id FROM glossaries WHERE name = 'region'), 1, 'Рудничный'),
     ((SELECT id FROM glossaries WHERE name = 'region'), 2, 'Центральный'),
-    ((SELECT id FROM glossaries WHERE name = 'region'), 3, 'Рудничный'),
-    ((SELECT id FROM glossaries WHERE name = 'region'), 4, 'Заводский'),
-    ((SELECT id FROM glossaries WHERE name = 'region'), 5, 'Кировский'),
-    ((SELECT id FROM glossaries WHERE name = 'region'), 6, 'Ленинский');
+    ((SELECT id FROM glossaries WHERE name = 'region'), 3, 'Заводский'),
+    ((SELECT id FROM glossaries WHERE name = 'region'), 4, 'Кировский'),
+    ((SELECT id FROM glossaries WHERE name = 'region'), 5, 'Ленинский'),
+    ((SELECT id FROM glossaries WHERE name = 'region'), 6, 'Сельская местность');
 
 -- ==========================================
 -- Диагнозы
