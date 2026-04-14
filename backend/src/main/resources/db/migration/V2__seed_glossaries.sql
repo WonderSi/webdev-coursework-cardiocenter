@@ -29,12 +29,12 @@ INSERT INTO glossary_values (glossary_id, code, value) VALUES
 ((SELECT id FROM glossaries WHERE name = 'profession'), 6,  'Служащие, сфера обслуживания, работники среднего звена'),
 ((SELECT id FROM glossaries WHERE name = 'profession'), 7,  'Никогда не работающие домохозяйки'),
 ((SELECT id FROM glossaries WHERE name = 'profession'), 8,  'Дипломированные специалисты, умственный труд'),
-((SELECT id FROM glossaries WHERE name = 'profession'), 9,  'Другое');
+((SELECT id FROM glossaries WHERE name = 'profession'), 9,  'Другое'),
 ((SELECT id FROM glossaries WHERE name = 'profession'), 10, 'Квалифицированные специалисты сельского хозяйства и рыболовного'),
 ((SELECT id FROM glossaries WHERE name = 'profession'), 11, 'Пенсионеры'),
 ((SELECT id FROM glossaries WHERE name = 'profession'), 12, 'Ремесленники и представители других отраслей промышленности'),
 ((SELECT id FROM glossaries WHERE name = 'profession'), 13, 'Техники и младшие специалисты'),
-((SELECT id FROM glossaries WHERE name = 'profession'), 14, 'Представители законодат. органов власти, высокопост. долж. лица, менеджеры и руководители'),
+((SELECT id FROM glossaries WHERE name = 'profession'), 14, 'Представители законодат. органов власти, высокопост. долж. лица, менеджеры и руководители');
 
 -- ==========================================
 -- Район / Регион
