@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController
 
 /*
     Контроллер опроса пациента.
-    GET /api/survey/config — возвращает конфигурацию опроса (группы вопросов, типы полей, варианты ответов из справочников)
     POST /api/survey/submit — принимает заполненные ответы, вызывает ML для прогноза, возвращает результат
+
+    GET /api/survey/config — ЗАКОММЕНТИРОВАНО: конфигурация опроса перенесена на фронтенд (survey.config.ts).
+    Если понадобится вернуть на бэкенд — раскомментировать код ниже.
 */
 @RestController
 @RequestMapping("/api/survey")
@@ -27,7 +29,9 @@ class SurveyController(
 
     /*
         Возвращает полную конфигурацию опроса для фронтенда.
+        КОНФИГ НА ФРОНТЕ
     */
+    /*
     @GetMapping("/config")
     fun getConfig(): ResponseEntity<SurveyConfigResponse> {
         // Загружаем все справочники и группируем по имени
@@ -65,6 +69,7 @@ class SurveyController(
 
         return ResponseEntity.ok(SurveyConfigResponse(groups))
     }
+    */
 
     /*
         Принимает заполненные ответы пациента и возвращает результат ML-прогноза.
@@ -82,7 +87,10 @@ class SurveyController(
             Каждая группа = один шаг опроса на фронтенде
             requiredFields — поля, которые обязательно должны быть заполнены
             glossary — имя справочника в БД для radio-полей (gender, alcohol, profession, region).
+
+            КОНФИГ НА ФРОНТЕ (survey.config.ts)
         */
+        /*
         private val SURVEY_GROUPS = listOf(
             SurveyGroupTemplate(
                 id = 1,
@@ -157,6 +165,7 @@ class SurveyController(
                 )
             )
         )
+        */
     }
 }
 
@@ -172,7 +181,10 @@ class SurveyController(
     @param horizontal — отображать варианты radio горизонтально
     @param vertical — отображать варианты radio вертикально
     @param yearKey — ключ поля для года (для yesno-полей с уточнением года)
+
+    КОНФИГ НА ФРОНТЕ
 */
+/*
 data class SurveyFieldTemplate(
     val key: String,
     val type: String,
@@ -185,14 +197,6 @@ data class SurveyFieldTemplate(
     @JsonProperty("yearKey") val yearKey: String? = null
 )
 
-/*
-    Шаблон группы полей — один шаг опроса.
-
-    @param id — порядковый номер шага
-    @param title — заголовок шага
-    @param requiredFields — ключи полей, обязательных для заполнения перед переходом к следующему шагу
-    @param fields — список полей на этом шаге
-*/
 data class SurveyGroupTemplate(
     val id: Int,
     val title: String,
@@ -200,9 +204,6 @@ data class SurveyGroupTemplate(
     val fields: List<SurveyFieldTemplate>
 )
 
-/*
-    GET /api/survey/config.
-*/
 data class SurveyConfigResponse(
     val groups: List<SurveyConfigGroup>
 )
@@ -230,3 +231,4 @@ data class SurveyFieldOption(
     @JsonProperty("valueId") val valueId: Long,
     val label: String
 )
+*/
