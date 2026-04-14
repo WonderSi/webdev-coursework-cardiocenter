@@ -9,98 +9,94 @@
         Прогнозирование риска развития<br/>сердечно-сосудистых заболеваний
       </h1>
 
-      <div class="progress-bar">
-        <div
-          v-for="(step, index) in stepsMeta"
-          :key="step.id"
-          class="step"
-          :class="{ active: index <= currentStepIndex }"
-        ></div>
+      <div v-if="loading" class="loading">
+        <p>Загрузка опроса...</p>
       </div>
 
-      <div class="step-content">
-        <p class="question-text">{{ currentStepData.title }}</p>
-        <div class="divider"></div>
-
-        <component 
-          :is="stepComponents[currentStepIndex]" 
-          v-if="stepComponents[currentStepIndex]"
-          :form="form" 
-        />
-        <div v-else class="form-container">
-          <p style="text-align: center; color: gray;">Шаг в разработке...</p>
+      <template v-else-if="currentGroup">
+        <div class="progress-bar">
+          <div
+            v-for="(_, index) in store.config!.groups"
+            :key="index"
+            class="step"
+            :class="{ active: index <= currentStepIndex }"
+          ></div>
         </div>
-      </div>
 
-      <SurveyNavigation 
-        :current-step-index="currentStepIndex"
-        :is-last-step="isLastStep"
-        :is-next-btn-disabled="isNextBtnDisabled"
-        @next="nextStep"
-        @prev="prevStep"
-      />
+        <div class="step-content">
+          <p class="question-text">{{ currentGroup.title }}</p>
+          <div class="divider"></div>
+
+          <SurveyQuestion
+            v-for="field in currentGroup.fields"
+            :key="field.key"
+            :field="field"
+          />
+        </div>
+
+        <SurveyNavigation
+          :current-step-index="currentStepIndex"
+          :is-last-step="isLastStep"
+          :is-next-btn-disabled="isNextDisabled || store.loading"
+          @next="handleNext"
+          @prev="prevStep"
+        />
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useSurveyStore } from '@/stores/survey.store'
 
 import SurveyNavigation from '@/components/survey/SurveyNavigation.vue'
-import Step1 from '@/components/survey/Step1.vue'
-import Step2 from '@/components/survey/Step2.vue'
-import Step3 from '@/components/survey/Step3.vue'
-import Step4 from '@/components/survey/Step4.vue'
-import Step5 from '@/components/survey/Step5.vue'
-import Step6 from '@/components/survey/Step6.vue'
+import SurveyQuestion from '@/components/survey/SurveyQuestion.vue'
 
-const stepComponents = [Step1, Step2, Step3, Step4, Step5, Step6]
-
-const form = ref<Record<string, any>>({
-  gender: null, age: null, height: null, weight: null, hipMeasurement: null,
-  alcohol: null,
-  profession: null,
-  region: null,
-  glucose: null, cholesterol: null, nonHdlCholesterol: null, vldlCholesterol: null,
-    hdlCholesterol: null, ldlCholesterol: null, apolipoproteinA: null, apolipoproteinB: null,
-    triglycerides: null,
-
-  stroke: null, strokeYear: null, heartFailure: null, heartFailureYear: null,
-  cad: null, cadYear: null, angina: null, anginaYear: null,
-  myocardialInfarction: null, myocardialInfarctionYear: null,
-  arterialHypertension: null, arterialHypertensionYear: null
-})
-
-const stepsMeta = ref([
-  { id: 1, title: 'Укажите, пожалуйста, ваши основные параметры:', requiredFields: ['gender', 'age', 'height', 'weight'] },
-  { id: 2, title: 'Употребляете ли вы алкоголь?', requiredFields: ['alcohol'] },
-  { id: 3, title: 'Выберите ваш род деятельности', requiredFields: ['profession'] },
-  { id: 4, title: 'Где вы проживаете', requiredFields: ['region'] },
-  { id: 5, title: 'Ваши лабораторные параметры', requiredFields: [] },
-  { id: 6, title: 'Хронические заболевания и диагнозы', requiredFields: [] }
-])
+const router = useRouter()
+const store = useSurveyStore()
+const loading = ref(true)
 
 const currentStepIndex = ref(0)
-const currentStepData = computed(() => stepsMeta.value[currentStepIndex.value])
-const isLastStep = computed(() => currentStepIndex.value === stepsMeta.value.length - 1)
+const currentGroup = computed(() =>
+  store.config?.groups?.[currentStepIndex.value] ?? null
+)
+const isLastStep = computed(() =>
+  store.config ? currentStepIndex.value === store.config.groups.length - 1 : false
+)
 
-const isNextBtnDisabled = computed(() => {
-  const required = currentStepData.value.requiredFields
-  return required.some(field => {
-    const value = form.value[field]
-    return value === null || value === undefined || value === ''
+const isNextDisabled = computed(() => {
+  const group = currentGroup.value
+  if (!group?.requiredFields?.length) return false
+  return group.requiredFields.some(field => {
+    const value = store.answers[field]
+    return value === null || value === undefined || value === '' || (typeof value === 'number' && isNaN(value))
   })
 })
 
-const nextStep = () => {
-  if (isNextBtnDisabled.value) return
-  if (!isLastStep.value) { currentStepIndex.value++ } 
-  else { console.log('Опрос завершен! Данные:', form.value) }
+const handleNext = async () => {
+  if (isNextDisabled.value) return
+  if (isLastStep.value) {
+    const success = await store.submit()
+    if (success) {
+      router.push('/results')
+    } else {
+      alert('Ошибка при отправке. Попробуйте ещё раз.')
+    }
+  } else {
+    currentStepIndex.value++
+  }
 }
 
 const prevStep = () => {
   if (currentStepIndex.value > 0) { currentStepIndex.value-- }
 }
+
+onMounted(() => {
+  store.loadConfig()
+  loading.value = false
+})
 </script>
 
 <style scoped lang="scss">
@@ -118,11 +114,11 @@ const prevStep = () => {
 }
 
 .logo-container {
-  flex-shrink: 0; 
-  .logo { 
+  flex-shrink: 0;
+  .logo {
     width: 100px;
     height: 100px;
-    object-fit: contain; 
+    object-fit: contain;
     }
 }
 
@@ -138,7 +134,7 @@ const prevStep = () => {
   align-items: center;
   min-height: 0;
   overflow-y: scroll;
-  
+
   &::-webkit-scrollbar { width: 6px; color: $color-accent; }
   &::-webkit-scrollbar-track {
     background: transparent;
@@ -146,7 +142,7 @@ const prevStep = () => {
     }
   &::-webkit-scrollbar-thumb {
     background-color: $color-accent;
-    border-radius: 10px; 
+    border-radius: 10px;
     }
   &::-webkit-scrollbar-thumb:hover { background-color: $color-accent; }
 }
@@ -184,13 +180,20 @@ const prevStep = () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 40px;
+  gap: 20px;
 }
 
 .question-text {
   text-align: center;
   font-size: 1.1rem;
   color: $color-text;
+}
+
+.loading {
+  font-size: 1.1rem;
+  color: $color-text;
+  padding: 48px 0;
 }
 </style>
