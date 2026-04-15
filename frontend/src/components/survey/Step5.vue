@@ -1,91 +1,60 @@
 <template>
-  <div class="form-container">
-    <div class="form-group">
-      <label class="label">Глюкоза:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="4,5" v-model="form.glucose" />
-        <span class="unit">ммоль/л</span>
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label class="label">Холестерин:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="5,3" v-model="form.cholesterol" />
-        <span class="unit">ммоль/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Холестерин не-ЛПВП:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="3,2" v-model="form.nonHdlCholesterol" />
-        <span class="unit">ммоль/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Холестерин ЛПОНП:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="0,8" v-model="form.vldlCholesterol" />
-        <span class="unit">ммоль/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Холестерин ЛПВП:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="1,2" v-model="form.hdlCholesterol" />
-        <span class="unit">ммоль/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Холестерин ЛПНП:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="3,0" v-model="form.ldlCholesterol" />
-        <span class="unit">ммоль/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Аполипопротеин А (Апо А):</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="1,5" v-model="form.apolipoproteinA" />
-        <span class="unit">г/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Аполипопротеин B (Апо B):</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="0,9" v-model="form.apolipoproteinB" />
-        <span class="unit">г/л</span>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="label">Триглицериды:</label>
-      <div class="input-group">
-        <input type="number" class="input-field" placeholder="1,7" v-model="form.triglycerides" />
-        <span class="unit">ммоль/л</span>
+  <div class="step-container">
+    <div v-for="field in group.fields" :key="field.key">
+      <div v-if="field.type === 'radio'" class="radio-group-vertical">
+        <label v-for="opt in field.options" :key="opt.valueId" class="radio-label">
+          <input type="radio" :name="field.key" :value="opt.valueId" v-model="answers[field.key]" />
+          <span>{{ opt.label }}</span>
+        </label>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { SurveyGroup } from '@/stores/survey.store'
+
 defineProps<{
-  form: Record<string, any>
+  group: SurveyGroup
+  answers: Record<string, any>
 }>()
 </script>
 
 <style scoped lang="scss">
-.form-container {
-  gap: 24px;
+@use '@/styles/variables' as *;
+
+.step-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
-.label {
-  width: 220px;
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: $color-text;
+
+  input[type="radio"] {
+    accent-color: $color-accent;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  span {
+    flex: 1;
+  }
 }
 </style>

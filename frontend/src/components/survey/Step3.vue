@@ -1,69 +1,66 @@
 <template>
-  <div class="form-container">
+  <div class="step-container">
+    <div v-for="field in group.fields" :key="field.key">
       <div class="radio-group-vertical">
-      <label class="radio-label">
-          <input type="radio" :value="14" v-model="form.profession" />
-          <span>Представители законодат. органов власти,  высокопосталенные долж. лица, менеджеры и руководители</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="4" v-model="form.profession" />
-          <span>Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="10" v-model="form.profession" />
-          <span>Квалифицированные специалисты сельского хозяйства и рыболовного</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="12" v-model="form.profession" />
-          <span>Ремесленники и представители других отраслей промышленности</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="5" v-model="form.profession" />
-          <span>Операторы и монтажники установок и машинного оборудования</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="6" v-model="form.profession" />
-          <span>Служащие, сфера обслуживания, работники среднего звена</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="8" v-model="form.profession" />
-          <span>Дипломированные специалисты, умственный труд</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="7" v-model="form.profession" />
-          <span>Никогда не работающие домохозяйки</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="13" v-model="form.profession" />
-          <span>Техники и младшие специалисты</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="1" v-model="form.profession" />
-          <span>Ведение домашнего хозяйства</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="3" v-model="form.profession" />
-          <span>Лица свободных профессий</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="2" v-model="form.profession" />
-          <span>Вооруженные силы</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="11" v-model="form.profession" />
-          <span>Пенсионеры</span>
-      </label>
-      <label class="radio-label">
-          <input type="radio" :value="9" v-model="form.profession" />
-          <span>Другое</span>
-      </label>
+        <label v-for="opt in field.options" :key="opt.valueId" class="radio-label">
+          <input type="radio" :name="field.key" :value="opt.valueId" v-model="answers[field.key]" />
+          <span>{{ opt.label }}</span>
+        </label>
       </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Получаем доступ к объекту form из родительского компонента
+import type { SurveyGroup } from '@/stores/survey.store'
+
 defineProps<{
-  form: Record<string, any>
+  group: SurveyGroup
+  answers: Record<string, any>
 }>()
 </script>
+
+<style scoped lang="scss">
+@use '@/styles/variables' as *;
+
+.step-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.radio-group-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: $color-text;
+
+  input[type="radio"] {
+    accent-color: $color-accent;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  span {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .radio-label {
+    font-size: 0.95rem;
+  }
+}
+</style>

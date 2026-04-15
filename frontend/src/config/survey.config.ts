@@ -28,7 +28,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
     },
     {
       id: 2,
-      title: 'Укажите, пожалуйста, ваши антропометрические параметры:',
+      title: 'Ваши параметры:',
       requiredFields: ['height', 'weight'],
       fields: [
         {
@@ -65,16 +65,16 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Алкоголь',
           vertical: true,
           options: [
-            { valueId: 1, label: 'Нет' },
+            { valueId: 3, label: 'Употребляю' },
             { valueId: 2, label: 'Употреблял ранее' },
-            { valueId: 3, label: 'Да, в настоящее время' },
+            { valueId: 1, label: 'Никогда не употреблял' },
           ],
         },
       ],
     },
     {
       id: 4,
-      title: 'Выберите ваш род деятельности',
+      title: 'Выберите ваш основной род деятельности:',
       requiredFields: ['profession'],
       fields: [
         {
@@ -83,27 +83,27 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Профессия',
           vertical: true,
           options: [
+            { valueId: 14, label: 'Представители законодательных органов власти, высокопоставленные должностные лица, менеджеры и руководители' },
+            { valueId: 10, label: 'Квалифицированные специалисты сельского хозяйства и рыболовного' },
+            { valueId: 4, label: 'Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд' },
             { valueId: 1, label: 'Ведение домашнего хозяйства' },
-            { valueId: 2, label: 'Вооружённые силы' },
-            { valueId: 3, label: 'Лица свободных профессий' },
-            { valueId: 4, label: 'Низкоквалифицированные работники' },
-            { valueId: 5, label: 'Операторы и монтажники' },
-            { valueId: 6, label: 'Служащие, сфера обслуживания' },
+            { valueId: 2, label: 'Вооруженные силы' },
+            { valueId: 5, label: 'Операторы и монтажники установок и машинного оборудования' },
+            { valueId: 6, label: 'Служащие, сфера обслуживания, работники среднего звена' },
             { valueId: 7, label: 'Никогда не работающие домохозяйки' },
-            { valueId: 8, label: 'Дипломированные специалисты' },
-            { valueId: 9, label: 'Другое' },
-            { valueId: 10, label: 'Сельское хозяйство и рыболовство' },
+            { valueId: 8, label: 'Дипломированные специалисты, умственный труд' },
+            { valueId: 3, label: 'Лица свободных профессий' },
             { valueId: 11, label: 'Пенсионеры' },
-            { valueId: 12, label: 'Ремесленники' },
+            { valueId: 12, label: 'Ремесленники и представители других отраслей промышленности' },
             { valueId: 13, label: 'Техники и младшие специалисты' },
-            { valueId: 14, label: 'Руководители и должностные лица' },
+            { valueId: 9, label: 'Другое' },
           ],
         },
       ],
     },
     {
       id: 5,
-      title: 'Где вы проживаете?',
+      title: 'Выберите Ваш район проживания:',
       requiredFields: ['region'],
       fields: [
         {
@@ -112,12 +112,12 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Район',
           vertical: true,
           options: [
-            { valueId: 1, label: 'Рудничный' },
+            { valueId: 6, label: 'Сельская местность' },
             { valueId: 2, label: 'Центральный' },
             { valueId: 3, label: 'Заводской' },
+            { valueId: 1, label: 'Рудничный' },
             { valueId: 4, label: 'Кировский' },
             { valueId: 5, label: 'Ленинский' },
-            { valueId: 6, label: 'Сельская местность' },
           ],
         },
       ],

@@ -25,12 +25,11 @@
 
         <div class="step-content">
           <p class="question-text">{{ currentGroup.title }}</p>
-          <div class="divider"></div>
 
-          <SurveyQuestion
-            v-for="field in currentGroup.fields"
-            :key="field.key"
-            :field="field"
+          <component
+            :is="stepComponent"
+            :group="currentGroup"
+            :answers="store.answers"
           />
         </div>
 
@@ -52,7 +51,13 @@ import { useRouter } from 'vue-router'
 import { useSurveyStore } from '@/stores/survey.store'
 
 import SurveyNavigation from '@/components/survey/SurveyNavigation.vue'
-import SurveyQuestion from '@/components/survey/SurveyQuestion.vue'
+import Step1 from '@/components/survey/Step1.vue'
+import Step2 from '@/components/survey/Step2.vue'
+import Step3 from '@/components/survey/Step3.vue'
+import Step4 from '@/components/survey/Step4.vue'
+import Step5 from '@/components/survey/Step5.vue'
+import Step6 from '@/components/survey/Step6.vue'
+import Step7 from '@/components/survey/Step7.vue'
 
 const router = useRouter()
 const store = useSurveyStore()
@@ -65,6 +70,19 @@ const currentGroup = computed(() =>
 const isLastStep = computed(() =>
   store.config ? currentStepIndex.value === store.config.groups.length - 1 : false
 )
+
+const stepComponent = computed(() => {
+  const map: Record<number, any> = {
+    0: Step1,
+    1: Step2,
+    2: Step3,
+    3: Step4,
+    4: Step5,
+    5: Step6,
+    6: Step7,
+  }
+  return map[currentStepIndex.value] ?? Step1
+})
 
 const isNextDisabled = computed(() => {
   const group = currentGroup.value
@@ -180,7 +198,7 @@ onMounted(() => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 40px;
   gap: 20px;
 }
