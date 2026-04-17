@@ -23,6 +23,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Возраст',
           unit: 'лет',
           placeholder: '27',
+          validation: { min: 18, max: 120 },
         },
       ],
     },
@@ -37,6 +38,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Рост',
           unit: 'см',
           placeholder: '165',
+          validation: { min: 50, max: 250 },
         },
         {
           key: 'weight',
@@ -44,6 +46,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Вес',
           unit: 'кг',
           placeholder: '60',
+          validation: { min: 20, max: 300 },
         },
         {
           key: 'hipMeasurement',
@@ -51,6 +54,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
           label: 'Объём бёдер',
           unit: 'см',
           placeholder: '90',
+          validation: { min: 40, max: 200 },
         },
       ],
     },

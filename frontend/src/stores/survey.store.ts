@@ -7,6 +7,12 @@ export interface GlossaryOption {
   label: string
 }
 
+export interface ValidationRule {
+  min?: number
+  max?: number
+  required?: boolean
+}
+
 // Описание одного поля анкеты
 export interface SurveyField {
   key: string
@@ -18,6 +24,7 @@ export interface SurveyField {
   vertical?: boolean
   yearKey?: string
   options?: GlossaryOption[]
+  validation?: ValidationRule
 }
 
 // Группа полей с заголовками и списком обязательных полей
