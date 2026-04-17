@@ -21,8 +21,9 @@
           <input
             type="number"
             class="input-field year-input"
+            :class="{ 'input-error': field.yearKey && errors[field.yearKey] }"
             placeholder="1998"
-            v-model.number="answers[field.yearKey!]"
+            v-model.number="answers[field.yearKey]"
             min="1950"
             :max="new Date().getFullYear()"
           />
@@ -38,6 +39,7 @@ import type { SurveyGroup } from '@/stores/survey.store'
 defineProps<{
   group: SurveyGroup
   answers: Record<string, any>
+  errors: Record<string, string>
 }>()
 </script>
 
@@ -130,6 +132,11 @@ defineProps<{
   height: 24px;
 
   &:focus { border-color: $color-accent; }
+
+  &.input-error {
+    border-color: #e74c3c;
+    background-color: #fdf2f2;
+  }
 }
 
 /* Animations */

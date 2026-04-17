@@ -7,11 +7,13 @@
         <input
           type="number"
           class="input-field"
+          :class="{ 'input-error': errors[field.key] }"
           :placeholder="field.placeholder || ''"
           v-model.number="answers[field.key]"
         />
         <span class="unit">{{ field.unit }}</span>
       </div>
+
     </div>
   </div>
 </template>
@@ -22,6 +24,7 @@ import type { SurveyGroup } from '@/stores/survey.store'
 defineProps<{
   group: SurveyGroup
   answers: Record<string, any>
+  errors: Record<string, string>
 }>()
 </script>
 
@@ -70,6 +73,11 @@ defineProps<{
     text-align: center;
 
     &:focus { border-color: $color-accent; }
+
+    &.input-error {
+      border-color: #e74c3c;
+      background-color: #fdf2f2;
+    }
   }
 
   .unit {
