@@ -1,5 +1,11 @@
 <template>
   <div class="survey-page">
+    <Transition name="fade">
+      <div v-if="hasErrors" class="error-banner">
+        <span>Пожалуйста, проверьте введённые данные</span>
+      </div>
+    </Transition>
+
     <div class="logo-container">
       <img src="@/assets/logo.png" alt="logo" class="logo" />
     </div>
@@ -30,6 +36,7 @@
             :is="stepComponent"
             :group="currentGroup"
             :answers="store.answers"
+            :errors="fieldErrors"
           />
         </div>
 
@@ -84,14 +91,60 @@ const stepComponent = computed(() => {
   return map[currentStepIndex.value] ?? Step1
 })
 
-const isNextDisabled = computed(() => {
+const fieldErrors = computed<Record<string, string>>(() => {
+  const errors: Record<string, string> = {}
   const group = currentGroup.value
-  if (!group?.requiredFields?.length) return false
-  return group.requiredFields.some(field => {
-    const value = store.answers[field]
-    return value === null || value === undefined || value === '' || (typeof value === 'number' && isNaN(value))
-  })
+  if (!group) return errors
+
+  for (const field of group.fields) {
+    const value = store.answers[field.key]
+    const isEmpty = value === null || value === undefined || value === ''
+
+    // Required
+    if (group.requiredFields.includes(field.key) && isEmpty) {
+      errors[field.key] = 'Обязательное поле'
+      continue
+    }
+
+    // Number
+    if (field.type === 'number' && !isEmpty && field.validation) {
+      const num = Number(value)
+      if (isNaN(num)) {
+        errors[field.key] = 'Введите число'
+      } else if (field.validation.min !== undefined && num < field.validation.min) {
+        errors[field.key] = `Минимум ${field.validation.min}`
+      } else if (field.validation.max !== undefined && num > field.validation.max) {
+        errors[field.key] = `Максимум ${field.validation.max}`
+      }
+    }
+
+    // Year validation for yesno fields with yearKey
+    if (field.yearKey && value === 1) {
+      const yearValue = store.answers[field.yearKey]
+      if (yearValue !== null && yearValue !== undefined && yearValue !== '') {
+        const year = Number(yearValue)
+        const currentYear = new Date().getFullYear()
+        const age = Number(store.answers.age)
+        const birthYear = age ? currentYear - (age + 1) : 1950
+        if (isNaN(year)) {
+          errors[field.yearKey] = 'Введите корректный год'
+        } else if (year < 1950) {
+          errors[field.yearKey] = 'Год должен быть не ранее 1950'
+        } else if (year > currentYear) {
+          errors[field.yearKey] = `Год не может быть больше ${currentYear}`
+        } else if (age && year < birthYear) {
+          errors[field.yearKey] = `Год диагноза не может быть раньше года рождения (${birthYear})`
+        }
+      }
+    }
+  }
+
+  return errors
 })
+
+const hasErrors = computed(() => Object.keys(fieldErrors.value).length > 0)
+
+const isNextDisabled = computed(() => hasErrors.value)
 
 const handleNext = async () => {
   if (isNextDisabled.value) return
@@ -213,5 +266,27 @@ onMounted(() => {
   font-size: 1.1rem;
   color: $color-text;
   padding: 48px 0;
+}
+
+.error-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #e74c3c;
+  color: #fff;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.fade-enter-active { animation: fadeIn 0.3s ease; }
+.fade-leave-active { animation: fadeIn 0.2s ease reverse; }
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 </style>
