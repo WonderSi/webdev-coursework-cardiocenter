@@ -38,17 +38,17 @@ class MlClient(
             apolipoprotein_a = request.apolipoproteinA?.toDouble(),
             apolipoprotein_b = request.apolipoproteinB?.toDouble(),
             triglycerides = request.triglycerides?.toDouble(), 
-            stroke = request.stroke?.let { if (it) 1 else 0 }, // true=1, false=0
+            stroke = request.stroke,
             stroke_year = request.strokeYear,
-            heart_failure = request.heartFailure?.let { if (it) 1 else 0 },
+            heart_failure = request.heartFailure,
             heart_failure_year = request.heartFailureYear,
-            cad_chd_ihd = request.cad?.let { if (it) 1 else 0 },
+            cad_chd_ihd = request.cad,
             cad_chd_ihd_year = request.cadYear,
-            angine = request.angina?.let { if (it) 1 else 0 },
+            angine = request.angina,
             angine_year = request.anginaYear,
-            myocardial_infarction = request.myocardialInfarction?.let { if (it) 1 else 0 },
+            myocardial_infarction = request.myocardialInfarction,
             myocardial_infarction_year = request.myocardialInfarctionYear,
-            arterial_hypertension = request.arterialHypertension?.let { if (it) 1 else 0 },
+            arterial_hypertension = request.arterialHypertension,
             arterial_hypertension_year = request.arterialHypertensionYear
         )
 

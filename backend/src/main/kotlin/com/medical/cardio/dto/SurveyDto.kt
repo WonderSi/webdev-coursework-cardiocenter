@@ -68,28 +68,34 @@ data class SurveyRequest(
 //    @field:DecimalMin("0.1") @field:DecimalMax("20.0")
     val triglycerides: BigDecimal? = null,
 
-    val stroke: Boolean? = null,
-    @field:Min(1900)
+    @field:Min(0) @field:Max(1)
+    val stroke: Int? = null,
+    @field:Min(1950) @field:Max(2026)
     val strokeYear: Int? = null,
 
-    val heartFailure: Boolean? = null,
-    @field:Min(1900)
+    @field:Min(0) @field:Max(1)
+    val heartFailure: Int? = null,
+    @field:Min(1950) @field:Max(2026)
     val heartFailureYear: Int? = null,
 
-    val cad: Boolean? = null,
-    @field:Min(1900)
+    @field:Min(0) @field:Max(1)
+    val cad: Int? = null,
+    @field:Min(1950) @field:Max(2026)
     val cadYear: Int? = null,
 
-    val angina: Boolean? = null,
-    @field:Min(1900)
+    @field:Min(0) @field:Max(1)
+    val angina: Int? = null,
+    @field:Min(1950) @field:Max(2026)
     val anginaYear: Int? = null,
 
-    val myocardialInfarction: Boolean? = null,
-    @field:Min(1900)
+    @field:Min(0) @field:Max(1)
+    val myocardialInfarction: Int? = null,
+    @field:Min(1950) @field:Max(2026)
     val myocardialInfarctionYear: Int? = null,
 
-    val arterialHypertension: Boolean? = null,
-    @field:Min(1900)
+    @field:Min(0) @field:Max(1)
+    val arterialHypertension: Int? = null,
+    @field:Min(1950) @field:Max(2026)
     val arterialHypertensionYear: Int? = null,
 
     @field:Valid
