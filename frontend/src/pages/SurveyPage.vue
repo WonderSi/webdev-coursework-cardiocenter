@@ -31,6 +31,7 @@
 
         <div class="step-content">
           <p class="question-text">{{ currentGroup.title }}</p>
+          <div class="divider"></div>
 
           <component
             :is="stepComponent"
