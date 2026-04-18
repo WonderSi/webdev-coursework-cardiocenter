@@ -1,5 +1,6 @@
 package com.medical.cardio.service
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.medical.cardio.dto.PredictionResult
 import com.medical.cardio.dto.SurveyRequest
 import org.slf4j.LoggerFactory
@@ -25,32 +26,34 @@ class MlClient(
             age = request.age,
             height = request.height?.toDouble(),
             weight = request.weight?.toDouble(),
-            hip_measurement = request.hipMeasurement?.toDouble(),
-            alcohol = request.alcoholId?.toInt(),
+            hipMeasurement = request.hipMeasurement?.toDouble() ?: 0.0,
+            alcohol = request.alcoholId?.toInt()?.minus(1),
             profession = request.professionId?.toInt(),
             region = request.regionId?.toInt(),
             glucose = request.glucose?.toDouble(),
             cholesterol = request.cholesterol?.toDouble(),
-            non_hdl_cholesterol = request.nonHdlCholesterol?.toDouble(),
-            vldl_cholesterol = request.vldlCholesterol?.toDouble(),
-            hdl_cholesterol = request.hdlCholesterol?.toDouble(),
-            ldl_cholesterol = request.ldlCholesterol?.toDouble(),
-            apolipoprotein_a = request.apolipoproteinA?.toDouble(),
-            apolipoprotein_b = request.apolipoproteinB?.toDouble(),
-            triglycerides = request.triglycerides?.toDouble(), 
-            stroke = request.stroke,
-            stroke_year = request.strokeYear,
-            heart_failure = request.heartFailure,
-            heart_failure_year = request.heartFailureYear,
-            cad_chd_ihd = request.cad,
-            cad_chd_ihd_year = request.cadYear,
-            angine = request.angina,
-            angine_year = request.anginaYear,
-            myocardial_infarction = request.myocardialInfarction,
-            myocardial_infarction_year = request.myocardialInfarctionYear,
-            arterial_hypertension = request.arterialHypertension,
-            arterial_hypertension_year = request.arterialHypertensionYear
+            nonHdlCholesterol = request.nonHdlCholesterol?.toDouble(),
+            vldlCholesterol = request.vldlCholesterol?.toDouble(),
+            hdlCholesterol = request.hdlCholesterol?.toDouble(),
+            ldlCholesterol = request.ldlCholesterol?.toDouble(),
+            apolipoproteinA = request.apolipoproteinA?.toDouble(),
+            apolipoproteinB = request.apolipoproteinB?.toDouble(),
+            triglycerides = request.triglycerides?.toDouble(),
+            stroke = request.stroke?.let { if (it) 1 else 0 },
+            strokeYear = request.strokeYear ?: 1950,
+            heartFailure = request.heartFailure?.let { if (it) 1 else 0 },
+            heartFailureYear = request.heartFailureYear ?: 1950,
+            cadChdIhd = request.cad?.let { if (it) 1 else 0 },
+            cadChdIhdYear = request.cadYear ?: 1950,
+            angine = request.angina?.let { if (it) 1 else 0 },
+            angineYear = request.anginaYear ?: 1950,
+            myocardialInfarction = request.myocardialInfarction?.let { if (it) 1 else 0 },
+            myocardialInfarctionYear = request.myocardialInfarctionYear ?: 1950,
+            arterialHypertension = request.arterialHypertension?.let { if (it) 1 else 0 },
+            arterialHypertensionYear = request.arterialHypertensionYear ?: 1950
         )
+
+        log.info("Sending ML request: {}", mlRequest)
 
         return webClient.post()
             .uri("/predictions/predict")
@@ -59,13 +62,16 @@ class MlClient(
             .bodyToMono(MlPredictResponse::class.java)
             .map { response ->
                 PredictionResult(
-                    diseaseType = response.disease_type,
-                    probability = "${(response.disease_probability * 100).toInt()}%", // Преобразование в проценты
+                    diseaseType = response.diseaseType,
+                    probability = "${(response.diseaseProbability * 100).toInt()}%",
                     message = response.message
                 )
             }
             .onErrorResume { e ->
                 log.error("ML service call failed: ${e.message}")
+                if (e is org.springframework.web.reactive.function.client.WebClientResponseException) {
+                    log.error("ML response body: ${e.responseBodyAsString}")
+                }
                 Mono.just(
                     PredictionResult(
                         diseaseType = null,
@@ -82,36 +88,36 @@ data class MlPredictRequest(
     val age: Int?,
     val height: Double?,
     val weight: Double?,
-    val hip_measurement: Double?,
+    @JsonProperty("hip_measurement") val hipMeasurement: Double?,
     val alcohol: Int?,
     val profession: Int?,
     val region: Int?,
     val glucose: Double?,
     val cholesterol: Double?,
-    val non_hdl_cholesterol: Double?,
-    val vldl_cholesterol: Double?,
-    val hdl_cholesterol: Double?,
-    val ldl_cholesterol: Double?,
-    val apolipoprotein_a: Double?,
-    val apolipoprotein_b: Double?,
+    @JsonProperty("non_hdl_cholesterol") val nonHdlCholesterol: Double?,
+    @JsonProperty("vldl_cholesterol") val vldlCholesterol: Double?,
+    @JsonProperty("hdl_cholesterol") val hdlCholesterol: Double?,
+    @JsonProperty("ldl_cholesterol") val ldlCholesterol: Double?,
+    @JsonProperty("apolipoprotein_a") val apolipoproteinA: Double?,
+    @JsonProperty("apolipoprotein_b") val apolipoproteinB: Double?,
     val triglycerides: Double?,
     val stroke: Int?,
-    val stroke_year: Int?,
-    val heart_failure: Int?,
-    val heart_failure_year: Int?,
-    val cad_chd_ihd: Int?,
-    val cad_chd_ihd_year: Int?,
+    @JsonProperty("stroke_year") val strokeYear: Int?,
+    @JsonProperty("heart_failure") val heartFailure: Int?,
+    @JsonProperty("heart_failure_year") val heartFailureYear: Int?,
+    @JsonProperty("cad_chd_ihd") val cadChdIhd: Int?,
+    @JsonProperty("cad_chd_ihd_year") val cadChdIhdYear: Int?,
     val angine: Int?,
-    val angine_year: Int?,
-    val myocardial_infarction: Int?,
-    val myocardial_infarction_year: Int?,
-    val arterial_hypertension: Int?,
-    val arterial_hypertension_year: Int?
+    @JsonProperty("angine_year") val angineYear: Int?,
+    @JsonProperty("myocardial_infarction") val myocardialInfarction: Int?,
+    @JsonProperty("myocardial_infarction_year") val myocardialInfarctionYear: Int?,
+    @JsonProperty("arterial_hypertension") val arterialHypertension: Int?,
+    @JsonProperty("arterial_hypertension_year") val arterialHypertensionYear: Int?
 )
 
 data class MlPredictResponse(
-    val disease_type: String?,
-    val disease_probability: Double,
+    @JsonProperty("disease_type") val diseaseType: String?,
+    @JsonProperty("disease_probability") val diseaseProbability: Double,
     val message: String,
-    val model_version: String
+    @JsonProperty("model_version") val modelVersion: String
 )
