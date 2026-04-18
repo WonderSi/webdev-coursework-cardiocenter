@@ -70,32 +70,32 @@ data class SurveyRequest(
 
     @field:Min(0) @field:Max(1)
     val stroke: Int? = null,
-    @field:Min(1950) @field:Max(2026)
+    @field:Min(1950)
     val strokeYear: Int? = null,
 
     @field:Min(0) @field:Max(1)
     val heartFailure: Int? = null,
-    @field:Min(1950) @field:Max(2026)
+    @field:Min(1950)
     val heartFailureYear: Int? = null,
 
     @field:Min(0) @field:Max(1)
     val cad: Int? = null,
-    @field:Min(1950) @field:Max(2026)
+    @field:Min(1950)
     val cadYear: Int? = null,
 
     @field:Min(0) @field:Max(1)
     val angina: Int? = null,
-    @field:Min(1950) @field:Max(2026)
+    @field:Min(1950)
     val anginaYear: Int? = null,
 
     @field:Min(0) @field:Max(1)
     val myocardialInfarction: Int? = null,
-    @field:Min(1950) @field:Max(2026)
+    @field:Min(1950)
     val myocardialInfarctionYear: Int? = null,
 
     @field:Min(0) @field:Max(1)
     val arterialHypertension: Int? = null,
-    @field:Min(1950) @field:Max(2026)
+    @field:Min(1950)
     val arterialHypertensionYear: Int? = null,
 
     @field:Valid
