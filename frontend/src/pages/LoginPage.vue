@@ -4,31 +4,25 @@
             <img src="@/assets/logo.png" alt="logo" class="logo" />
         </div>
         
-         <div class="basic-card">
-            <div class="basic-card-header">
-                Добро пожаловать!
+        <div class="basic-card">
+            <div class="basic-card-header">Добро пожаловать</div>
+            <div class="basic-card-header-subtext">Войдите, чтобы использовать сервис</div>
+
+            <div class="input-group">
+                <input
+                    type="text"
+                    class="input-field"
+                />
+                <input
+                    type="text"
+                    class="input-field"
+                />
             </div>
-            <div class="basic-card-text">
-                    <p>
-                    <strong>Болезни сердечно-сосудистой системы</strong>
-                    остаются ведущей причиной инвалидизации и смертности во всём мире.
-                    </p>
-                    <p>
-                    Предлагаем вам выяснить, <strong>каков Ваш риск развития
-                    сердечно-сосудистых заболеваний</strong> на основе ваших медицинских
-                    показателей, профессии, района проживания и других факторов.
-                    </p>
-                    <p>
-                    Расчёт будет произведён с использованием методов
-                    <strong>искусственного интеллекта.</strong>
-                    </p>
-                    <p>
-                    Перед прохождением опроса желательно иметь при себе медицинскую
-                    карту или знать результаты своих обследований.
-                    </p>
-                </div>
-                <button class="basic-card-main-btn" @click="">Начать</button>
-                <button class="basic-card-sub-btn"  @click="goBackHomePage">Вернуться</button>
+
+
+
+            <button class="basic-card-main-btn" @click="">Войти</button>
+            <button class="basic-card-sub-btn"  @click="goBackHomePage">Вернуться</button>
          </div>
     </div>
 </template>

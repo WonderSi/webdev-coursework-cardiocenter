@@ -19,6 +19,13 @@
   text-align: center;
 }
 
+.basic-card-header-subtext {
+  font-size: 1.1rem;
+  color: $color-secondary;
+  text-align: center;
+}
+
+
 .basic-card-text {
   display: flex;
   flex-direction: column;
