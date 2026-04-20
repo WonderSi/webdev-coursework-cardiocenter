@@ -3,6 +3,7 @@ import HomePage from '@/pages/HomePage.vue'
 import SurveyPage from '@/pages/SurveyPage.vue'
 import ResultsPage from '@/pages/ResultsPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
+import DashboardsPage from '@/pages/DashboardsPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -12,6 +13,7 @@ const router = createRouter({
     { path: '/results',  component: ResultsPage },
 
     { path: '/login',  component: LoginPage },
+    { path: '/dashboards',  component: DashboardsPage },
   ]
 })
 
