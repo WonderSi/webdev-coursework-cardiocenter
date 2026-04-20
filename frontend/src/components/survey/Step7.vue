@@ -1,35 +1,42 @@
 <template>
   <div class="step-container">
-    <div class="question-block" v-for="field in group.fields" :key="field.key">
-      <span class="question-text">{{ field.label }}</span>
+    <template v-for="(field, i) in group.fields" :key="field.key">
+      <div class="question-wrapper">
+        <div class="question-block">
+          <span class="question-text">{{ field.label }}</span>
 
-      <div class="radio-group-horizontal">
-        <label class="radio-label">
-          <span>Да</span>
-          <input type="radio" :name="field.key" :value="1" v-model="answers[field.key]" />
-        </label>
-        <label class="radio-label">
-          <span>Нет</span>
-          <input type="radio" :name="field.key" :value="0" v-model="answers[field.key]" />
-        </label>
-      </div>
+          <div class="radio-group-horizontal">
+            <label class="radio-label">
+              <span>Да</span>
+              <input type="radio" :name="field.key" :value="1" v-model="answers[field.key]" />
+            </label>
+            <label class="radio-label">
+              <span>Нет</span>
+              <input type="radio" :name="field.key" :value="0" v-model="answers[field.key]" />
+            </label>
+          </div>
 
-      <Transition name="expand-down">
-        <div v-if="answers[field.key] === 1 && field.yearKey" class="conditional-block">
-          <div class="connecting-line-graphic"></div>
-          <span class="year-label">Год диагностирования:</span>
-          <input
-            type="number"
-            class="input-field year-input"
-            :class="{ 'input-error': field.yearKey && errors[field.yearKey] }"
-            placeholder="1998"
-            v-model.number="answers[field.yearKey]"
-            min="1950"
-            :max="new Date().getFullYear()"
-          />
+          <Transition name="expand-down">
+            <div v-if="answers[field.key] === 1 && field.yearKey" class="conditional-block">
+              <div class="connecting-line-graphic"></div>
+              <span class="year-label">Год первого диагностирования:</span>
+              <div class="input-group">
+                <input
+                  type="number"
+                  class="input-field year-input"
+                  :class="{ 'input-error': field.yearKey && errors[field.yearKey] }"
+                  placeholder="2012"
+                  v-model.number="answers[field.yearKey]"
+                  min="1950"
+                  :max="new Date().getFullYear()"
+                />
+                <span class="unit">г.</span>
+              </div>
+            </div>
+          </Transition>
         </div>
-      </Transition>
-    </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -49,15 +56,23 @@ defineProps<{
 .step-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  width: 100%;
+}
+
+.question-wrapper {
+  display: flex;
+  flex-direction: column;
   width: 100%;
 }
 
 .question-block {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  text-align: left;
+  position: relative;
+  gap: 16px;
+  padding: 16px 0 16px 80px;
 }
 
 .question-text {
@@ -65,12 +80,12 @@ defineProps<{
   color: $color-text;
   font-size: 1rem;
   line-height: 1.3;
-  text-align: center;
 }
 
 .radio-group-horizontal {
   display: flex;
   gap: 24px;
+  padding-left: 32px;
 }
 
 .radio-label {
@@ -81,10 +96,7 @@ defineProps<{
   font-size: 0.95rem;
   color: $color-text;
 
-  span { order: 1; }
-
   input[type="radio"] {
-    order: 2;
     accent-color: $color-accent;
     width: 18px;
     height: 18px;
@@ -95,10 +107,11 @@ defineProps<{
 .conditional-block {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  padding-left: 32px;
   gap: 12px;
   width: 100%;
   position: relative;
-  padding-left: 32px;
 }
 
 .connecting-line-graphic {
@@ -115,7 +128,7 @@ defineProps<{
 }
 
 .year-label {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: $color-text;
   white-space: nowrap;
 }
