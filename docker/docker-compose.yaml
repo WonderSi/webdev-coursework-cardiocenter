@@ -1,0 +1,140 @@
+services:
+  # ============================================
+  # PostgreSQL
+  # ============================================
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cardio_postgres
+    environment:
+      POSTGRES_DB: cardio_db
+      POSTGRES_USER: cardio_user
+      POSTGRES_PASSWORD: cardio_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U cardio_user -d cardio_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # Redis
+  # ============================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: cardio_redis
+    command: redis-server --requirepass redis_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "redis_pass", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # ML Service
+  # ТОЛЬКО внутри Docker-сети — исключаем ports:
+  # Backend обращается по имени: http://ml-service:8000
+  # ============================================
+
+  ml-service:
+    build:
+      context: ../ml
+      dockerfile: Dockerfile
+    image: ml-service
+    container_name: cardio_ml
+    #    ports:
+    #      - "8000:8000"
+    expose:
+      - "8000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    networks:
+      - internal
+    #    healthcheck:
+#      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health" ]
+#      interval: 15s
+#      timeout: 5s
+#      retries: 3
+    restart: unless-stopped
+
+
+  # ============================================
+  # Backend
+  # ============================================
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: cardio-backend
+    container_name: cardio_backend
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ML_SERVICE_URL: ${ML_SERVICE_URL}
+    ports:
+      - "8080:8080" # Swagger
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s # Время на старт
+    restart: unless-stopped
+
+  # ============================================
+  # Frontend
+  # ============================================
+  fontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    image: cardio-frontend
+    container_name: cardio_frontend
+    ports:
+      - "80:80"
+    networks:
+      - internal
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
