@@ -60,16 +60,18 @@
         <div class="modal-card">
           <div class="login-card-header">Восстановление пароля</div>
           <p class="modal-description">
-            Необходимо отправить запрос администратору, введите Вашу электронную почту
+            Необходимо отправить запрос администратору
           </p>
           
           <div class="form-field">
-            <label>Электронная почта</label>
+            <label>Email</label>
             <input type="email" class="login-input" placeholder="doctor@niikpssz.ru" />
           </div>
 
-          <button class="login-btn" @click="closeModal">Отправить</button>
-          <button class="modal-back-btn" @click="closeModal">Назад к входу</button>
+          <button class="modal-sent-btn" @click="closeModal">Отправить</button>
+          <button class="backToHomePage-btn" @click="closeModal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Назад</button>
         </div>
       </div>
     </Teleport>
@@ -88,7 +90,7 @@ const eyeOpenSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" 
 const eyeClosedSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75" stroke="#8A8FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
 const togglePasswordVisibility = () => {
-  isPasswordVisible.ref.value = !isPasswordVisible.ref.value
+  isPasswordVisible.value = !isPasswordVisible.value
 }
 
 const goBackHomePage = () => router.push('/')
@@ -265,15 +267,46 @@ const closeModal = () => isModalOpen.value = false
   justify-content: space-between;
   align-items: center;
   font-size: 0.95rem;
+  padding-inline: 2px;
 
-  .remember-me {
+.remember-me {
     font-weight: 400;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
     color: $color-secondary;
     cursor: pointer;
-    input { accent-color: $color-accent; }
+    
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid $color-secondary;
+      border-radius: 4px;
+      background-color: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+
+      &:checked {
+        background-color: $color-accent;
+        border-color: $color-accent; 
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 4.5px;
+          top: 1.25px;
+          width: 5px;
+          height: 9px;
+          border: solid $color-white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
+    }
   }
 
   .forgot-password {
@@ -295,8 +328,8 @@ const closeModal = () => isModalOpen.value = false
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(35, 36, 43, 0.5);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -307,27 +340,41 @@ const closeModal = () => isModalOpen.value = false
   background: white;
   padding: 40px;
   border-radius: $radius-basic-card;
-  width: 400px;
+  width: 500px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .modal-description {
   text-align: center;
   color: $color-secondary;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 1rem;
+  padding-top: 10px;
+  padding-bottom: 32px;
+}
+
+.modal-sent-btn {
+  margin: 20px 0px 40px 0px;
+  background: $color-accent;
+  color: $color-white;
+  padding: 13px;
+  border: none;
+  border-radius: $radius-rect-buttons;
+  font-size: 1rem;
+  cursor: pointer;
+  &:hover {
+    background: $color-accent-lighter;
+  }
 }
 
 .modal-back-btn {
   background: none;
   border: none;
-  color: $color-secondary;
-  font-size: 0.9rem;
+  color: $color-accent;
+  font-size: 1rem;
   cursor: pointer;
-  &:hover { color: $color-text; }
+  &:hover { color: rgba($color-accent, 0.7); }
 }
 
 </style>
