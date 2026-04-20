@@ -46,7 +46,7 @@
             <input type="checkbox" v-model="rememberMe" />
             <span>Запомнить меня</span>
           </label>
-          <button type="button" class="forgot-link" @click="openModal">Забыли пароль?</button>
+          <button type="button" class="forgot-password" @click="openModal">Забыли пароль?</button>
         </div>
 
         <button type="submit" class="login-btn" :disabled="isLoading">
