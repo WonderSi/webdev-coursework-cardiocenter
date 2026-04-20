@@ -39,18 +39,18 @@ class MlClient(
             apolipoproteinA = request.apolipoproteinA?.toDouble(),
             apolipoproteinB = request.apolipoproteinB?.toDouble(),
             triglycerides = request.triglycerides?.toDouble(),
-            stroke = request.stroke?.let { if (it) 1 else 0 },
+            stroke = request.stroke,
             strokeYear = request.strokeYear ?: 1950,
-            heartFailure = request.heartFailure?.let { if (it) 1 else 0 },
+            heartFailure = request.heartFailure,
             heartFailureYear = request.heartFailureYear ?: 1950,
-            cadChdIhd = request.cad?.let { if (it) 1 else 0 },
+            cadChdIhd = request.cad,
             cadChdIhdYear = request.cadYear ?: 1950,
-            angine = request.angina?.let { if (it) 1 else 0 },
+            angine = request.angina,
             angineYear = request.anginaYear ?: 1950,
-            myocardialInfarction = request.myocardialInfarction?.let { if (it) 1 else 0 },
+            myocardialInfarction = request.myocardialInfarction,
             myocardialInfarctionYear = request.myocardialInfarctionYear ?: 1950,
-            arterialHypertension = request.arterialHypertension?.let { if (it) 1 else 0 },
-            arterialHypertensionYear = request.arterialHypertensionYear ?: 1950
+            arterialHypertension = request.arterialHypertension,
+            arterialHypertensionYear = request.arterialHypertensionYear ?: 1950,
         )
 
         log.info("Sending ML request: {}", mlRequest)
