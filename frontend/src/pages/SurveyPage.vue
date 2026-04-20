@@ -6,7 +6,7 @@
       </div>
     </Transition>
 
-    <div class="logo-container">
+    <div class="smaller-logo-container">
       <img src="@/assets/logo.png" alt="logo" class="logo" />
     </div>
 
@@ -183,15 +183,6 @@ onMounted(() => {
   padding: 40px 20px;
   box-sizing: border-box;
   gap: 24px;
-}
-
-.logo-container {
-  flex-shrink: 0;
-  .logo {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    }
 }
 
 .survey-card {
