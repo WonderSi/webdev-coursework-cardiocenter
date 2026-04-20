@@ -131,8 +131,9 @@
 .spacer-24 { height: 24px; }
 .divider {
   width: 100%;
-  height: 2px;
-  border-radius: 10px;
+  height: 0;
+  border-radius: 10;
+  border-top: 2px solid rgba(255, 255, 255, 0.7); ;
 }
 
 
