@@ -3,12 +3,12 @@
 
         <!-- left-side -->
         <div class="intro">
-            <div class="logo-and-text">
-                <div class="logo">
-                    <img src="@/assets/logo.png" alt="logo"/>
-                </div>
-                <div class="nii-text">НИИ КПССЗ</div>
+          <div class="logo-and-text">
+            <div class="logo">
+              <img src="@/assets/logo.png" alt="logo"/>
             </div>
+            <div class="nii-text">НИИ КПССЗ</div>
+          </div>
 
             <div class="intro-text">
                 <div class="intro-header">
