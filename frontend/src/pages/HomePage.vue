@@ -22,11 +22,11 @@
         </div>
 
         <!-- right-side -->
-         <div class="welcome-card">
-            <div class="welcome-header">
+         <div class="basic-card">
+            <div class="basic-card-header">
                 Добро пожаловать!
             </div>
-            <div class="welcome-text">
+            <div class="basic-card-text">
                     <p>
                     <strong>Болезни сердечно-сосудистой системы</strong>
                     остаются ведущей причиной инвалидизации и смертности во всём мире.
@@ -45,8 +45,8 @@
                     карту или знать результаты своих обследований.
                     </p>
                 </div>
-                <button class="start-btn" @click="goToSurvey">Начать</button>
-                <button class="enter-as-doctor-btn">Войти как врач</button>
+                <button class="basic-card-main-btn" @click="goToSurvey">Начать</button>
+                <button class="basic-card-sub-btn"  @click="goToLogin">Войти как врач</button>
          </div>
     </div>
 </template>
@@ -58,6 +58,9 @@ const router = useRouter()
 
 const goToSurvey = () => {
   router.push('/survey')
+}
+const goToLogin = () => {
+  router.push('/login')
 }
 </script>
 
@@ -77,7 +80,7 @@ const goToSurvey = () => {
   max-height: 80vh;
 
   padding: 48px;
-  border-radius: $radius-auth-card;
+  border-radius: $radius-glass-card;
 
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(20px);
@@ -130,73 +133,6 @@ height: 128px;
   color: rgba(255, 255, 255, 0.85);
 }
 
-// right-side
-.welcome-card {
-  flex: 0 0 420px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+// right-side in basic-card.scss; buttons too
 
-  background: $color-white;
-  border-radius: $radius-welcome-card;
-  padding: 32px 32px 24px 32px;
-  filter: drop-shadow(0 5 20 #070E2C, 0.2); // поправить
-}
-
-.welcome-header {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $color-text;
-  text-align: center;
-}
-
-.welcome-text {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  p {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: $color-text;
-    text-align: justify;
-  }
-}
-
-// buttons
-
-.start-btn {
-  width: 100%;
-  padding: 16px;
-  border: none;
-  border-radius: $radius-rect-buttons;
-  background: $color-accent;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: $color-accent-lighter;
-  }
-}
-
-.enter-as-doctor-btn {
-  width: 100%;
-  padding: 10px;
-  border: none;
-  background: transparent;
-  color: $color-accent;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.7;
-  }
-}
 </style>
