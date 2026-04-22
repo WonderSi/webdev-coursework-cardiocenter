@@ -166,7 +166,11 @@
   }
 
   &:hover, &.router-link-active {
-    color: $color-text;
+    color: $color-accent;
+    padding-left: 8px;
+    padding-block: 4px;
+    background-color: $color-white;
+    border-radius: 10px;
   }
 }
 
