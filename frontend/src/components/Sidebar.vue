@@ -7,9 +7,7 @@
       <div class="nii-text">НИИ КПССЗ</div>
     </div>
 
-    <div class="spacer-32"></div>
     <div class="divider"></div>
-    <div class="spacer-32"></div>
 
     <nav class="main-menu">
       <router-link to="/data-view" class="menu-item">
@@ -67,7 +65,6 @@
       </div>
 
       <div class="divider"></div>
-      <div class="spacer-24"></div>
 
       <button class="support-btn">
         <div class="icon">
@@ -112,6 +109,7 @@
   align-items: center;
   gap: 8px;
   justify-content: flex-start;
+  margin-bottom: 32px;
 
   .sidebar-logo {
     width: 50px;
@@ -127,8 +125,6 @@
   }
 }
 
-.spacer-32 { height: 32px; }
-.spacer-24 { height: 24px; }
 .divider {
   width: 100%;
   height: 0;
@@ -138,6 +134,7 @@
 
 
 .main-menu {
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -219,6 +216,7 @@
   border: none;
   display: flex;
   align-items: center;
+  margin-top: 24px;
   gap: 8px;
   svg {
     fill: none;
