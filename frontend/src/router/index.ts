@@ -5,8 +5,8 @@ import ResultsPage from '@/pages/ResultsPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import DashboardsPage from '@/pages/menu pages/DashboardsPage.vue'
 import ViewDataPage from '@/pages/menu pages/ViewDataPage.vue'
-import UploadDataPage from '@/pages/menu pages/UploadDataPage.vue'
-import ModelTrainingPage from '@/pages/menu pages/ModelTrainingPage.vue'
+// import UploadDataPage from '@/pages/menu pages/UploadDataPage.vue'
+// import ModelTrainingPage from '@/pages/menu pages/ModelTrainingPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
