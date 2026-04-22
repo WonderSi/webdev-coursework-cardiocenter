@@ -115,7 +115,7 @@ const goHome = () => {
   border: none;
   border-radius: 12px;
   background: $color-accent;
-  color: #fff;
+  color: $color-white;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;

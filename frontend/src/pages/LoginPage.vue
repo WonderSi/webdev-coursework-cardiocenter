@@ -38,14 +38,6 @@
             </div>
           </div>
         </div>
-
-        <div class="form-options">
-          <label class="remember-me">
-            <input type="checkbox" v-model="rememberMe" />
-            <span>Запомнить меня</span>
-          </label>
-          <button class="forgot-password" @click="openModal">Забыли пароль?</button>
-        </div>
       </div>
 
       <button class="login-btn" @click="handleLogin">Войти</button>
@@ -57,41 +49,11 @@
         Вернуться
       </button>
     </div>
-
-    <Teleport to="body">
-      <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-card">
-          <div class="login-card-header">Восстановление пароля</div>
-          <p class="modal-description">
-            Заявка на восстановление доступа будет отправлена администратору
-          </p>
-          
-          <div class="form-field">
-            <label>Email</label>
-            <input 
-              type="email" 
-              v-model="recoveryEmail" 
-              class="login-input" 
-              placeholder="doctor@niikpssz.ru" 
-            />
-          </div>
-
-          <button class="login-btn" style="margin-top: 20px;" @click="sendRecoveryEmail">Отправить заявку</button>
-          
-          <button class="backToHomePage-btn" @click="closeModal"> 
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Назад
-          </button>
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -99,24 +61,12 @@ const router = useRouter()
 // Состояния формы
 const email = ref('')
 const password = ref('')
-const rememberMe = ref(false)
 const isPasswordVisible = ref(false)
 
-// Состояния модалки
-const isModalOpen = ref(false)
 const recoveryEmail = ref('')
 
 const eyeOpenSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z" fill="#8A8FA8"/></svg>`
 const eyeClosedSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75" stroke="#8A8FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-
-// Проверка кэша при загрузке
-onMounted(() => {
-  const savedEmail = localStorage.getItem('userEmail')
-  if (savedEmail) {
-    email.value = savedEmail
-    rememberMe.value = true
-  }
-})
 
 // Логика кнопок
 const goBackHomePage = () => router.push('/')
@@ -126,20 +76,8 @@ const togglePasswordVisibility = () => {
 }
 
 const handleLogin = () => {
-  if (rememberMe.value) {
-    localStorage.setItem('userEmail', email.value)
-  } else {
-    localStorage.removeItem('userEmail')
-  }
   console.log('Авторизация:', email.value, password.value)
   // Здесь будет вызов API
-}
-
-// Управление модалкой
-const openModal = () => (isModalOpen.value = true)
-const closeModal = () => {
-  isModalOpen.value = false
-  recoveryEmail.value = ''
 }
 
 const sendRecoveryEmail = () => {
@@ -150,7 +88,6 @@ const sendRecoveryEmail = () => {
   const body = encodeURIComponent(`# ЗАЯВКА НА ВОССТАНОВЛЕНИЕ ПАРОЛЯ\nEMAIL: ${recoveryEmail.value}`)
   
   window.location.href = `mailto:${adminMail}?subject=${subject}&body=${body}`
-  closeModal()
 }
 </script>
 
@@ -171,7 +108,6 @@ const sendRecoveryEmail = () => {
 .login-form {
   display: flex;
   flex-direction: column;
-  padding-bottom: 40px;
 }
 
 .login-fields {
@@ -261,11 +197,11 @@ const sendRecoveryEmail = () => {
 .login-btn {
   width: 100%;
   border: none;
-  margin-bottom: 16px;
+  margin-block: 32px;
   padding: 13px;
   border-radius: $radius-rect-buttons;
   background: $color-accent;
-  color: #ffffff;
+  color: $color-white;
   font-size: 1rem;
   font-weight: 600;
   font-family: inherit;
@@ -315,13 +251,6 @@ const sendRecoveryEmail = () => {
   }
 }
 
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.95rem;
-  padding-inline: 2px;
-  padding-top: 12px;
 .remember-me {
     font-weight: 400;
     display: flex;
@@ -361,74 +290,5 @@ const sendRecoveryEmail = () => {
       }
     }
   }
-
-  .forgot-password {
-    background: none;
-    border: none;
-    color: $color-accent;
-    font-weight: 400;
-    font-size: 0.95rem;
-    cursor: pointer;
-    font-family: inherit;
-    &:hover { text-decoration: underline; }
-  }
-}
-
-// Modal
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(35, 36, 43, 0.5);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-card {
-  background: white;
-  padding: 40px;
-  border-radius: $radius-basic-card;
-  width: 500px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.modal-description {
-  text-align: center;
-  color: $color-secondary;
-  font-size: 1rem;
-  font-weight: 300;
-  padding-top: 10px;
-  padding-bottom: 32px;
-}
-
-.modal-sent-btn {
-  margin: 20px 0px 40px 0px;
-  background: $color-accent;
-  color: $color-white;
-  padding: 13px;
-  border: none;
-  border-radius: $radius-rect-buttons;
-  font-size: 1rem;
-  cursor: pointer;
-  &:hover {
-    background: $color-accent-lighter;
-  }
-}
-
-.modal-back-btn {
-  background: none;
-  border: none;
-  color: $color-accent;
-  font-size: 1rem;
-  cursor: pointer;
-  &:hover { color: rgba($color-accent, 0.7); }
-}
 
 </style>
