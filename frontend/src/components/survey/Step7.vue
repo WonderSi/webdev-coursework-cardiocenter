@@ -1,6 +1,6 @@
 <template>
   <div class="step-container">
-    <template v-for="(field, i) in group.fields" :key="field.key">
+    <template v-for="field in group.fields" :key="field.key">
       <div class="question-wrapper">
         <div class="question-block">
           <span class="question-text">{{ field.label }}</span>
