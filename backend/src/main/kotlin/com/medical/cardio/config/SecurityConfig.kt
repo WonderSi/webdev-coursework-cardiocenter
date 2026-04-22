@@ -86,6 +86,7 @@ class SecurityConfig(
             ).permitAll()
             auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             auth.requestMatchers("/api/admin/**").hasRole("DOCTOR")
+            auth.requestMatchers("/api/admin/extended/**").hasRole("DOCTOR_EXTENDED")
             auth.anyRequest().authenticated()
         }
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
