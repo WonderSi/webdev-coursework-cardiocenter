@@ -82,10 +82,10 @@ const goToLogin = () => {
   padding: 48px;
   border-radius: $radius-glass-card;
 
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba($color-glass-white, 0.25);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba($color-glass-white, 0.4);
 }
 
 // left-side

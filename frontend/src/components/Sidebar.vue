@@ -97,10 +97,10 @@
   padding: 24px;
   box-sizing: border-box;
 
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba($color-glass-white, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba($color-glass-white, 0.5);
   z-index: 100;
 }
 
@@ -129,7 +129,7 @@
   width: 100%;
   height: 0;
   border-radius: 10;
-  border-top: 2px solid rgba(255, 255, 255, 0.7); ;
+  border-top: 2px solid rgba($color-glass-white, 0.7); ;
 }
 
 
@@ -144,7 +144,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba($color-glass-white, 0.7);
   transition: all 0.2s ease;
 
   text-decoration: none;
@@ -191,7 +191,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: rgba(255, 255, 255, 0.7);;
+    color: rgba($color-glass-white, 0.7);;
     font-weight: 500;
     .username {
       color: $color-white;
@@ -202,7 +202,7 @@
 .logout-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba($color-glass-white, 0.7);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -225,7 +225,7 @@
   svg {
     fill: none;
   }
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba($color-glass-white, 0.7);
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;
