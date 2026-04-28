@@ -19,15 +19,14 @@ class JwtAuthFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val authHeader = request.getHeader("Authorization")
+        val token = request.cookies
+            ?.firstOrNull { it.name == "access_token" }
+            ?.value
 
-        if (authHeader.isNullOrBlank() || !authHeader.startsWith("Bearer ")) {
+        if (token.isNullOrBlank()) {
             filterChain.doFilter(request, response)
             return
         }
-        
-
-        val token = authHeader.substringAfter("Bearer ")
 
         // Аутентификация
         try {

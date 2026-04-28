@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -25,26 +28,42 @@ class AuthController(
     @PostMapping("/login")
     fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> =
         try {
-            // Проверяет логин/пароль
             authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(request.username, request.password)
+                UsernamePasswordAuthenticationToken(request.email, request.password)
             )
-            // Загрузка пользователя из БД и генерация JWT-токена
-            val userDetails = adminUserDetailsService.loadUserByUsername(request.username)
+            val userDetails = adminUserDetailsService.loadUserByUsername(request.email)
             val token = jwtService.generateToken(userDetails)
 
-            ResponseEntity.ok(
-                LoginResponse(
-                    token = token,
-                    username = userDetails.username,
-                    role = userDetails.authorities.first().authority
+            ResponseEntity.ok()
+                .header(
+                    "Set-Cookie",
+                    "access_token=$token; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict"
                 )
-            )
+                .body(
+                    LoginResponse(
+                        email = userDetails.username,
+                        role = userDetails.authorities.first().authority
+                    )
+                )
         } catch (_: BadCredentialsException) {
             ResponseEntity.status(401).build()
         }
 
+    @GetMapping("/me")
+    fun me(@AuthenticationPrincipal user: UserDetails): ResponseEntity<LoginResponse> =
+        ResponseEntity.ok(
+            LoginResponse(
+                email = user.username,
+                role = user.authorities.first().authority
+            )
+        )
+
     @PostMapping("/logout")
     fun logout(): ResponseEntity<Unit> =
-        ResponseEntity.ok(Unit)
+        ResponseEntity.ok()
+            .header(
+                "Set-Cookie",
+                "access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict"
+            )
+            .build()
 }
