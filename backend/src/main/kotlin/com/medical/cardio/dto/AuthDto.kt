@@ -9,7 +9,9 @@ data class LoginRequest(
     val email: String,
 
     @field:NotBlank
-    val password: String
+    val password: String,
+
+    val rememberMe: Boolean = false
 )
 
 data class LoginResponse(
