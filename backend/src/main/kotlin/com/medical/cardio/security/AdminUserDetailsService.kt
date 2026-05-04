@@ -21,17 +21,17 @@ class AdminUserDetailsService(
 
         UsernameNotFoundException
     */
-    override fun loadUserByUsername(username: String): UserDetails =
-        adminUserRepository.findByUsername(username)
+    override fun loadUserByUsername(email: String): UserDetails =
+        adminUserRepository.findByEmail(email)
             ?.let { entity ->
                 val authority = SimpleGrantedAuthority("ROLE_${entity.role}")
                 User(
-                    entity.username,
+                    entity.email,
                     entity.passwordHash,
                     listOf(authority)
                 )
             }
-            ?: throw UsernameNotFoundException("Admin user '$username' not found")
+            ?: throw UsernameNotFoundException("Admin user '$email' not found")
 
 
     fun authentication(userDetails: UserDetails) =
