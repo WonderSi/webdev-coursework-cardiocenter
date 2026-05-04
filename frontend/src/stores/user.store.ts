@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 export const useUserStore = defineStore('user', () => {
   const email = ref<string | null>(null)
   const role = ref<string | null>(null)
+  const router = useRouter()
 
   const isAuthenticated = computed(() => email.value !== null)
   const isExtended = computed(() => role.value === 'ROLE_DOCTOR_EXTENDED')
@@ -35,6 +37,7 @@ export const useUserStore = defineStore('user', () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     email.value = null
     role.value = null
+    router.push('/login')
   }
 
   return { email, role, isAuthenticated, isExtended, login, fetchMe, logout }

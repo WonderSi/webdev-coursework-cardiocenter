@@ -15,7 +15,15 @@ class MlClient(
     @Value("\${app.ml-service.url}") private val mlServiceUrl: String
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
-    private val webClient = webClientBuilder.baseUrl(mlServiceUrl).build()
+    private val webClient = webClientBuilder
+        .baseUrl(mlServiceUrl)
+        .clientConnector(
+            org.springframework.http.client.reactive.ReactorClientHttpConnector(
+                reactor.netty.http.client.HttpClient.create()
+                    .responseTimeout(java.time.Duration.ofSeconds(10))
+            )
+        )
+        .build()
 
     fun predict(request: SurveyRequest): Mono<PredictionResult> {
         log.info("ML prediction called — genderId={}, age={}", request.genderId, request.age)
