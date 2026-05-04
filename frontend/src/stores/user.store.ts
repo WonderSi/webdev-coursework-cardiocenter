@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import router from '@/router'
 
 export const useUserStore = defineStore('user', () => {
   const email = ref<string | null>(null)
   const role = ref<string | null>(null)
-  const router = useRouter()
 
   const isAuthenticated = computed(() => email.value !== null)
   const isExtended = computed(() => role.value === 'ROLE_DOCTOR_EXTENDED')
