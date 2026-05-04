@@ -17,7 +17,9 @@
     <span class="card-number">{{databaseMock.amountOfRecords}}</span>
     <div class="last-update">
         <div class="dynamics">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12L12 4M12 4H6.5M12 4V9.5" stroke="#04A040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3.09839 3.09839H13.4263M13.4263 3.09839V13.4263M13.4263 3.09839L3.09839 13.4263" stroke="#04A040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
           <span class="dynamics-span">{{ databaseMock.dynamic }}</span>
         </div>
         <span class="last-update-date">{{databaseMock.lastUpdateDate}}</span>
@@ -218,16 +220,6 @@ const districtData = ref([
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
-.dashboards-grid-container {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: 160px; // базовая высота ячейки
-  min-height: 100vh;
-  margin-left: 240px; 
-  padding: 40px;
-  gap: 24px;
-}
-
 // Утилиты
 .col-2 { grid-column: span 2; }
 .col-3 { grid-column: span 3; }
@@ -241,12 +233,25 @@ const districtData = ref([
 .color-pink { color: $color-pink-women !important; }
 .color-green { color: $color-green !important; }
 
+// -----------------------------------------------------------------
+
+.dashboards-grid-container {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(160px, auto);
+  align-content: start;
+  min-height: 100vh;
+  margin-left: 240px; 
+  padding: 40px;
+  gap: 24px;
+}
+
 // --- ОБЩИЙ СТИЛЬ ДЛЯ ВСЕХ КАРТОЧЕК
 .dashboard-card {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  border-radius: $radius-glass-card;
+  border-radius: $radius-glass-card-dashboards;
   background: rgba($color-glass-white, 0.6); 
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -264,7 +269,7 @@ const districtData = ref([
 
 .card-icon {
   width: 40px;
-  height: px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,7 +282,7 @@ const districtData = ref([
 }
 
 .card-number {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: $color-text;
   line-height: 1;
@@ -296,22 +301,21 @@ const districtData = ref([
   gap: 4px;
   
   .dynamics-span {
-    color: $color-green;
-    font-weight: 600;
-    font-size: 1.1rem;
+    color: $color-green; // должен зависеть от типа динамики
+    font-weight: 300;
+    font-size: 1rem;
   }
 }
 
 .last-update-date {
-  font-size: 0.9rem;
-  color: $color-blue-med;
-  font-weight: 500;
+  font-size: 1rem;
+  color: $color-blue-dark;
+  font-weight: 300;
 }
 
 .card-two-numbers {
   display: flex;
   justify-content: space-around;
-  margin-top: auto;
 }
 
 .percentage {
@@ -321,7 +325,7 @@ const districtData = ref([
   gap: 4px;
 
   .card-number {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
 
   .gender-label {
