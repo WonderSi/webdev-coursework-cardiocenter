@@ -33,13 +33,13 @@ class AuthController(
             )
             val userDetails = adminUserDetailsService.loadUserByUsername(request.email)
             val token = jwtService.generateToken(userDetails)
-            val maxAge = if (request.rememberMe) 2_592_000 else -1
+            val cookieValue = buildString {
+                append("access_token=$token; HttpOnly; Path=/; SameSite=Strict")
+                if (request.rememberMe) append("; Max-Age=2592000")
+            }
 
             ResponseEntity.ok()
-                .header(
-                    "Set-Cookie",
-                    "access_token=$token; HttpOnly; Path=/; Max-Age=$maxAge; SameSite=Strict"
-                )
+                .header("Set-Cookie", cookieValue)
                 .body(
                     LoginResponse(
                         email = userDetails.username,
