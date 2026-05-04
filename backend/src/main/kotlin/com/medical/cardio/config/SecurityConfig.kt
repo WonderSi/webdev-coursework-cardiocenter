@@ -77,8 +77,6 @@ class SecurityConfig(
                 "/api/auth/login",
                 "/api/auth/logout",
                 "/api/survey/**",
-                "/api/glossaries/**",
-                "/actuator/**",
                 "/swagger-ui",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
