@@ -106,7 +106,7 @@ async function handleLogout() {
   padding: 24px;
   box-sizing: border-box;
 
-  background: rgba($color-glass-white, 0.4);
+  background: rgba($color-glass-white, 0.35);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba($color-glass-white, 0.5);

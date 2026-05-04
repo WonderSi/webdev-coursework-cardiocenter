@@ -68,7 +68,7 @@ import Sidebar from '@/components/Sidebar.vue'
   padding: 24px;
   border-radius: 24px;
   
-  background: rgba($color-glass-white, 0.4); 
+  background: rgba($color-glass-white, 0.5); 
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba($color-glass-white, 0.6);
