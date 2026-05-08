@@ -34,8 +34,11 @@ class CacheConfig {
                 RedisSerializationContext.SerializationPair.fromSerializer(serializer)
             )
 
+        val dashboardConfig = defaultConfig.entryTtl(Duration.ofMinutes(5))
+
         return RedisCacheManager.builder(connectionFactory)
             .cacheDefaults(defaultConfig)
+            .withCacheConfiguration("dashboard-stats", dashboardConfig)
             .build()
     }
 }
