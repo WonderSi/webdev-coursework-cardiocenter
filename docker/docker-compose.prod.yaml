@@ -87,6 +87,7 @@ services:
       ML_SERVICE_URL: http://ml-service:8000
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
     expose:
       - "8080"
     networks:
@@ -103,7 +104,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      start_period: 120s
     restart: unless-stopped
 
   # ============================================
@@ -117,12 +118,12 @@ services:
     image: cardio-frontend
     container_name: cardio_frontend
     ports:
-      - "80:80"
+      - "3000:80"
     networks:
       - internal
     depends_on:
       backend:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
 
 networks:
