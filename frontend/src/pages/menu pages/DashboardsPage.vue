@@ -14,7 +14,7 @@
         </div>
         <div class="card-title">Всего записей о пациентах</div>
       </div>
-      <span class="card-number">{{ mockKpiData.totalRecords }}</span>
+      <span class="card-number-total-records">{{ mockKpiData.totalRecords }}</span>
     </div>
 
     <!-- Карточка 2: Соотношение полов -->
@@ -138,25 +138,44 @@ const chartOption = computed(() => {
 .row-1 { grid-row: span 1; }
 .row-2 { grid-row: span 2; }
 
+// большие экраны
+@media (max-width: 1400px) {
+  .col-2 { grid-column: span 4; } // Расширяем маленькие карточки
+  .col-4 { grid-column: span 8; } // Графики шире
+}
+
+// Маленькие экраны
+@media (max-width: 1024px) {
+  .col-2, .col-3, .col-4, .col-6 {
+    grid-column: span 12; // Всё выстраивается в одну колонку
+  }
+  .row-2 {
+    grid-row: span 1;
+    min-height: 350px; // мин высота для графиков
+  }
+}
+
+// -----------------------------------------------------------------
+
 .color-blue { color: $color-accent !important; }
 .color-pink { color: $color-pink-women !important; }
 .color-green { color: $color-green !important; }
 
-// -----------------------------------------------------------------
-
 .dashboards-grid-container {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-auto-rows: minmax(160px, auto);
-  grid-auto-columns: minmax(200px, auto);
   align-content: start;
+
   min-height: 100vh;
-  margin-left: 240px; 
+  margin-left: 240px; // для сайдбара
   padding: 40px;
   gap: 24px;
+
+  max-width: 1600px;
 }
 
-// --- ОБЩИЙ СТИЛЬ ДЛЯ ВСЕХ КАРТОЧЕК
+// -------------- ОБЩИЙ СТИЛЬ ДЛЯ ВСЕХ КАРТОЧЕК
 .dashboard-card {
   display: flex;
   flex-direction: column;
@@ -167,7 +186,10 @@ const chartOption = computed(() => {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba($color-glass-white, 0.6);
   box-shadow: 0 4px 24px rgba(7, 14, 44, 0.05);
+  transition: all 0.3s ease;
 }
+
+// -----------------------------------------------------------------
 
 // --- СТИЛИ ДЛЯ МАЛЕНЬКИХ ВЕРХНИХ КАРТОЧЕК
 .card-header {
@@ -187,8 +209,16 @@ const chartOption = computed(() => {
 
 .card-title {
   color: $color-text;
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 600;
+  line-height: 1.1;
+}
+
+.card-number-total-records {
+  font-size: 3rem;
+  font-weight: 700;
+  color: $color-text;
+  line-height: 1.4; // костыль чтобы было по центру карточки
 }
 
 .card-number {
