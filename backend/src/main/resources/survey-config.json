@@ -1,0 +1,76 @@
+{
+  "groups": [
+    {
+      "id": 1,
+      "title": "Укажите, пожалуйста, ваш пол и возраст:",
+      "requiredFields": ["gender", "age"],
+      "fields": [
+        { "key": "gender", "type": "radio", "label": "Пол", "horizontal": true, "glossary": "gender" },
+        { "key": "age", "type": "number", "label": "Возраст", "unit": "лет", "placeholder": "27" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Укажите, пожалуйста, ваши антропометрические параметры:",
+      "requiredFields": ["height", "weight"],
+      "fields": [
+        { "key": "height", "type": "number", "label": "Рост", "unit": "см", "placeholder": "165" },
+        { "key": "weight", "type": "number", "label": "Вес", "unit": "кг", "placeholder": "60" },
+        { "key": "hipMeasurement", "type": "number", "label": "Объём бёдер", "unit": "см", "placeholder": "90" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Употребляете ли вы алкоголь?",
+      "requiredFields": ["alcohol"],
+      "fields": [
+        { "key": "alcohol", "type": "radio", "label": "Алкоголь", "vertical": true, "glossary": "alcohol" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Выберите ваш род деятельности",
+      "requiredFields": ["profession"],
+      "fields": [
+        { "key": "profession", "type": "radio", "label": "Профессия", "vertical": true, "glossary": "profession" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Где вы проживаете?",
+      "requiredFields": ["region"],
+      "fields": [
+        { "key": "region", "type": "radio", "label": "Район", "vertical": true, "glossary": "region" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Ваши лабораторные параметры",
+      "requiredFields": [],
+      "fields": [
+        { "key": "glucose", "type": "number", "label": "Глюкоза", "unit": "ммоль/л", "placeholder": "4,5" },
+        { "key": "cholesterol", "type": "number", "label": "Холестерин", "unit": "ммоль/л", "placeholder": "5,3" },
+        { "key": "nonHdlCholesterol", "type": "number", "label": "Холестерин не-ЛПВП", "unit": "ммоль/л", "placeholder": "3,2" },
+        { "key": "vldlCholesterol", "type": "number", "label": "Холестерин ЛПОНП", "unit": "ммоль/л", "placeholder": "0,8" },
+        { "key": "hdlCholesterol", "type": "number", "label": "Холестерин ЛПВП", "unit": "ммоль/л", "placeholder": "1,2" },
+        { "key": "ldlCholesterol", "type": "number", "label": "Холестерин ЛПНП", "unit": "ммоль/л", "placeholder": "3,0" },
+        { "key": "apolipoproteinA", "type": "number", "label": "Аполипопротеин А (Апо А)", "unit": "г/л", "placeholder": "1,5" },
+        { "key": "apolipoproteinB", "type": "number", "label": "Аполипопротеин B (Апо B)", "unit": "г/л", "placeholder": "0,9" },
+        { "key": "triglycerides", "type": "number", "label": "Триглицериды", "unit": "ммоль/л", "placeholder": "1,7" }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Хронические заболевания и диагнозы",
+      "requiredFields": [],
+      "fields": [
+        { "key": "stroke", "type": "yesno", "label": "Диагностировался ли инсульт?", "yearKey": "strokeYear" },
+        { "key": "heartFailure", "type": "yesno", "label": "Диагностировалась ли сердечная недостаточность (СН)?", "yearKey": "heartFailureYear" },
+        { "key": "cad", "type": "yesno", "label": "Диагностировалось ли нарушение ритма или другие ишемические болезни сердца (ИБС)?", "yearKey": "cadYear" },
+        { "key": "angina", "type": "yesno", "label": "Диагностировалась ли стенокардия?", "yearKey": "anginaYear" },
+        { "key": "myocardialInfarction", "type": "yesno", "label": "Диагностировался ли инфаркт миокарда?", "yearKey": "myocardialInfarctionYear" },
+        { "key": "arterialHypertension", "type": "yesno", "label": "Диагностировалась ли артериальная гипертензия (АГ)?", "yearKey": "arterialHypertensionYear" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+@use '@/styles/variables' as *;
+
+.basic-card {
+  flex: 0 0 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  background: $color-white;
+  border-radius: $radius-basic-card;
+  padding: 32px 32px 24px 32px;
+  filter: drop-shadow(0 5 20 #070E2C, 0.2); // поправить
+}
+
+.basic-card-header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $color-text;
+  text-align: center;
+}
+
+.basic-card-header-subtext {
+  font-size: 1.1rem;
+  color: $color-secondary;
+  text-align: center;
+}
+
+
+.basic-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: $color-text;
+    text-align: justify;
+  }
+}
+
+// buttons
+
+.basic-card-main-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: $radius-rect-buttons;
+  background: $color-accent;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: $color-accent-lighter;
+  }
+}
+
+.basic-card-sub-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: $color-accent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}

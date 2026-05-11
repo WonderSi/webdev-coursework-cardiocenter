@@ -1,0 +1,246 @@
+<template>
+  <aside class="sidebar-glass">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img src="@/assets/logo-sidebar.png" alt="logo"/>
+      </div>
+      <div class="nii-text">НИИ КПССЗ</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <nav class="main-menu">
+      <router-link to="/view-data" class="menu-item">
+        <div class="icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.692 9.99805C19.2433 9.31738 20.019 8.49105 20.019 7.51905C20.019 6.54705 19.2433 5.72105 17.692 5.04105C16.1407 4.36105 14.2497 4.02038 12.019 4.01905C9.78833 4.01771 7.89433 4.35838 6.337 5.04105C4.779 5.72038 4 6.54638 4 7.51905C4 8.49171 4.779 9.31805 6.337 9.99805C7.895 10.678 9.789 11.0184 12.019 11.019C14.249 11.0197 16.14 10.6794 17.692 9.99805ZM14.476 12.365C15.3153 12.2357 16.104 12.0447 16.842 11.792C17.58 11.5394 18.23 11.2264 18.792 10.853C19.354 10.4797 19.763 10.048 20.019 9.55805V12.519C19.763 13.009 19.354 13.4407 18.792 13.814C18.2307 14.188 17.5807 14.5014 16.842 14.754C16.104 15.0067 15.3153 15.1974 14.476 15.326C13.6367 15.4547 12.8113 15.519 12 15.519C11.1887 15.519 10.3633 15.4547 9.524 15.326C8.68467 15.1974 7.899 15.0067 7.167 14.754C6.435 14.5014 5.78833 14.188 5.227 13.814C4.66567 13.44 4.25667 13.0087 4 12.52V9.55805C4.256 10.0474 4.665 10.479 5.227 10.853C5.78833 11.2264 6.435 11.5397 7.167 11.793C7.899 12.045 8.68467 12.2357 9.524 12.365C10.3633 12.4944 11.1887 12.5587 12 12.558C12.8113 12.5574 13.6367 12.493 14.476 12.365ZM14.476 16.865C15.3147 16.7357 16.1033 16.5447 16.842 16.292C17.5807 16.0394 18.2307 15.7264 18.792 15.353C19.3533 14.9797 19.7623 14.548 20.019 14.058V17C19.763 17.49 19.354 17.9217 18.792 18.295C18.2307 18.6684 17.5807 18.9817 16.842 19.235C16.104 19.4877 15.3153 19.6784 14.476 19.807C13.6367 19.9357 12.8113 20 12 20C11.1887 20 10.3633 19.9357 9.524 19.807C8.68467 19.6784 7.899 19.4877 7.167 19.235C6.435 18.9824 5.78833 18.669 5.227 18.295C4.66567 17.921 4.25667 17.4894 4 17V14.058C4.25667 14.5474 4.66567 14.979 5.227 15.353C5.78833 15.727 6.435 16.0404 7.167 16.293C7.899 16.5457 8.68467 16.7364 9.524 16.865C10.3633 16.9937 11.1887 17.058 12 17.058C12.8113 17.058 13.6367 16.9944 14.476 16.865Z" stroke="currentColor" fill="currentColor"/>
+          </svg>
+        </div>
+        <span>Просмотр данных</span>
+      </router-link>
+      
+      <router-link to="/upload-data" class="menu-item">
+        <div class="icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97933 19.8043 4.588 19.413C4.19667 19.0217 4.00067 18.5507 4 18V15H6V18H18V15H20V18C20 18.55 19.8043 19.021 19.413 19.413C19.0217 19.805 18.5507 20.0007 18 20H6Z" fill="currentColor" stroke="currentColor"/>
+          </svg>
+        </div>
+        <span>Загрузка данных</span>
+      </router-link>
+      
+      <router-link to="/model-training" class="menu-item">
+        <div class="icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M11.9999 2C12.4396 2.00078 12.8667 2.14638 13.2152 2.41428C13.5638 2.68219 13.8143 3.05747 13.9282 3.48209C14.042 3.90671 14.0128 4.35701 13.845 4.76335C13.6772 5.16968 13.3802 5.50941 12.9999 5.73V6H15.9999C17.0608 6 18.0782 6.42143 18.8284 7.17157C19.5785 7.92172 19.9999 8.93913 19.9999 10V10.05C20.5643 10.1657 21.0713 10.4727 21.4355 10.9191C21.7996 11.3655 21.9984 11.9239 21.9984 12.5C21.9984 13.0761 21.7996 13.6345 21.4355 14.0809C21.0713 14.5273 20.5643 14.8343 19.9999 14.95V16C19.9999 17.0609 19.5785 18.0783 18.8284 18.8284C18.0782 19.5786 17.0608 20 15.9999 20H7.99994C6.93908 20 5.92166 19.5786 5.17152 18.8284C4.42137 18.0783 3.99994 17.0609 3.99994 16V14.95C3.4348 14.8352 2.92671 14.5286 2.56175 14.0821C2.1968 13.6356 1.99744 13.0767 1.99744 12.5C1.99744 11.9233 2.1968 11.3644 2.56175 10.9179C2.92671 10.4714 3.4348 10.1648 3.99994 10.05V10C3.99994 8.93913 4.42137 7.92172 5.17152 7.17157C5.92166 6.42143 6.93908 6 7.99994 6H10.9999V5.73C10.6197 5.50941 10.3227 5.16968 10.1549 4.76335C9.9871 4.35701 9.95786 3.90671 10.0717 3.48209C10.1855 3.05747 10.4361 2.68219 10.7847 2.41428C11.1332 2.14638 11.5603 2.00078 11.9999 2ZM8.99994 11C8.73473 11 8.48037 11.1054 8.29284 11.2929C8.1053 11.4804 7.99994 11.7348 7.99994 12V14C7.99994 14.2652 8.1053 14.5196 8.29284 14.7071C8.48037 14.8946 8.73473 15 8.99994 15C9.26516 15 9.51951 14.8946 9.70705 14.7071C9.89459 14.5196 9.99994 14.2652 9.99994 14V12C9.99994 11.7348 9.89459 11.4804 9.70705 11.2929C9.51951 11.1054 9.26516 11 8.99994 11ZM14.9999 11C14.7347 11 14.4804 11.1054 14.2928 11.2929C14.1053 11.4804 13.9999 11.7348 13.9999 12V14C13.9999 14.2652 14.1053 14.5196 14.2928 14.7071C14.4804 14.8946 14.7347 15 14.9999 15C15.2652 15 15.5195 14.8946 15.707 14.7071C15.8946 14.5196 15.9999 14.2652 15.9999 14V12C15.9999 11.7348 15.8946 11.4804 15.707 11.2929C15.5195 11.1054 15.2652 11 14.9999 11Z" fill="currentColor" stroke="currentColor"/>
+          </svg>
+        </div>
+        <span>Обучение модели</span>
+      </router-link>
+      
+      <router-link to="/dashboards" class="menu-item">
+        <div class="icon">
+          <svg width="21" height="24" viewBox="0 0 21 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.26562 21.5555H2.95312C2.69205 21.5555 2.44167 21.4502 2.25707 21.2626C2.07246 21.0751 1.96875 20.8208 1.96875 20.5555V14.5555C1.96875 14.2903 2.07246 14.036 2.25707 13.8484C2.44167 13.6609 2.69205 13.5555 2.95312 13.5555H4.26562C4.5267 13.5555 4.77708 13.6609 4.96168 13.8484C5.14629 14.036 5.25 14.2903 5.25 14.5555V20.5555C5.25 20.8208 5.14629 21.0751 4.96168 21.2626C4.77708 21.4502 4.5267 21.5555 4.26562 21.5555ZM13.4531 21.5555H12.1406C11.8796 21.5555 11.6292 21.4502 11.4446 21.2626C11.26 21.0751 11.1562 20.8208 11.1562 20.5555V10.5555C11.1562 10.2903 11.26 10.036 11.4446 9.84844C11.6292 9.6609 11.8796 9.55554 12.1406 9.55554H13.4531C13.7142 9.55554 13.9646 9.6609 14.1492 9.84844C14.3338 10.036 14.4375 10.2903 14.4375 10.5555V20.5555C14.4375 20.8208 14.3338 21.0751 14.1492 21.2626C13.9646 21.4502 13.7142 21.5555 13.4531 21.5555ZM18.0469 21.5555H16.7344C16.4733 21.5555 16.2229 21.4502 16.0383 21.2626C15.8537 21.0751 15.75 20.8208 15.75 20.5555V5.88888C15.75 5.62366 15.8537 5.36931 16.0383 5.18177C16.2229 4.99423 16.4733 4.88888 16.7344 4.88888H18.0469C18.3079 4.88888 18.5583 4.99423 18.7429 5.18177C18.9275 5.36931 19.0312 5.62366 19.0312 5.88888V20.5555C19.0312 20.8208 18.9275 21.0751 18.7429 21.2626C18.5583 21.4502 18.3079 21.5555 18.0469 21.5555ZM8.85938 21.5555H7.54688C7.2858 21.5555 7.03542 21.4502 6.85082 21.2626C6.66621 21.0751 6.5625 20.8208 6.5625 20.5555V2.55554C6.5625 2.29033 6.66621 2.03597 6.85082 1.84844C7.03542 1.6609 7.2858 1.55554 7.54688 1.55554H8.85938C9.12045 1.55554 9.37083 1.6609 9.55543 1.84844C9.74004 2.03597 9.84375 2.29033 9.84375 2.55554V20.5555C9.84375 20.8208 9.74004 21.0751 9.55543 21.2626C9.37083 21.4502 9.12045 21.5555 8.85938 21.5555Z" fill="currentColor" stroke="currentColor"/>
+          </svg>
+        </div>
+        <span>Аналитика</span>
+      </router-link>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="user-info">
+          <div class="icon">
+            <svg width="18" height="18" viewBox="1 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M14.6667 12.8334C15.8478 12.8334 16.9832 13.2895 17.8363 14.1063C18.6894 14.9232 19.1942 16.0378 19.2454 17.2178L19.25 17.4167V18.3334C19.2501 18.7959 19.0755 19.2414 18.761 19.5805C18.4465 19.9197 18.0154 20.1274 17.5542 20.1621L17.4167 20.1667H4.58333C4.12081 20.1669 3.67531 19.9922 3.33616 19.6777C2.99701 19.3632 2.78927 18.9321 2.75458 18.4709L2.75 18.3334V17.4167C2.75007 16.2356 3.20608 15.1001 4.02294 14.2471C4.8398 13.394 5.95444 12.8892 7.13442 12.838L7.33333 12.8334H14.6667ZM11 1.83337C12.2156 1.83337 13.3814 2.31626 14.2409 3.1758C15.1004 4.03534 15.5833 5.20113 15.5833 6.41671C15.5833 7.63228 15.1004 8.79807 14.2409 9.65761C13.3814 10.5172 12.2156 11 11 11C9.78442 11 8.61864 10.5172 7.75909 9.65761C6.89955 8.79807 6.41667 7.63228 6.41667 6.41671C6.41667 5.20113 6.89955 4.03534 7.75909 3.1758C8.61864 2.31626 9.78442 1.83337 11 1.83337Z" fill="currentColor" stroke="currentColor"/>
+            </svg>
+          </div>
+          <span class="username">{{ userStore.email }}</span>
+        </div>
+        <button class="logout-btn" title="Выйти" @click="handleLogout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="4">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="support-btn">
+        <div class="icon">
+          <svg width="26" height="24" viewBox="0 0 26 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.10254 5H20.8975C21.5113 5.00001 22.0701 5.20203 22.4561 5.51953C22.8365 5.83255 23 6.21095 23 6.55273V15.835C22.9999 16.1766 22.8363 16.5543 22.4561 16.8672C22.0701 17.1847 21.5114 17.3877 20.8975 17.3877H8.44336C7.77888 17.3877 7.10326 17.6335 6.625 18.126L3.99609 20.8301C3.85622 20.9731 3.5867 21.0497 3.2959 20.9658C3.16106 20.9269 3.07592 20.8658 3.03516 20.8213C3.00355 20.7867 3.00002 20.7677 3 20.7451V6.55273C3 6.21095 3.16348 5.83255 3.54395 5.51953C3.92991 5.20202 4.48868 5.00001 5.10254 5Z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <span>Сообщить о проблеме</span>
+      </button>
+    </div>
+  </aside>
+</template>
+
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.store'
+
+const router = useRouter()
+const userStore = useUserStore()
+
+async function handleLogout() {
+  await userStore.logout()
+  router.push('/login')
+}
+</script>
+
+<style scoped lang="scss">
+@use '@/styles/variables' as *;
+
+.sidebar-glass {
+  width: 240px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  box-sizing: border-box;
+
+  background: rgba($color-glass-white, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba($color-glass-white, 0.5);
+  z-index: 100;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  margin-bottom: 32px;
+
+  .sidebar-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+  }
+
+  .nii-text {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: $color-white;
+    line-height: 1.2;
+  }
+}
+
+.divider {
+  width: 100%;
+  height: 0;
+  border-radius: 10;
+  border-top: 2px solid rgba($color-glass-white, 0.7); ;
+}
+
+
+.main-menu {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba($color-glass-white, 0.7);
+  transition: all 0.2s ease;
+
+  text-decoration: none;
+  color: $color-white;
+  font-weight: 500;
+  font-size: 0.95rem;
+
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      path {
+        stroke: none; 
+        fill: currentColor;
+      }
+    }
+  }
+
+  &:hover, &.router-link-active {
+    color: $color-accent;
+    padding-left: 8px;
+    padding-block: 4px;
+    background-color: $color-white;
+    border-radius: 10px;
+  }
+}
+
+.sidebar-footer {
+  margin-top: auto; // Прижимает футер к низу
+  display: flex;
+  flex-direction: column;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 24px;
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba($color-glass-white, 0.7);;
+    font-weight: 500;
+    .username {
+      color: $color-white;
+    }
+  }
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: rgba($color-glass-white, 0.7);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+  &:hover { color: $color-cold-red; }
+  svg {
+    fill: none;
+    stroke-width: 2px;
+  }
+}
+
+.support-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  margin-top: 24px;
+  gap: 8px;
+  svg {
+    fill: none;
+  }
+  color: rgba($color-glass-white, 0.7);
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  
+  &:hover { color: #ffffff; }
+}
+</style>

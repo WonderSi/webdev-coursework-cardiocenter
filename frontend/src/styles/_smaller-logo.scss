@@ -1,0 +1,8 @@
+.smaller-logo-container {
+  flex-shrink: 0;
+  .logo {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    }
+}
