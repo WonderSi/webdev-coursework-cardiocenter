@@ -121,11 +121,17 @@ services:
   fontend:
     build:
       context: ../frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev # альт докер файл
     image: cardio-frontend
     container_name: cardio_frontend
     ports:
-      - "80:80"
+    # prod: - "80:80"
+      - "5173:5173"
+    volumes: # весь блок добавлен для реал-тайм редактирования
+      - ../frontend:/app
+      - /app/node_modules
+    environment: # блок добавлен для реал-тайм редактирования
+      - CHOKIDAR_USEPOLLING=true
     networks:
       - internal
     depends_on:

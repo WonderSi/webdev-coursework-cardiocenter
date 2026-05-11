@@ -5,9 +5,14 @@ import path from 'path'
 export default defineConfig({
   plugins: [vue()],
   server: {
+    host: true,             // + блоки добавлены для реалтайм редактуры 
+    port: 5173,             // +
+    watch: {                // +
+      usePolling: true,     // +
+    },                      // +
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://backend:8080', // изменено с //localhost:8080 для реалтайма
         changeOrigin: true
       }
     }
