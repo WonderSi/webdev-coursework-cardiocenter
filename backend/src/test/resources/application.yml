@@ -17,3 +17,10 @@ logging:
   level:
     com.medical: DEBUG
     org.hibernate.SQL: DEBUG
+
+app:
+  jwt:
+    secret: dGVzdC1zZWNyZXQta2V5LWZvci1jaS10ZXN0cy1vbmx5LTMyLWJ5dGVz
+    expiration-ms: 86400000
+  ml-service:
+    url: http://localhost:8000
