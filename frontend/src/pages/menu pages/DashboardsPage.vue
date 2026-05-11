@@ -14,16 +14,7 @@
       </div>
       <div class="card-title">Всего записей о пациентах</div>
     </div>
-    <span class="card-number">{{databaseMock.amountOfRecords}}</span>
-    <div class="last-update">
-        <div class="dynamics">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3.09839 3.09839H13.4263M13.4263 3.09839V13.4263M13.4263 3.09839L3.09839 13.4263" stroke="#04A040" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="dynamics-span">{{ databaseMock.dynamic }}</span>
-        </div>
-        <span class="last-update-date">{{databaseMock.lastUpdateDate}}</span>
-      </div>
+      <span class="card-number">{{databaseMock.amountOfRecords}}</span>
     </div>
 
   <!-- Карточка 2: Соотношение полов -->
@@ -48,167 +39,139 @@
     </div>
   </div>
 
-  <!-- 3. Обучение модели -->
-
-  <!-- 4. Точность модели -->
-
-  <!-- 5. Распределение диагнозов (возраст/пол) - Базовый Bar -->
-
-  <!-- 6. Самые частые болезни (Горизонтальный Bar) -->
-
-  <!-- 7. Связь Возраст / Частота / Пол (Bubble Chart) -->
-
-  <!-- 8. Показатели: Норма/Выше/Ниже (Stacked Bar) На примере Глюкозы -->
-
-  <!-- 10. список районов (Кастомный HTML) -->
+  <!-- Карточка 3: Распределение пол-возраст -->
+  <div class="dashboard-card col-4 row-2">
+    <div class="card-header chart-header">
+      <div class="card-title">Возрастно-половая структура</div>
+      <div class="custom-legend">
+        <span class="legend-men">м</span>
+        <span class="legend-divider">-</span>
+        <span class="legend-women">ж</span>
+      </div>
+    </div>
+    <div class="chart-container">
+      <v-chart class="chart" :option="chartOption" autoresize />
+    </div>
+  </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { BarChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
+import VChart from 'vue-echarts'
 import Sidebar from '@/components/Sidebar.vue'
+// import dashboardsData from '../../mocks/dashboardsData'
 
-// --- Настройка Chart.js ---
-import { Bar, Bubble, Radar } from 'vue-chartjs'
-import { 
-  Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, 
-  LinearScale, PointElement, LineElement, RadialLinearScale, Filler
-} from 'chart.js'
+// ECharts модули
+use([CanvasRenderer, BarChart, GridComponent, TooltipComponent]);
 
-ChartJS.register(
-  Title, Tooltip, Legend, BarElement, CategoryScale, 
-  LinearScale, PointElement, LineElement, RadialLinearScale, Filler
-)
+interface Patient {
+  age: number;
+  gender: number;
+}
 
-// ==========================================
-// MOCK DATA (Имитация ответа от Backend)
-// // CONNECT TO BACKEND HERE IN onMounted
-// Опираемся на сущности: PatientEntity, DiagnosisEntity, GlossaryValueEntity
-// ==========================================
-
-const databaseMock = ref({
-  amountOfRecords: 1253,
-  lastUpdateDate: '01.05.2026',
-  dynamic: 'positive'
-})
-
-const mlModelMock = ref({
-  lastTrained: '01.05.2026',
-  recordsUsed: 12050,
-  accuracy: 94.2
-})
-
-// --- 5. Диагнозы по возрасту и полу (Bar) ---
-// Группировка: PatientEntity.age -> бакеты, PatientEntity.gender -> цвет
-const ageGenderData = ref({
-  labels:['<30', '30-39', '40-49', '50-59', '60-69', '70+'],
-  datasets:[
-    { label: 'Мужчины', backgroundColor: '#1567E2', data:[50, 120, 250, 320, 180, 90] },
-    { label: 'Женщины', backgroundColor: '#CF4688', data:[40, 100, 210, 350, 200, 110] }
-  ]
-})
-const baseBarOptions = ref({
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
-})
-
-// --- 6. Самые частые болезни (Horizontal Bar) ---
-// Группировка: DiagnosisEntity.diagnosis (Glossary) -> Count
-const topDiseasesData = ref({
-  labels:['Артер. Гипертензия', 'ИБС', 'Стенокардия', 'Серд. недостат.', 'Инсульт', 'Инфаркт'],
-  datasets:[{
-    label: 'Случаев',
-    backgroundColor: '#5D8DD3',
-    data:[850, 620, 410, 320, 150, 90],
-    borderRadius: 4
-  }]
-})
-const horizontalBarOptions = ref({
-  indexAxis: 'y', // КЛЮЧЕВАЯ ФИЧА ДЛЯ ГОРИЗОНТАЛЬНОГО ГРАФИКА
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: { x: { beginAtZero: true }, y: { grid: { display: false } } }
-})
-
-// --- 7. Связь: Возраст (X), Кол-во диагнозов (Y), Популяция (Радиус) (Bubble Chart) ---
-// Группировка: PatientEntity.age, Count(DiagnosisEntity)
-const bubbleCorrelationData = ref({
-  datasets:[
-    {
-      label: 'Мужчины',
-      backgroundColor: 'rgba(21, 103, 226, 0.6)', // $color-accent with opacity
-      borderColor: '#1567E2',
-      // x: Возраст, y: Среднее кол-во диагнозов на человека, r: размер выборки пациентов
-      data:[{x: 35, y: 0.5, r: 10}, {x: 45, y: 1.2, r: 25}, {x: 55, y: 2.8, r: 40}, {x: 65, y: 4.1, r: 35}, {x: 75, y: 5.5, r: 15}]
-    },
-    {
-      label: 'Женщины',
-      backgroundColor: 'rgba(207, 70, 136, 0.6)', // $color-pink-women
-      borderColor: '#CF4688',
-      data:[{x: 35, y: 0.4, r: 8}, {x: 45, y: 1.0, r: 20}, {x: 55, y: 2.5, r: 45}, {x: 65, y: 4.5, r: 40}, {x: 75, y: 6.0, r: 20}]
-    }
-  ]
-})
-const bubbleOptions = ref({
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: true, position: 'bottom' } },
-  scales: { x: { title: { display: true, text: 'Возраст' } }, y: { title: { display: true, text: 'Ср. кол-во диагнозов' } } }
-})
-
-// --- 8. Показатели: Уровень глюкозы по районам (Stacked Bar) ---
-// Данные: PatientEntity.glucose (Разбивка: <3.3 Ниже, 3.3-5.5 Норма, >5.5 Выше), сгруппировано по PatientEntity.region
-const glucoseStackedData = ref({
-  labels:['Рудничный', 'Центр.', 'Ленинский', 'Кировский', 'Заводский'],
-  datasets: [
-    { label: 'Ниже нормы', backgroundColor: '#8AB3F1', data:[10, 5, 8, 12, 15] },
-    { label: 'Норма', backgroundColor: '#04A040', data:[60, 70, 65, 50, 45] },
-    { label: 'Выше нормы', backgroundColor: '#EA566F', data: [30, 25, 27, 38, 40] }
-  ]
-})
-const stackedBarOptions = ref({
-  responsive: true, maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { stacked: true, grid: { display: false } }, // СТЕКИНГ ВКЛЮЧЕН
-    y: { stacked: true, beginAtZero: true }
+const processChartData = (patients: Patient[]) => {
+  const groups = {
+    '<30': { men: 0, women: 0 },
+    '30-39': { men: 0, women: 0 },
+    '40-49': { men: 0, women: 0 },
+    '50-59': { men: 0, women: 0 },
+    '60+': { men: 0, women: 0 }
   }
-})
 
-// --- 9. Профессии и диагнозы (Radar Chart) ---
-// Оси: Профессии (GlossaryValue). Линии: Вид диагноза. Значение: % больных.
-const professionRadarData = ref({
-  labels:['Офис', 'Шахтер', 'Водитель', 'Строитель', 'Учитель', 'Врач'],
-  datasets:[
+  patients.forEach(p => {
+    let group: keyof typeof groups = '60+'
+    if (p.age < 30) group = '<30'
+    else if (p.age < 40) group = '30-39'
+    else if (p.age < 50) group = '40-49'
+    else if (p.age < 60) group = '50-59'
+
+    if (p.gender === 1) groups[group].men++
+    else if (p.gender === 2) groups[group].women++
+  })
+
+  return {
+    labels: Object.keys(groups),
+    menData: Object.values(groups).map(g => g.men),
+    womenData: Object.values(groups).map(g => g.women)
+  }
+}
+
+const rawPatients = ref<Patient[]>([])
+const chartData = computed(() => processChartData(rawPatients.value))
+
+// ECharts конфиг
+const chartOption = computed(() => ({
+  tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+  grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+  xAxis: {
+    type: 'category' as const,
+    data: chartData.value.labels,
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: { color: '#8A8FA8', fontWeight: 500 }
+  },
+  yAxis: {
+    type: 'value' as const,
+    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
+    axisLabel: { color: '#8A8FA8' }
+  },
+  series: [
     {
-      label: 'ИБС',
-      backgroundColor: 'rgba(21, 103, 226, 0.2)', borderColor: '#1567E2',
-      pointBackgroundColor: '#1567E2',
-      data:[30, 60, 55, 40, 25, 35]
+      name: 'Мужчины',
+      type: 'bar' as const,
+      data: chartData.value.menData,
+      itemStyle: { color: '#1567E2', borderRadius: [4, 4, 0, 0] as [number, number, number, number] }
     },
     {
-      label: 'Гипертензия',
-      backgroundColor: 'rgba(234, 86, 111, 0.2)', borderColor: '#EA566F',
-      pointBackgroundColor: '#EA566F',
-      data:[65, 50, 70, 45, 80, 75]
+      name: 'Женщины',
+      type: 'bar' as const,
+      data: chartData.value.womenData,
+      itemStyle: { color: '#DF2242', borderRadius: [4, 4, 0, 0] as [number, number, number, number] }
     }
   ]
-})
-const radarOptions = ref({
-  responsive: true, maintainAspectRatio: false,
-  scales: { r: { ticks: { display: false } } }, // Скрываем цифры на паутине для чистоты
-  plugins: { legend: { display: true, position: 'bottom' } }
-})
+}))
 
-// --- 10. Данные для районов (Оставляем как было) ---
-const districtData = ref([
-  { name: 'Рудничный', numberOfDiagnoses: 1234, EcologyData: 1000 },
-  { name: 'Центральный', numberOfDiagnoses: 1234, EcologyData: 1000 },
-  { name: 'Ленинский', numberOfDiagnoses: 1234, EcologyData: 1000 },
-  { name: 'Кировский', numberOfDiagnoses: 1234, EcologyData: 1000 },
-  { name: 'Заводский', numberOfDiagnoses: 1234, EcologyData: 1000 },
-  { name: 'Сельск. местн.', numberOfDiagnoses: 1234, EcologyData: 1000 }
-])
+// const baseBarOptions = ref({
+//   responsive: true, maintainAspectRatio: false,
+//   plugins: { legend: { display: false } },
+//   scales: { x: { grid: { display: false } }, y: { beginAtZero: true } }
+// })
+
+
+// const horizontalBarOptions = ref({
+//   indexAxis: 'y', // ДЛЯ ГОРИЗОНТАЛЬНОГО ГРАФИКА
+//   responsive: true, maintainAspectRatio: false,
+//   plugins: { legend: { display: false } },
+//   scales: { x: { beginAtZero: true }, y: { grid: { display: false } } }
+// })
+
+// const bubbleOptions = ref({
+//   responsive: true, maintainAspectRatio: false,
+//   plugins: { legend: { display: true, position: 'bottom' } },
+//   scales: { x: { title: { display: true, text: 'Возраст' } }, y: { title: { display: true, text: 'Ср. кол-во диагнозов' } } }
+// })
+
+
+// const stackedBarOptions = ref({
+//   responsive: true, maintainAspectRatio: false,
+//   plugins: { legend: { display: false } },
+//   scales: {
+//     x: { stacked: true, grid: { display: false } }, // СТЕКИНГ ВКЛЮЧЕН
+//     y: { stacked: true, beginAtZero: true }
+//   }
+// })
+
+
+// const radarOptions = ref({
+//   responsive: true, maintainAspectRatio: false,
+//   scales: { r: { ticks: { display: false } } }, // Скрываем цифры на паутине для чистоты
+//   plugins: { legend: { display: true, position: 'bottom' } }
+// })
 
 // API FETCH SIMULATION
 // onMounted(() => {
@@ -239,6 +202,7 @@ const districtData = ref([
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-auto-rows: minmax(160px, auto);
+  grid-auto-columns: minmax(200px, auto);
   align-content: start;
   min-height: 100vh;
   margin-left: 240px; 
@@ -331,6 +295,37 @@ const districtData = ref([
   .gender-label {
     font-size: 1rem;
     font-weight: 500;
+  }
+}
+
+// --- доп для ECharts
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.custom-legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+
+  .legend-men { color: $color-accent; } // Blue
+  .legend-women { color: $color-pink-women; } // Pink
+  .legend-divider { color: $color-text; }
+}
+
+.chart-container {
+  width: 100%;
+  flex-grow: 1; // Заставляет график занимать оставшееся пространство высоты
+  min-height: 0;
+  
+  .chart {
+    height: 100%;
+    width: 100%;
   }
 }
 
