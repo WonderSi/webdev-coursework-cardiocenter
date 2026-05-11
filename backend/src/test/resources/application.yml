@@ -24,3 +24,6 @@ app:
     expiration-ms: 86400000
   ml-service:
     url: http://localhost:8000
+
+BOOTSTRAP_ADMIN_EMAIL: test-admin@test.com
+BOOTSTRAP_ADMIN_PASSWORD: test-admin-password
