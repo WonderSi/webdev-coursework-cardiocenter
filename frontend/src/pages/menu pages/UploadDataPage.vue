@@ -198,10 +198,12 @@ async function uploadFile() {
   formData.append('file', selectedFile.value)
 
   try {
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData, credentials: 'include' })
     if (!res.ok) {
       const body = await res.json().catch(() => null)
-      uploadError.value = body?.error ?? `Ошибка сервера: ${res.status}`
+      uploadError.value = (res.status === 401 || res.status === 403)
+        ? 'Сессия истекла — войдите заново'
+        : body?.error ?? `Ошибка сервера: ${res.status}`
       return
     }
     report.value = await res.json()
@@ -216,8 +218,13 @@ async function uploadFile() {
 async function downloadTemplate() {
   templateLoading.value = true
   try {
-    const res = await fetch('/api/admin/upload/template')
-    if (!res.ok) { uploadError.value = 'Не удалось скачать шаблон'; return }
+    const res = await fetch('/api/admin/upload/template', { credentials: 'include' })
+    if (!res.ok) {
+      uploadError.value = res.status === 401 || res.status === 403
+        ? 'Сессия истекла — войдите заново'
+        : `Не удалось скачать шаблон (${res.status})`
+      return
+    }
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
