@@ -277,7 +277,7 @@ const chartOption = computed(() => {
   font-weight: 700;
 
   .legend-men { color: $color-accent; } // Blue
-  .legend-women { color: $color-pink-women; } // Pink
+  .legend-women { color: $color-red; } // Red
   .legend-divider { color: $color-text; }
 }
 

@@ -8,7 +8,7 @@ export const mockKpiData = {
 // в каждой группе находим число мужчин БЕЗ ЕДИНОГО ДИАГНОЗА + число мужчин с хотя бы одним диагнозом
 // и также находим общее число БЕЗ ЕДИНОГО ДИАГНОЗА женщин + число женщин с хотя бы одним диагнозом
 export const mockAgeGenderData = [
-  { ageGroup: '< 30', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
+  { ageGroup: '<30', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
   { ageGroup: '30-39', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
   { ageGroup: '40-49', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
   { ageGroup: '50-59', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
