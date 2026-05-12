@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
+import { SVGRenderer } from 'echarts/renderers'
 import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
@@ -68,31 +68,63 @@ import Sidebar from '@/components/Sidebar.vue'
 import { mockKpiData, mockAgeGenderData } from '@/mocks/dashboardsData'
 
 // ECharts модули
-use([CanvasRenderer, BarChart, GridComponent, TooltipComponent]);
+use([SVGRenderer, BarChart, GridComponent, TooltipComponent]);
 
 // ECharts конфиг для распределения возраст-пол-здоровье:
 const chartOption = computed(() => {
   return {
+    render: 'svg',
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' }
     },
     legend: { show: false },
     grid: {
-      top: '10%',
-      left: '3%',
+      top: '4%',
+      left: '6%',
       right: '4%',
-      bottom: '3%',
+      bottom: '10%',
       containLabel: true
     },
     xAxis: {
       type: 'category',
+      name: 'возрастная группа',
+      nameLocation: 'center',
+      nameGap: 35,
+      nameTextStyle: {
+        color: '#0D3C81', // $color-blue-dark;
+        fontWeight: 600,
+        fontSize: 14
+      },
+      axisLabel: { 
+        color: '#0D3C81',
+        fontWeight: 600,
+        fontSize: 14
+      },
+      axisLine: {
+        show: true,
+        lineStyle: { color: '#0D3C81', width: 4 }
+      },
       data: mockAgeGenderData.map(item => item.ageGroup),
       axisTick: { show: false }
     },
     yAxis: {
-      type: 'value',                                   // $color-secondary
-      splitLine: { lineStyle: { type: 'dashed', color: '#8A8FA8' } }
+      type: 'value',
+      name: 'численность',
+      nameLocation: 'middle',
+      nameGap: 35,
+      nameRotate: -90,
+      nameTextStyle: {
+        color: '#0D3C81', // $color-blue-dark;
+        fontWeight: 600,
+        fontSize: 14
+      },
+      axisLabel: { 
+        color: '#0D3C81',
+        fontWeight: 600,
+        fontSize: 14
+      },                                        // $color-accent-lighter;
+      splitLine: { lineStyle: { color: '#8AB3F1' } }
     },
     series: [
       // --- МУЖЧИНЫ
@@ -114,7 +146,7 @@ const chartOption = computed(() => {
           borderRadius: [2, 2, 0, 0]
         }
       },
-      // --- FEMALE GROUP ---
+      // --- ЖЕНЩИНЫ
       {
         name: 'Здоровые (Ж)',
         type: 'bar',
