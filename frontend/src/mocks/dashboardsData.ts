@@ -17,17 +17,15 @@ export const mockAgeGenderData = [
 ];
 
 // сколько диагностировано (мужчин/женщин) и процент от общего числа мужчин/женщин
-export const genderDiagnosesData = [
+export const mockGenderDiagnosesData = [
     { maleDiagnosed: 100, malePercent: 10 },
     { femaleDiagnosed: 80, femalePercent: 20 }
-];   // здесь чтобы заново не считать можно из предыдущего всё суммировать
-// т.е. в каждой возрастной группе сумма diagnosedMale и сумма diagnosedFemale,
-// и с нуля считаем только процент от общего числа пола
+];
 
 // для каждого пациента считаем ИМТ ( weight / height^2 в метрах )
 // пример: 65кг 170 см => 65 : 1,7² = 22,5 (округляем до одной цифры после ,)
 // подсчитываем сколько в каждой группе и выдаём сюда
-export const weightData = [
+export const mockWeightData = [
     { category: 'Недостаточный', totalCount: 10, diagnosedCount: 5, diagnosedPercent: 50 }, // дефицит: < 18,5
     // категория, кол-во таких пациентов, кол-во пациентов с хотя бы одним диагнозом, процент диагностированных от общего числа пациентов
     { category: 'Нормальный', totalCount: 20, diagnosedCount: 12, diagnosedPercent: 60 },   // норм. вес: 18,5 - 24,9
@@ -36,7 +34,7 @@ export const weightData = [
 ];
 
 // "употребляете ли вы алкоголь"
-export const alcoholConsumptionData = [
+export const mockAlcoholConsumptionData = [
     { category: 'Употребляю', totalCount: 100, diagnosedCount: 50, diagnosedPercent: 50 },
     { category: 'Употреблял ранее', totalCount: 400, diagnosedCount: 230, diagnosedPercent: 55 },
     { category: 'Никогда не употреблял', totalCount: 200, diagnosedCount: 10, diagnosedPercent: 0.5 }
@@ -46,7 +44,7 @@ export const alcoholConsumptionData = [
 // затем в каждой группе смотрим число заболеваний (где им диагностировали хотя бы одно ССЗ)
 // выводим топ-5 групп с наибольшей заболеваемостью ССЗ
 // имя профессии, число диагностированных, % диагностированных
-export const professionData = [
+export const mockProfessionData = [
     { profName: "Профессия 1", diagnosedCount: 50, diagnosedPercent: 50 },
     { profName: "Профессия 2", diagnosedCount: 50, diagnosedPercent: 50 },
     { profName: "Профессия 3", diagnosedCount: 50, diagnosedPercent: 50 },
@@ -59,7 +57,7 @@ export const professionData = [
 // считаем по каждому диагнозу у скольких людей (строк в бд)
 // он был диагностирован, сортируем по убыванию (descending)
 // и выдаём сюда в топ: имя болезни (маппинг словаря с бека), число диагностированных + процент от общего числа диагнозов
-export const mostDiagnosedData = [
+export const mockMostDiagnosedData = [
     { diagName: "ССЗ 1", diagnosedCount: 10, percent: 10 }, // все варики:
     { diagName: "ССЗ 1", diagnosedCount: 20, percent: 20 }, // инсульт,
     { diagName: "ССЗ 1", diagnosedCount: 10, percent: 10 }, // сердечная недостаточность,
@@ -68,7 +66,7 @@ export const mostDiagnosedData = [
     { diagName: "ССЗ 1", diagnosedCount: 40, percent: 40 }  // инфаркт миокарда,  
 ];                                                          // артериальная гипертензия
 
-export const districtData = [
+export const mockDistrictData = [
   { name: 'Рудничный', numberOfDiagnoses: 1234, EcologyData: 1000 },
   { name: 'Центральный', numberOfDiagnoses: 1234, EcologyData: 1000 },
   { name: 'Ленинский', numberOfDiagnoses: 1234, EcologyData: 1000 },
@@ -78,7 +76,7 @@ export const districtData = [
 ]; // подсчитываем число диагностированных по каждому району +
    // связываем это с данными об экологии, но пока непонятно что будет в "данные об экологии", какой-то параметр
 
-export const labParams = [
+export const mockLabParams = [
     // ...?
 ];
 // потом надо придумать как лабораторные данные приплести
