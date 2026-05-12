@@ -598,13 +598,11 @@ const chartDistricts = computed(() => {
     xAxis: [
       { 
         type: 'value', 
-        name: 'Диагнозы',
         splitLine: { lineStyle: { color: '#8AB3F1' } },
         axisLabel: { color: '#0f356e', fontWeight: 400, fontSize: 14 },
       },
       { 
         type: 'value', 
-        name: 'Экология',
         splitLine: { show: false },
         axisLabel: { color: '#20B2AA', fontWeight: 400, fontSize: 14 },
       }
