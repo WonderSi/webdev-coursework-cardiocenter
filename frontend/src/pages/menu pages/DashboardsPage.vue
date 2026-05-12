@@ -4,8 +4,8 @@
 
     <!-- ================= СТРОКА 1 (Маленькие карточки, Высота 1) ================= -->
 
-    <!-- Карточка 1: Всего записей -->
-    <div class="dashboard-card col-3 row-1">
+    <!-- Карточка: Всего записей -->
+    <div class="dashboard-card col-1 row-1">
       <div class="card-header">
         <div class="card-icon">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,8 +17,8 @@
       <span class="card-number-total-records">{{ mockKpiData.totalRecords }}</span>
     </div>
 
-    <!-- Карточка 2: % диагностированных м-ж -->
-    <div class="dashboard-card col-3 row-1">
+    <!-- Карточка: % диагностированных м-ж -->
+    <div class="dashboard-card col-1 row-1">
       <div class="card-header">
         <div class="card-icon">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -39,37 +39,8 @@
       </div>
     </div>
 
-    <!-- Карточка 3: Распределение пол-возраст -->
-    <div class="dashboard-card col-6 row-2">
-      <div class="card-header chart-header">
-        <div class="card-title">Возрастно-половая структура</div>
-        <div class="custom-legend">
-          <span class="legend-men">м</span>
-          <span class="legend-divider">-</span>
-          <span class="legend-women">ж</span>
-        </div>
-      </div>
-      <div class="chart-container">
-        <v-chart class="chart" :option="chartAgeGender" autoresize />
-      </div>
-    </div>
-
-    <!-- Карточка 4: Вес - диагнозы -->
-    <div class="dashboard-card col-6 row-2">
-      <div class="card-header chart-header">
-        <div class="card-title">Корреляция веса и ССЗ</div>
-        <div class="custom-legend">
-          <span style="color: #1567E2">●</span> Здоровые 
-          <span style="color: #DF2242; margin-left: 10px">●</span> ССЗ
-        </div>
-      </div>
-      <div class="chart-container">
-        <v-chart class="chart" :option="chartWeight" autoresize />
-      </div>
-    </div>
-
-    <!-- Карточка 5: алкоголь -->
-    <div class="dashboard-card col-4 row-2">
+    <!-- Карточка алкоголь -->
+    <div class="dashboard-card col-2 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Употребление алкоголя</div>
       </div>
@@ -92,18 +63,8 @@
       </div>
     </div>
 
-    <!-- Карточка 6: Профессии -->
-    <div class="dashboard-card col-4 row-2">
-      <div class="card-header chart-header">
-        <div class="card-title">Профессии и Риск ССЗ</div>
-      </div>
-      <div class="chart-container">
-        <v-chart class="chart" :option="chartProfessions" autoresize />
-      </div>
-    </div>
-
-    <!-- Карточка 7: Чаще всего диагностируют -->
-    <div class="dashboard-card col-4 row-2">
+    <!-- Карточка: Чаще всего диагностируют -->
+    <div class="dashboard-card col-3 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Частые диагнозы</div>
       </div>
@@ -112,8 +73,47 @@
       </div>
     </div>
 
-    <!-- Карточка 8: Районы и экология -->
-    <div class="dashboard-card col-12 row-2">
+    <!-- Карточка: Распределение пол-возраст -->
+    <div class="dashboard-card col-3 row-2">
+      <div class="card-header chart-header">
+        <div class="card-title">Возрастно-половая структура</div>
+        <div class="custom-legend">
+          <span class="legend-men">м</span>
+          <span class="legend-divider">-</span>
+          <span class="legend-women">ж</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <v-chart class="chart" :option="chartAgeGender" autoresize />
+      </div>
+    </div>
+
+    <!-- Карточка: Вес - диагнозы -->
+    <div class="dashboard-card col-3 row-2">
+      <div class="card-header chart-header">
+        <div class="card-title">Корреляция веса и ССЗ</div>
+        <div class="custom-legend">
+          <span style="color: #1567E2">●</span> Здоровые 
+          <span style="color: #DF2242; margin-left: 10px">●</span> ССЗ
+        </div>
+      </div>
+      <div class="chart-container">
+        <v-chart class="chart" :option="chartWeight" autoresize />
+      </div>
+    </div>
+
+    <!-- Карточка: Профессии -->
+    <div class="dashboard-card col-6 row-2">
+      <div class="card-header chart-header">
+        <div class="card-title">Профессии и Риск ССЗ</div>
+      </div>
+      <div class="chart-container">
+        <v-chart class="chart" :option="chartProfessions" autoresize />
+      </div>
+    </div>
+
+    <!-- Карточка: Районы и экология -->
+    <div class="dashboard-card col-6 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Районы и Экология</div>
         <div class="custom-legend-ecology">
@@ -618,29 +618,22 @@ const chartDistricts = computed(() => {
 @use '@/styles/variables' as *;
 
 // Утилиты
+.col-1 { grid-column: span 1; }
 .col-2 { grid-column: span 2; }
 .col-3 { grid-column: span 3; }
-.col-4 { grid-column: span 4; }
 .col-6 { grid-column: span 6; }
 
 .row-1 { grid-row: span 1; }
 .row-2 { grid-row: span 2; }
 
-// большие экраны
 @media (max-width: 1400px) {
-  .col-2 { grid-column: span 4; } // Расширяем маленькие карточки
-  .col-4 { grid-column: span 8; } // Графики шире
+  .col-3 { grid-column: span 6; } 
+  .col-1 { grid-column: span 3; }
+  .col-2 { grid-column: span 6; }
 }
 
-// Маленькие экраны
 @media (max-width: 1024px) {
-  .col-2, .col-3, .col-4, .col-6 {
-    grid-column: span 12; // Всё выстраивается в одну колонку
-  }
-  .row-2 {
-    grid-row: span 1;
-    min-height: 350px; // мин высота для графиков
-  }
+  .col-1, .col-2, .col-3, .col-6 { grid-column: span 6; }
 }
 
 // -----------------------------------------------------------------
@@ -651,10 +644,11 @@ const chartDistricts = computed(() => {
 
 .dashboards-grid-container {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-auto-rows: minmax(160px, auto);
+  grid-auto-flow: dense;
   align-content: start;
-
+  
   min-height: 100vh;
   margin-left: 240px; // для сайдбара
   padding: 40px;
