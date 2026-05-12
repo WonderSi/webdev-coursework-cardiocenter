@@ -26,11 +26,11 @@ export const mockGenderDiagnosesData = [
 // пример: 65кг 170 см => 65 : 1,7² = 22,5 (округляем до одной цифры после ,)
 // подсчитываем сколько в каждой группе и выдаём сюда
 export const mockWeightData = [
-    { category: 'Недостаточный', totalCount: 10, diagnosedCount: 5, diagnosedPercent: 50 }, // дефицит: < 18,5
-    // категория, кол-во таких пациентов, кол-во пациентов с хотя бы одним диагнозом, процент диагностированных от общего числа пациентов
-    { category: 'Нормальный', totalCount: 20, diagnosedCount: 12, diagnosedPercent: 60 },   // норм. вес: 18,5 - 24,9
-    { category: 'Избыточный', totalCount: 10, diagnosedCount: 4, diagnosedPercent: 40 },   // избыточный вес: 25 - 29,9
-    { category: 'Ожирение', totalCount: 5, diagnosedCount: 2, diagnosedPercent: 50 }        // ожирение: 30+
+    { category: 'Недостаточный', healthyCount: 10, diagnosedCount: 5, diagnosedPercent: 50 }, // дефицит: < 18,5
+    // категория, кол-во пациентов без единого диагноза, кол-во пациентов с хотя бы одним диагнозом, процент диагностированных от общего числа пациентов
+    { category: 'Нормальный', healthyCount: 20, diagnosedCount: 12, diagnosedPercent: 60 },   // норм. вес: 18,5 - 24,9
+    { category: 'Избыточный', healthyCount: 10, diagnosedCount: 4, diagnosedPercent: 40 },   // избыточный вес: 25 - 29,9
+    { category: 'Ожирение', healthyCount: 5, diagnosedCount: 2, diagnosedPercent: 50 }        // ожирение: 30+
 ];
 
 // "употребляете ли вы алкоголь"
