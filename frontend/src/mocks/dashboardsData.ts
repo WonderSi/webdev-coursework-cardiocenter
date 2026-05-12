@@ -1,20 +1,19 @@
 export const mockKpiData = {
   totalRecords: 1240,                // всего записей пациентов в БД
-  lastDataUpdateDate: "01.05.2026",  // дата последнего обновления данных в БД 
   malePercentage: 45,                // сколько % пациентов мужчины
   femalePercentage: 55,              // сколько % пациентов женщины
 };
 
 // бьём пациентов на группы по возрасту,
-// в каждой группе находим общее число мужчин + число мужчин с хотя бы одним диагнозом
-// и также находим общее число женщин + число женщин с хотя бы одним диагнозом
+// в каждой группе находим число мужчин БЕЗ ЕДИНОГО ДИАГНОЗА + число мужчин с хотя бы одним диагнозом
+// и также находим общее число БЕЗ ЕДИНОГО ДИАГНОЗА женщин + число женщин с хотя бы одним диагнозом
 export const mockAgeGenderData = [
-  { ageGroup: '< 30', male: 45, diagnosedMale: 20, female: 30, diagnosedFemale: 10 },
-  { ageGroup: '30-39', male: 45, diagnosedMale: 20, female: 30, diagnosedFemale: 10 },
-  { ageGroup: '40-49', male: 45, diagnosedMale: 20, female: 30, diagnosedFemale: 10 },
-  { ageGroup: '50-59', male: 45, diagnosedMale: 20, female: 30, diagnosedFemale: 10 },
-  { ageGroup: '60-69', male: 45, diagnosedMale: 20, female: 30, diagnosedFemale: 10 },
-  { ageGroup: '70+', male: 45, diagnosedMale: 20, female: 30, diagnosedFemale: 10 },
+  { ageGroup: '< 30', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
+  { ageGroup: '30-39', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
+  { ageGroup: '40-49', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
+  { ageGroup: '50-59', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
+  { ageGroup: '60-69', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
+  { ageGroup: '70+', healthyMale: 45, diagnosedMale: 20, healthyFemale: 30, diagnosedFemale: 10 },
 ];
 
 // сколько диагностировано (мужчин/женщин) и процент от общего числа мужчин/женщин

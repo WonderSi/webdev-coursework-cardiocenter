@@ -70,55 +70,67 @@ import { mockKpiData, mockAgeGenderData } from '@/mocks/dashboardsData'
 // ECharts модули
 use([CanvasRenderer, BarChart, GridComponent, TooltipComponent]);
 
-// ECharts конфиг для распределения возраст-пол:
+// ECharts конфиг для распределения возраст-пол-здоровье:
 const chartOption = computed(() => {
   return {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' }
     },
-    // встроенная легенда откл. т.к. у нас кастомная HTML
     legend: { show: false },
     grid: {
-      top: 20,
-      right: 10,
-      bottom: 20,
-      left: 30,
+      top: '10%',
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
       containLabel: true
     },
     xAxis: {
       type: 'category',
       data: mockAgeGenderData.map(item => item.ageGroup),
-      axisLabel: { color: '#242942', fontWeight: 500 },
-      axisLine: { lineStyle: { color: 'rgba(36, 41, 66, 0.2)' } },
       axisTick: { show: false }
     },
     yAxis: {
-      type: 'value',
-      axisLabel: { color: '#8A8FA8' },
-      splitLine: { 
-        lineStyle: { type: 'dashed', color: 'rgba(138, 143, 168, 0.15)' } 
-      }
+      type: 'value',                                   // $color-secondary
+      splitLine: { lineStyle: { type: 'dashed', color: '#8A8FA8' } }
     },
     series: [
+      // --- МУЖЧИНЫ
       {
-        name: 'Мужчины',
+        name: 'Здоровые (М)',
         type: 'bar',
-        barWidth: '30%',
-        data: mockAgeGenderData.map(item => item.male),
-        itemStyle: { 
-          color: '#1567E2',
-          borderRadius: [4, 4, 0, 0]
-        }
+        stack: 'male',
+        barWidth: 25,
+        data: mockAgeGenderData.map(item => item.healthyMale),
+        itemStyle: { color: '#5e9bf7' } // $color-blue-med
       },
       {
-        name: 'Женщины',
+        name: 'Диагноз (М)',
         type: 'bar',
-        barWidth: '30%',
-        data: mockAgeGenderData.map(item => item.female),
+        stack: 'male',
+        data: mockAgeGenderData.map(item => item.diagnosedMale),
         itemStyle: { 
-          color: '#DF2242',
-          borderRadius: [4, 4, 0, 0] 
+          color: '#1567E2', // $color-accent
+          borderRadius: [2, 2, 0, 0]
+        }
+      },
+      // --- FEMALE GROUP ---
+      {
+        name: 'Здоровые (Ж)',
+        type: 'bar',
+        stack: 'female',
+        barWidth: 25,
+        data: mockAgeGenderData.map(item => item.healthyFemale),
+        itemStyle: { color: '#ff8095' } // $color-light-red
+      },
+      {
+        name: 'Диагноз (Ж)',
+        type: 'bar',
+        stack: 'female',
+        data: mockAgeGenderData.map(item => item.diagnosedFemale),
+        itemStyle: { 
+          color: '#DF2242', // $color-red
+          borderRadius: [2, 2, 0, 0] 
         }
       }
     ]
