@@ -48,7 +48,7 @@
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#0D3C81"/>
           </svg>
         </div>
-        <div class="card-title">Диагностировано ССЗ</div>
+        <div class="card-title">Пациентов с ССЗ</div>
       </div>
       
       <div class="card-two-numbers">
@@ -78,6 +78,20 @@
       </div>
     </div>
 
+    <!-- Карточка 4: Вес - диагнозы -->
+    <div class="dashboard-card col-4 row-2">
+      <div class="card-header chart-header">
+        <div class="card-title">Корреляция веса и ССЗ</div>
+        <div class="custom-legend">
+          <span style="color: #1567E2">●</span> Здоровые 
+          <span style="color: #DF2242; margin-left: 10px">●</span> ССЗ
+        </div>
+      </div>
+      <div class="chart-container">
+        <v-chart class="chart" :option="chartWeight" autoresize />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -89,7 +103,7 @@ import { BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import Sidebar from '@/components/Sidebar.vue'
-import { mockKpiData, mockAgeGenderData, mockGenderDiagnosesData } from '@/mocks/dashboardsData'
+import { mockKpiData, mockAgeGenderData, mockGenderDiagnosesData, mockWeightData } from '@/mocks/dashboardsData'
 
 // ECharts модули
 use([SVGRenderer, BarChart, GridComponent, TooltipComponent]);
@@ -99,7 +113,29 @@ const chartAgeGender = computed(() => {
   return {
     render: 'svg',
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
+      borderRadius: 12,
+      padding: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderColor: 'rgba(32, 92, 182, 0.35)',
+      borderWidth: 1,
+      textStyle: {
+        color: '#0D3C81', // $color-blue-dark
+        fontSize: 16,
+        fontFamily: 'Inter, sans-serif'
+      },
+      formatter: function (params: any) {
+        let res = `<div style="margin-bottom: 8px; font-size: 16px;">
+                      <strong>${params[0].axisValue}</strong>
+                    </div>`;
+        params.forEach((item: any) => {
+          res += `<div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
+                    <span>${item.marker} ${item.seriesName}</span>
+                    <span style="font-weight: 700;">${item.value}</span>
+                  </div>`;
+        });
+        return res;
+      }
     },
     legend: { show: false },
     grid: {
@@ -122,19 +158,19 @@ const chartAgeGender = computed(() => {
       },
       axisLabel: { 
         color: '#0D3C81',
-        fontWeight: 600,
+        fontWeight: 400,
         fontSize: 14
       },
       axisLine: {
         show: true,
-        lineStyle: { color: '#0D3C81', width: 4 }
+        lineStyle: { color: '#0D3C81', width: 2 }
       },
       data: mockAgeGenderData.map(item => item.ageGroup),
       axisTick: { show: false }
     },
     yAxis: {
       type: 'value',
-      name: 'численность',
+      name: 'число пациентов',
       nameLocation: 'middle',
       nameGap: 35,
       nameRotate: -90,
@@ -145,15 +181,15 @@ const chartAgeGender = computed(() => {
       },
       axisLabel: { 
         color: '#0D3C81',
-        fontWeight: 600,
+        fontWeight: 400,
         fontSize: 14,
         verticalAlign: 'bottom',
         padding: [0, 0, 0, 0]
-      },                                        // $color-accent-lighter;
+      },                       // $color-accent-lighter;
       splitLine: { lineStyle: { color: '#8AB3F1' } },
       axisLine: {
         show: true,
-        lineStyle: { color: '#0D3C81', width: 4 }
+        lineStyle: { color: '#0D3C81', width: 2 }
       },
     },
     series: [
@@ -162,7 +198,7 @@ const chartAgeGender = computed(() => {
         name: 'Диаг',
         type: 'bar',
         stack: 'male',
-        barWidth: 25,
+        barWidth: 30,
         data: mockAgeGenderData.map(item => item.healthyMale),
         itemStyle: { color: '#5e9bf7' } // $color-blue-med
       },
@@ -181,7 +217,7 @@ const chartAgeGender = computed(() => {
         name: 'Здоровые (Ж)',
         type: 'bar',
         stack: 'female',
-        barWidth: 25,
+        barWidth: 30,
         data: mockAgeGenderData.map(item => item.healthyFemale),
         itemStyle: { color: '#ff8095' } // $color-light-red
       },
@@ -199,8 +235,92 @@ const chartAgeGender = computed(() => {
   };
 });
 
-// const chartHealtyDiagnosedGender = computed(() => {
-//   return {  } }
+// -------- КАРТОЧКА ВЕС + ССЗ
+const chartWeight = computed(() => {
+  return {
+    renderer: 'svg',
+    tooltip: {
+      trigger: 'axis',
+      borderRadius: 12,
+      padding: 12,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderColor: 'rgba(32, 92, 182, 0.35)',
+      borderWidth: 1,
+      textStyle: {
+        color: '#0D3C81', // $color-blue-dark
+        fontSize: 16,
+        fontFamily: 'Inter, sans-serif'
+      },
+      formatter: function (params: any) {
+        let res = `<div style="margin-bottom: 8px; font-size: 16px;">
+                      <strong>${params[0].axisValue}</strong>
+                    </div>`;
+        params.forEach((item: any) => {
+          res += `<div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
+                    <span>${item.marker} ${item.seriesName}</span>
+                    <span style="font-weight: 700;">${item.value}</span>
+                  </div>`;
+        });
+        return res;
+      }
+    },
+    grid: {
+      top: '0%',
+      left: '0%',
+      right: '0%',
+      bottom: '10%',
+      containLabel: true
+    },
+    xAxis: [
+      {
+        type: 'value',
+        name: 'число пацентов',
+        nameLocation: 'center',
+        nameGap: 30,
+        nameTextStyle: { color: '#0D3C81', fontWeight: 400, fontSize: 16},
+        axisLabel: { color: '#0D3C81', fontWeight: 400, fontSize: 14 },
+        splitLine: { lineStyle: { color: '#8AB3F1' } } // $color-accent-lighter
+      }
+    ],
+    yAxis: {
+      type: 'category',
+      z: 10,
+      data: mockWeightData.map(item => item.category),
+      axisLabel: { color: '#0D3C81', fontWeight: 600, fontSize: 16 },
+      axisLine: { lineStyle: { color: '#0D3C81', width: 2 } }
+    },
+    series: [
+      {
+        name: 'Здоровые',
+        type: 'bar',
+        stack: 'total',
+        barWidth: 30,
+        data: mockWeightData.map(item => item.healthyCount),
+        itemStyle: { color: '#5e9bf7' } // $color-blue-med
+      },
+      {
+        name: 'С диагнозом',
+        type: 'bar',
+        stack: 'total',
+        data: mockWeightData.map(item => item.diagnosedCount),
+        itemStyle: { color: '#EA566F' }, // $color-cold-red
+        // % диагностированных поверх палок
+        label: {
+          show: true,
+          position: 'left',
+          distance: 10,
+          formatter: (params: any) => {
+            const percent = mockWeightData[params.dataIndex].diagnosedPercent;
+            return percent + '%'
+          },
+          color: '#0D3C81', // $color-blue-dark
+          fontWeight: 600,
+          fontSize: 14
+        }
+      }
+    ]
+  };
+});
   
 </script>
 
@@ -257,7 +377,7 @@ const chartAgeGender = computed(() => {
 .dashboard-card {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 20px;
   border-radius: $radius-glass-card-dashboards;
   background: rgba($color-glass-white, 0.6); 
   backdrop-filter: blur(20px);
@@ -288,8 +408,8 @@ const chartAgeGender = computed(() => {
 
 .card-title {
   color: $color-blue-dark;
-  font-size: 1.15rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 800;
   line-height: 1.1;
 }
 
@@ -313,7 +433,7 @@ const chartAgeGender = computed(() => {
   gap: 4px;
 
   .card-number {
-    font-size: 2.3rem;
+    font-size: 3rem;
     font-weight: 700;
     color: $color-text;
     line-height: 1;
