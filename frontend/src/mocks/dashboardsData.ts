@@ -35,10 +35,10 @@ export const mockWeightData = [
 
 // "употребляете ли вы алкоголь"
 export const mockAlcoholConsumptionData = [
-    { category: 'Употребляю', totalCount: 100, diagnosedCount: 50, diagnosedPercent: 50 },
-    { category: 'Употреблял ранее', totalCount: 400, diagnosedCount: 230, diagnosedPercent: 55 },
-    { category: 'Никогда не употреблял', totalCount: 200, diagnosedCount: 10, diagnosedPercent: 0.5 }
-];
+    { category: 'Употребляю', healthyCount: 100, diagnosedCount: 50, diagnosedPercent: 50 },
+    { category: 'Употреблял ранее', healthyCount: 400, diagnosedCount: 230, diagnosedPercent: 55 },
+    { category: 'Никогда не употреблял', healthyCount: 200, diagnosedCount: 10, diagnosedPercent: 0.5 }
+]; // сколько здоровых (без единого ССЗ), сколько больных (1+ ссз), процент диагностированных
 
 // сначала группируем данные по профессими
 // затем в каждой группе смотрим число заболеваний (где им диагностировали хотя бы одно ССЗ)
