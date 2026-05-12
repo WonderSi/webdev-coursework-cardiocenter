@@ -5,7 +5,7 @@
     <!-- ================= СТРОКА 1 (Маленькие карточки, Высота 1) ================= -->
 
     <!-- Карточка 1: Всего записей -->
-    <div class="dashboard-card col-2 row-1">
+    <div class="dashboard-card col-3 row-1">
       <div class="card-header">
         <div class="card-icon">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,31 +17,8 @@
       <span class="card-number-total-records">{{ mockKpiData.totalRecords }}</span>
     </div>
 
-    <!-- Карточка 2: Соотношение полов
-    <div class="dashboard-card col-2 row-1">
-      <div class="card-header">
-        <div class="card-icon">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.5001 3.33337C13.3841 3.33337 14.232 3.68456 14.8571 4.30968C15.4822 4.93481 15.8334 5.78265 15.8334 6.66671C15.8334 7.55076 15.4822 8.39861 14.8571 9.02373C14.232 9.6488 13.3841 10 12.5001 10C11.616 10 10.7682 9.64885 10.1431 9.02373C9.51794 8.39861 9.16675 7.55076 9.16675 6.66671C9.16675 5.78265 9.51794 4.93481 10.1431 4.30968C10.7682 3.68456 11.616 3.33337 12.5001 3.33337ZM10.0001 11.6667H15.0001C15.8841 11.6667 16.732 12.0179 17.3571 12.643C17.9822 13.2681 18.3334 14.116 18.3334 15V24.1667H15.8334V36.6667H9.16675V24.1667H6.66675V15C6.66675 14.116 7.01794 13.2681 7.64306 12.643C8.26818 12.0179 9.11603 11.6667 10.0001 11.6667ZM27.5001 3.33337C28.3841 3.33337 29.232 3.68456 29.8571 4.30968C30.4822 4.93481 30.8334 5.78265 30.8334 6.66671C30.8334 7.55076 30.4822 8.39861 29.8571 9.02373C29.232 9.64885 28.3841 10 27.5001 10C26.616 10 25.7682 9.64885 25.1431 9.02373C24.5179 8.39861 24.1667 7.55076 24.1667 6.66671C24.1667 5.78265 24.5179 4.93481 25.1431 4.30968C25.7682 3.68456 26.616 3.33337 27.5001 3.33337ZM25.0001 11.6667H30.0001C30.8841 11.6667 31.732 12.0179 32.3571 12.643C32.9822 13.2681 33.3334 14.116 33.3334 15V24.1667H30.8334V36.6667H24.1667V24.1667H21.6667V15C21.6667 14.116 22.0179 13.2681 22.6431 12.643C23.2682 12.0179 24.116 11.6667 25.0001 11.6667Z" fill="#0f356e"/>
-          </svg>
-        </div>
-        <div class="card-title">Соотношение полов</div>
-      </div>
-      <div class="card-two-numbers">
-        <div class="percentage">
-          <span class="card-number color-blue">{{ mockKpiData.malePercentage }}%</span>
-          <span class="gender-label color-blue">мужчины</span>
-        </div>
-        <div class="percentage">
-          <span class="card-number color-pink">{{ mockKpiData.femalePercentage }}%</span>
-          <span class="gender-label color-pink">женщины</span>
-        </div>
-      </div>
-    </div> -->
-    <!-- ПО СУТИ БЕСПОЛЕЗНАЯ ДЛЯ НАС КАРТОЧКА, ПОЭТОМУ УБИРАЕМ -->
-
     <!-- Карточка 2: % диагностированных м-ж -->
-    <div class="dashboard-card col-2 row-1">
+    <div class="dashboard-card col-3 row-1">
       <div class="card-header">
         <div class="card-icon">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -50,7 +27,6 @@
         </div>
         <div class="card-title">Пациентов с ССЗ</div>
       </div>
-      
       <div class="card-two-numbers">
         <div class="percentage">
           <span class="card-number color-blue">{{ mockGenderDiagnosesData[0].malePercent }}%</span>
@@ -64,7 +40,7 @@
     </div>
 
     <!-- Карточка 3: Распределение пол-возраст -->
-    <div class="dashboard-card col-4 row-2">
+    <div class="dashboard-card col-6 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Возрастно-половая структура</div>
         <div class="custom-legend">
@@ -79,7 +55,7 @@
     </div>
 
     <!-- Карточка 4: Вес - диагнозы -->
-    <div class="dashboard-card col-4 row-2">
+    <div class="dashboard-card col-6 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Корреляция веса и ССЗ</div>
         <div class="custom-legend">
@@ -93,7 +69,7 @@
     </div>
 
     <!-- Карточка 5: алкоголь -->
-    <div class="dashboard-card col-3 row-2">
+    <div class="dashboard-card col-4 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Употребление алкоголя</div>
       </div>
@@ -137,7 +113,7 @@
     </div>
 
     <!-- Карточка 8: Районы и экология -->
-    <div class="dashboard-card col-4 row-2">
+    <div class="dashboard-card col-12 row-2">
       <div class="card-header chart-header">
         <div class="card-title">Районы и Экология</div>
         <div class="custom-legend-ecology">
