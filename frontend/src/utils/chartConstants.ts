@@ -1,6 +1,6 @@
 export const CHART_COLORS = {
   primaryBlue: '#1567E2',
-  darkBlue: '#0D3C81',
+  darkBlue: '#0f356e',
   lightBlue: '#76a5f0',
   red: '#DF2242',
   lightRed: '#ff8095',
@@ -27,12 +27,12 @@ export const COMMON_TOOLTIP = {
 export const AXIS_STYLE = {
   nameTextStyle: { 
     color: CHART_COLORS.darkBlue, 
-    fontWeight: 700, 
+    fontWeight: 400, 
     fontSize: 16 
   },
   axisLabel: { 
     color: CHART_COLORS.darkBlue, 
-    fontWeight: 600, 
+    fontWeight: 400, 
     fontSize: 14 
   },
   lineStyle: { 
