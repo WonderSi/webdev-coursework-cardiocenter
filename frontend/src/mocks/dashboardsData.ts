@@ -43,11 +43,11 @@ export const mockAlcoholConsumptionData = [
 // выводим топ-5 групп с наибольшей заболеваемостью ССЗ
 // имя профессии, число диагностированных, % диагностированных от общего числа человек
 export const mockProfessionData = [
-    { profName: "Профессия 1", diagnosedCount: 50, diagnosedPercent: 50 },
-    { profName: "Профессия 2", diagnosedCount: 50, diagnosedPercent: 50 },
-    { profName: "Профессия 3", diagnosedCount: 50, diagnosedPercent: 50 },
-    { profName: "Профессия 4", diagnosedCount: 50, diagnosedPercent: 50 },
-    { profName: "Профессия 5", diagnosedCount: 50, diagnosedPercent: 50 }
+    { profName: "Профессия 1", diagnosedCount: 50, diagnosedPercent: 10 },
+    { profName: "Профессия 2", diagnosedCount: 1250, diagnosedPercent: 70 },
+    { profName: "Профессия 3", diagnosedCount: 250, diagnosedPercent: 40 },
+    { profName: "Профессия 4", diagnosedCount: 500, diagnosedPercent: 30 },
+    { profName: "Профессия 5", diagnosedCount: 100, diagnosedPercent: 20 }
 ]; // ВАЖНО!!!!! если у нас мало данных (т.е. внутри профессии у нас всего лишь 10 записей и у 8 из них)
 // заболевания, то это слишком малая выборка и её мы в рейтинг не включаем.
 // вопрос какой threshold (порог) поставить в данном случае после которого мы не отсеиваем
@@ -58,9 +58,9 @@ export const mockProfessionData = [
 export const mockMostDiagnosedData = [
     { diagName: "ССЗ 1", diagnosedCount: 10, percent: 10 }, // все варики:
     { diagName: "ССЗ 1", diagnosedCount: 20, percent: 20 }, // инсульт,
-    { diagName: "ССЗ 1", diagnosedCount: 10, percent: 10 }, // сердечная недостаточность,
-    { diagName: "ССЗ 1", diagnosedCount: 10, percent: 10 }, // ишемические болезни сердца,
-    { diagName: "ССЗ 1", diagnosedCount: 10, percent: 10 }, // стенокардия,
+    { diagName: "ССЗ 1", diagnosedCount: 30, percent: 10 }, // сердечная недостаточность,
+    { diagName: "ССЗ 1", diagnosedCount: 40, percent: 10 }, // ишемические болезни сердца,
+    { diagName: "ССЗ 1", diagnosedCount: 100, percent: 60 }, // стенокардия,
     { diagName: "ССЗ 1", diagnosedCount: 40, percent: 40 }  // инфаркт миокарда,  
 ];                                                          // артериальная гипертензия
 
