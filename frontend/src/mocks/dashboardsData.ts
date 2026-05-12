@@ -1,7 +1,5 @@
 export const mockKpiData = {
-  totalRecords: 1240,                // всего записей пациентов в БД
-  malePercentage: 45,                // сколько % пациентов мужчины
-  femalePercentage: 55,              // сколько % пациентов женщины
+  totalRecords: 1240  // всего записей пациентов в БД
 };
 
 // бьём пациентов на группы по возрасту,
@@ -38,12 +36,12 @@ export const mockAlcoholConsumptionData = [
     { category: 'Употребляю', healthyCount: 100, diagnosedCount: 50, diagnosedPercent: 50 },
     { category: 'Употреблял ранее', healthyCount: 400, diagnosedCount: 230, diagnosedPercent: 55 },
     { category: 'Никогда не употреблял', healthyCount: 200, diagnosedCount: 10, diagnosedPercent: 0.5 }
-]; // сколько здоровых (без единого ССЗ), сколько больных (1+ ссз), процент диагностированных
+]; // сколько здоровых (без единого ССЗ), сколько больных (1 и более ССЗ), процент диагностированных
 
 // сначала группируем данные по профессими
 // затем в каждой группе смотрим число заболеваний (где им диагностировали хотя бы одно ССЗ)
 // выводим топ-5 групп с наибольшей заболеваемостью ССЗ
-// имя профессии, число диагностированных, % диагностированных
+// имя профессии, число диагностированных, % диагностированных от общего числа человек
 export const mockProfessionData = [
     { profName: "Профессия 1", diagnosedCount: 50, diagnosedPercent: 50 },
     { profName: "Профессия 2", diagnosedCount: 50, diagnosedPercent: 50 },
