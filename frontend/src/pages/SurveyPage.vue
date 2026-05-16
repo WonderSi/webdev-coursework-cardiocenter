@@ -94,6 +94,17 @@ const stepComponent = computed(() => {
   return map[currentStepIndex.value] ?? Step1
 })
 
+// Проверяем, есть ли пустые обязательные поля
+const hasEmptyRequiredFields = computed(() => {
+  const group = currentGroup.value
+  if (!group) return false
+
+  return group.requiredFields.some(key => {
+    const value = store.answers[key]
+    return value === null || value === undefined || value === ''
+  })
+})
+
 const fieldErrors = computed<Record<string, string>>(() => {
   const errors: Record<string, string> = {}
   const group = currentGroup.value
@@ -130,12 +141,13 @@ const fieldErrors = computed<Record<string, string>>(() => {
         const currentYear = new Date().getFullYear()
         const age = Number(store.answers.age)
         const birthYear = age ? currentYear - (age + 1) : MINYEAR
+        
         if (isNaN(year)) {
           errors[field.yearKey] = 'Введите корректный год'
         } else if (year < MINYEAR) {
-          errors[field.yearKey] = 'Год должен быть не ранее 1900'
+          errors[field.yearKey] = 'Год слишком мал'
         } else if (year > currentYear) {
-          errors[field.yearKey] = `Год не может быть больше ${currentYear}`
+          errors[field.yearKey] = `Год не может быть больше текущего (${currentYear})`
         } else if (age && year < birthYear) {
           errors[field.yearKey] = `Год диагноза не может быть раньше года рождения (${birthYear})`
         }
@@ -153,13 +165,25 @@ const currentErrorMessage = computed(() => {
   return errorsList.length > 0 ? errorsList[0] : 'Пожалуйста, проверьте введённые данные'
 })
 
+// Если пользователь начал что-то менять, скрываем ошибку
 watch(() => store.answers, () => {
   showErrors.value = false
 }, { deep: true })
 
-const isNextDisabled = computed(() => hasErrors.value)
+// Логика блокировки кнопки "Далее"
+const isNextDisabled = computed(() => {
+  // Кнопка выключена, если есть пустые обязательные поля (исходное состояние шага)
+  if (hasEmptyRequiredFields.value) return true
+  
+  // Кнопка выключена, если пользователь нажал "Далее", вылезла ошибка валидации, 
+  // и он ещё ничего не исправил (showErrors = true)
+  if (showErrors.value && hasErrors.value) return true
+  
+  return false
+})
 
 const handleNext = async () => {
+  // Если кнопка активна, но данные кривые (например, возраст "200") -> показываем баннер и блокируем
   if (hasErrors.value) {
     showErrors.value = true
     return
@@ -174,7 +198,7 @@ const handleNext = async () => {
     }
   } else {
     currentStepIndex.value++
-    showErrors.value = false
+    showErrors.value = false // Очищаем статус ошибок для нового шага
   }
 }
 
@@ -183,7 +207,6 @@ const prevStep = () => {
     currentStepIndex.value-- 
     showErrors.value = false
   }
-  
 }
 
 onMounted(() => {
