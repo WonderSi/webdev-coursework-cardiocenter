@@ -1,7 +1,7 @@
 <template>
   <div class="survey-page">
     <Transition name="fade">
-      <div v-if="hasErrors" class="error-banner">
+      <div v-if="showErrors && hasErrors" class="error-banner">
         <span>{{ currentErrorMessage }}</span>
       </div>
     </Transition>
@@ -37,7 +37,7 @@
             :is="stepComponent"
             :group="currentGroup"
             :answers="store.answers"
-            :errors="fieldErrors"
+            :errors="showErrors ? fieldErrors : {}"
           />
         </div>
 
@@ -94,17 +94,6 @@ const stepComponent = computed(() => {
   return map[currentStepIndex.value] ?? Step1
 })
 
-// Проверяем, есть ли пустые обязательные поля
-const hasEmptyRequiredFields = computed(() => {
-  const group = currentGroup.value
-  if (!group) return false
-
-  return group.requiredFields.some(key => {
-    const value = store.answers[key]
-    return value === null || value === undefined || value === ''
-  })
-})
-
 const fieldErrors = computed<Record<string, string>>(() => {
   const errors: Record<string, string> = {}
   const group = currentGroup.value
@@ -126,9 +115,9 @@ const fieldErrors = computed<Record<string, string>>(() => {
       if (isNaN(num)) {
         errors[field.key] = 'Введите число'
       } else if (field.validation.min !== undefined && num < field.validation.min) {
-        errors[field.key] = `Минимум ${field.validation.min}`
+        errors[field.key] = `Введите корректное значение`
       } else if (field.validation.max !== undefined && num > field.validation.max) {
-        errors[field.key] = `Максимум ${field.validation.max}`
+        errors[field.key] = `Введите корректное значение`
       }
     }
 
@@ -165,27 +154,28 @@ const currentErrorMessage = computed(() => {
   return errorsList.length > 0 ? errorsList[0] : 'Пожалуйста, проверьте введённые данные'
 })
 
-// Если пользователь начал что-то менять, скрываем ошибку
+// Если пользователь начал что-то менять, проверяем:
+// Если ошибок больше нет (hasErrors = false), скрываем баннер и разблокируем кнопку
 watch(() => store.answers, () => {
-  showErrors.value = false
+  if (!hasErrors.value) {
+    showErrors.value = false
+  }
 }, { deep: true })
 
 // Логика блокировки кнопки "Далее"
 const isNextDisabled = computed(() => {
-  // Кнопка выключена, если есть пустые обязательные поля (исходное состояние шага)
-  if (hasEmptyRequiredFields.value) return true
-  
-  // Кнопка выключена, если пользователь нажал "Далее", вылезла ошибка валидации, 
-  // и он ещё ничего не исправил (showErrors = true)
+  // Кнопка заблокирована ТОЛЬКО если пользователь уже нажал "Далее", 
+  // вылезла ошибка (showErrors = true) и данные до сих пор невалидны (hasErrors = true).
+  // Во всех остальных случаях даем возможность кликнуть, чтобы отловить ошибку.
   if (showErrors.value && hasErrors.value) return true
   
   return false
 })
 
 const handleNext = async () => {
-  // Если кнопка активна, но данные кривые (например, возраст "200") -> показываем баннер и блокируем
+  // Если есть незаполненные обязательные поля или неверный формат
   if (hasErrors.value) {
-    showErrors.value = true
+    showErrors.value = true // Показываем баннер и (computed выше) блокируем кнопку
     return
   }
 
