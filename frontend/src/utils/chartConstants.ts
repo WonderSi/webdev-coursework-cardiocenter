@@ -1,13 +1,13 @@
 export const CHART_COLORS = {
-  primaryBlue: '#1567E2',
-  darkBlue: '#0f356e',
-  lightBlue: '#76a5f0',
-  blueMed: '#5e9bf7',
-  red: '#DF2242',
-  lightRed: '#ff8095',
-  coldRed: '#EA566F',
-  ecology: '#20B2AA',
-  gridLine: '#8AB3F1'
+  primaryBlue: '#1567E2',  // $color-accent:
+  darkBlue: '#0f356e',     // $color-blue-dark
+  blueMed: '#5e9bf7',      // $color-blue-med
+  red: '#DF2242',          // $$color-red
+  lightRed: '#ff8095',     // $color-light-red
+  coldRed: '#EA566F',      // $color-cold-red
+  ecology: '#20B2AA',      // $color-ecology
+  gridLine: '#8AB3F1',     // $color-accent-lighter
+  white: '#FFFFFF'         // $color-white
 };
 
 const TOOLTIP_BASE = {
@@ -62,7 +62,7 @@ export const AXIS_STYLE = {
     width: 2
   },
   splitLine: { 
-    lineStyle: { color: CHART_COLORS.gridLine } 
+    lineStyle: { color: CHART_COLORS.gridLine, show: true } 
   }
 };
 

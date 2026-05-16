@@ -7,16 +7,22 @@ import {
   mockMostDiagnosedData, 
   mockDistrictData 
 } from '@/mocks/dashboardsData';
-import { CHART_COLORS, COMMON_TOOLTIP, AXIS_STYLE } from '@/utils/chartConstants';
+import { 
+  CHART_COLORS, 
+  COMMON_TOOLTIP, 
+  TOOLTIP_ALT, 
+  AXIS_STYLE, 
+  COMMON_GRID
+} from '@/utils/chartConstants';
 
 export function useDashboardCharts() {
   
   // Употребление алкоголя
   const chartAlcohol = computed(() => ({
     renderer: 'svg',
-    tooltip: {
+tooltip: {
       ...COMMON_TOOLTIP,
-      trigger: 'item',
+      trigger: 'item', // Переопределяем trigger для pie-чарта
       formatter: (params: any) => `
         <div style="margin-bottom: 8px; font-size: 15px;"><strong>${params.name}</strong></div>
         <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
@@ -52,14 +58,7 @@ const chartDiagnoses = computed(() => {
   return {
     renderer: 'svg',
     tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'none' },
-      borderRadius: 12,
-      padding: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: 'rgba(13, 60, 129, 0.2)',
-      borderWidth: 1,
-      textStyle: { color: CHART_COLORS.darkBlue, fontSize: 14 },
+      ...COMMON_TOOLTIP,
       formatter: (params: any) => {
         const data = mockMostDiagnosedData[params[0].dataIndex];
         return `
@@ -70,35 +69,35 @@ const chartDiagnoses = computed(() => {
           </div>
           <div style="display: flex; justify-content: space-between; gap: 20px;">
             <span>Доля от всех ССЗ:</span>
-            <span style="font-weight: 700; color: #1567E2;">${data.percent}%</span>
+            <span style="font-weight: 700; color: ${CHART_COLORS.primaryBlue};">${data.percent}%</span>
           </div>
         `;
       }
     },
-    grid: { top: '0%', left: '0%', right: '7%', bottom: '15%', containLabel: true },
+    grid: COMMON_GRID,
     xAxis: { 
       type: 'value', 
       name: 'число пациентов',
       nameLocation: 'center',
       nameGap: 40,
-      nameTextStyle: { color: CHART_COLORS.darkBlue, fontWeight: 400, fontSize: 16},
-      splitLine: { lineStyle: { color: '#8AB3F1' } }, // $color-accent-lighter 
-      axisLabel: { color: CHART_COLORS.darkBlue, fontWeight: 400, fontSize: 14 },
+      nameTextStyle: AXIS_STYLE.nameTextStyle,
+      splitLine: AXIS_STYLE.splitLine,
+      axisLabel: AXIS_STYLE.labelRegular,
     },
     yAxis: { 
       type: 'category', 
       z: 10,
       inverse: true, 
       data: mockMostDiagnosedData.map(item => item.diagName),
-      axisLabel: { color: CHART_COLORS.darkBlue, fontWeight: 600, fontSize: 16 },
-      axisLine: { lineStyle: { color: CHART_COLORS.darkBlue, width: 2 } },
+      axisLabel: AXIS_STYLE.labelBold,
+      axisLine: { lineStyle: AXIS_STYLE.lineStyle },
       axisTick: { show: false }
     },
     series: [{
       name: 'Случаи',
       type: 'bar',
       data: mockMostDiagnosedData.map(item => item.diagnosedCount),
-      itemStyle: { color: '#1567E2', borderRadius: [0, 2, 2, 0] },
+      itemStyle: { color: CHART_COLORS.primaryBlue, borderRadius: [0, 2, 2, 0] },
       barWidth: 25,
       label: { 
         show: true, 
@@ -111,23 +110,13 @@ const chartDiagnoses = computed(() => {
     }]
   };
 });
-  // Возрастно-половая структура
+
+// Возрастно-половая структура
 const chartAgeGender = computed(() => {
   return {
     renderer: 'svg',
     tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'none' }, // Строго type: 'none', как ты и просила
-      borderRadius: 12,
-      padding: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: 'rgba(32, 92, 182, 0.35)',
-      borderWidth: 1,
-      textStyle: {
-        color: CHART_COLORS.darkBlue,
-        fontSize: 16,
-        fontFamily: 'Inter, sans-serif'
-      },
+      ...TOOLTIP_ALT,
       formatter: function (params: any) {
         let res = `<div style="margin-bottom: 8px; font-size: 16px;">
                       <strong>${params[0].axisValue}</strong>
@@ -149,20 +138,9 @@ const chartAgeGender = computed(() => {
       name: 'возрастная группа',
       nameLocation: 'center',
       nameGap: 40,
-      nameTextStyle: {
-        color: '#0f356e',
-        fontWeight: 400,
-        fontSize: 16
-      },
-      axisLabel: { 
-        color: '#0f356e',
-        fontWeight: 400,
-        fontSize: 14
-      },
-      axisLine: {
-        show: true,
-        lineStyle: { color: '#0f356e', width: 2 }
-      },
+      nameTextStyle: AXIS_STYLE.nameTextStyle,
+      axisLabel: AXIS_STYLE.labelRegular,
+      axisLine: { show: true, lineStyle: AXIS_STYLE.lineStyle },
       data: mockAgeGenderData.map(item => item.ageGroup),
       axisTick: { show: false }
     },
@@ -172,23 +150,10 @@ const chartAgeGender = computed(() => {
       nameLocation: 'middle',
       nameGap: 40,
       nameRotate: -90,
-      nameTextStyle: {
-        color: '#0f356e',
-        fontWeight: 400,
-        fontSize: 16
-      },
-      axisLabel: { 
-        color: '#0f356e',
-        fontWeight: 400,
-        fontSize: 14,
-        verticalAlign: 'bottom',
-        padding: [0, 0, 0, 0]
-      },
-      splitLine: { lineStyle: { color: '#8AB3F1' } },
-      axisLine: {
-        show: true,
-        lineStyle: { color: '#0f356e', width: 2 }
-      },
+      nameTextStyle: AXIS_STYLE.nameTextStyle,
+      axisLabel: { ...AXIS_STYLE.labelRegular, verticalAlign: 'bottom', padding: [0, 0, 0, 0] },
+      splitLine: AXIS_STYLE.splitLine,
+      axisLine: { show: true, lineStyle: AXIS_STYLE.lineStyle },
     },
     series: [
       {
@@ -197,7 +162,7 @@ const chartAgeGender = computed(() => {
         stack: 'male',
         barWidth: 30,
         data: mockAgeGenderData.map(item => item.healthyMale),
-        itemStyle: { color: '#5e9bf7' }
+        itemStyle: { color: CHART_COLORS.blueMed }
       },
       {
         name: 'Диагностированные (М)',
@@ -205,7 +170,7 @@ const chartAgeGender = computed(() => {
         stack: 'male',
         data: mockAgeGenderData.map(item => item.diagnosedMale),
         itemStyle: { 
-          color: '#1567E2',
+          color: CHART_COLORS.primaryBlue,
           borderRadius: [2, 2, 0, 0]
         }
       },
@@ -215,7 +180,7 @@ const chartAgeGender = computed(() => {
         stack: 'female',
         barWidth: 30,
         data: mockAgeGenderData.map(item => item.healthyFemale),
-        itemStyle: { color: '#ff8095' }
+        itemStyle: { color: CHART_COLORS.lightRed }
       },
       {
         name: 'Диагностированные (Ж)',
@@ -223,7 +188,7 @@ const chartAgeGender = computed(() => {
         stack: 'female',
         data: mockAgeGenderData.map(item => item.diagnosedFemale),
         itemStyle: { 
-          color: '#DF2242',
+          color: CHART_COLORS.red,
           borderRadius: [2, 2, 0, 0] 
         }
       }
@@ -231,23 +196,12 @@ const chartAgeGender = computed(() => {
   };
 });
 
-  // Вес и ССЗ
+// Вес и ССЗ
 const chartWeight = computed(() => {
   return {
     renderer: 'svg',
     tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'none' },
-      borderRadius: 12,
-      padding: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: 'rgba(32, 92, 182, 0.35)',
-      borderWidth: 1,
-      textStyle: {
-        color: '#0f356e',
-        fontSize: 16,
-        fontFamily: 'Inter, sans-serif'
-      },
+      ...TOOLTIP_ALT,
       formatter: function (params: any) {
         let res = `<div style="margin-bottom: 8px; font-size: 16px;">
                       <strong>${params[0].axisValue}</strong>
@@ -261,24 +215,24 @@ const chartWeight = computed(() => {
         return res;
       }
     },
-    grid: { top: '0%', left: '0%', right: '7%', bottom: '15%', containLabel: true },
+    grid: COMMON_GRID,
     xAxis: [
       {
         type: 'value',
         name: 'число пациентов',
         nameLocation: 'center',
         nameGap: 40,
-        nameTextStyle: { color: '#0f356e', fontWeight: 400, fontSize: 16 },
-        axisLabel: { color: '#0f356e', fontWeight: 400, fontSize: 14 },
-        splitLine: { lineStyle: { color: '#8AB3F1' } }
+        nameTextStyle: AXIS_STYLE.nameTextStyle,
+        axisLabel: AXIS_STYLE.labelRegular,
+        splitLine: AXIS_STYLE.splitLine
       }
     ],
     yAxis: {
       type: 'category',
       z: 10,
       data: mockWeightData.map(item => item.category),
-      axisLabel: { color: '#0f356e', fontWeight: 600, fontSize: 16 },
-      axisLine: { lineStyle: { color: '#0f356e', width: 2 } }
+      axisLabel: AXIS_STYLE.labelBold,
+      axisLine: { lineStyle: AXIS_STYLE.lineStyle }
     },
     series: [
       {
@@ -287,14 +241,14 @@ const chartWeight = computed(() => {
         stack: 'total',
         barWidth: 30,
         data: mockWeightData.map(item => item.healthyCount),
-        itemStyle: { color: '#5e9bf7' }
+        itemStyle: { color: CHART_COLORS.blueMed }
       },
       {
         name: 'С диагнозом',
         type: 'bar',
         stack: 'total',
         data: mockWeightData.map(item => item.diagnosedCount),
-        itemStyle: { color: '#EA566F' },
+        itemStyle: { color: CHART_COLORS.coldRed },
         label: {
           show: true,
           position: 'right',
@@ -303,7 +257,7 @@ const chartWeight = computed(() => {
             const percent = mockWeightData[params.dataIndex].diagnosedPercent;
             return percent + '%';
           },
-          color: '#0f356e',
+          color: CHART_COLORS.darkBlue,
           fontWeight: 600,
           fontSize: 16
         }
@@ -317,14 +271,7 @@ const chartProfessions = computed(() => {
   return {
     renderer: 'svg',
     tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'none' },
-      borderRadius: 12,
-      padding: 12,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      borderColor: 'rgba(13, 60, 129, 0.2)',
-      borderWidth: 1,
-      textStyle: { color: '#0f356e', fontSize: 14 },
+      ...COMMON_TOOLTIP,
       formatter: (params: any) => {
         const data = mockProfessionData[params[0].dataIndex];
         return `
@@ -335,41 +282,41 @@ const chartProfessions = computed(() => {
           </div>
           <div style="display: flex; justify-content: space-between; gap: 20px;">
             <span>% имеющих ССЗ от общего числа:</span>
-            <span style="font-weight: 700; color: #DF2242;">${data.diagnosedPercent}%</span>
+            <span style="font-weight: 700; color: ${CHART_COLORS.red};">${data.diagnosedPercent}%</span>
           </div>
         `;
       }
     },
-    grid: { top: '0%', left: '0%', right: '7%', bottom: '15%', containLabel: true },
+    grid: COMMON_GRID,
     xAxis: { 
       type: 'value', 
       name: 'число пациентов',
       nameLocation: 'center',
       nameGap: 40,
-      nameTextStyle: { color: '#0f356e', fontWeight: 400, fontSize: 16},
-      splitLine: { lineStyle: { color: '#8AB3F1' } }, // $color-accent-lighter 
-      axisLabel: { color: '#0f356e', fontWeight: 400, fontSize: 14 },
+      nameTextStyle: AXIS_STYLE.nameTextStyle,
+      splitLine: AXIS_STYLE.splitLine,
+      axisLabel: AXIS_STYLE.labelRegular,
     },
     yAxis: { 
       type: 'category', 
       inverse: true,
       z: 10,
       data: mockProfessionData.map(item => item.profName),
-      axisLabel: { color: '#0f356e', fontWeight: 600, fontSize: 16 },
-      axisLine: { lineStyle: { color: '#0f356e', width: 2 } },
+      axisLabel: AXIS_STYLE.labelBold,
+      axisLine: { lineStyle: AXIS_STYLE.lineStyle },
       axisTick: { show: false }
     },
     series: [{
       name: 'случаев ССЗ',
       type: 'bar',
       data: mockProfessionData.map(item => item.diagnosedCount),
-      itemStyle: { color: '#DF2242', borderRadius: [0, 2, 2, 0] },
+      itemStyle: { color: CHART_COLORS.red, borderRadius: [0, 2, 2, 0] },
       barWidth: 30,
       label: { 
         show: true, 
         position: 'right', 
-        formatter: '{c}', // Цифра справа от бара
-        color: '#0f356e', 
+        formatter: '{c}',
+        color: CHART_COLORS.darkBlue,
         fontWeight: 600,
         fontSize: 16
       }
@@ -377,22 +324,18 @@ const chartProfessions = computed(() => {
   };
 });
 
-  // Районы и Экология
+// Районы и Экология
   const chartDistricts = computed(() => ({
     renderer: 'svg',
-    tooltip: { ...COMMON_TOOLTIP, trigger: 'axis', axisPointer: { type: 'shadow' } },
+    tooltip: { ...COMMON_TOOLTIP, },
     grid: { top: '0%', left: '0%', right: '0%', bottom: '0%', containLabel: true },
     xAxis: [
-      { type: 'value', splitLine: { lineStyle: { color: CHART_COLORS.gridLine } }, axisLabel: { color: CHART_COLORS.darkBlue, fontWeight: 400, fontSize: 14 } },
+      { type: 'value', splitLine: AXIS_STYLE.splitLine, axisLabel: AXIS_STYLE.labelRegular },
       { type: 'value', splitLine: { show: false }, axisLabel: { show: false } }
     ],
     yAxis: { type: 'category', z: 10, inverse: true, data: mockDistrictData.map(item => item.name),
-        axisLabel: { 
-            color: CHART_COLORS.darkBlue, 
-            fontWeight: 600, 
-            fontSize: 16
-        },
-        axisLine: { lineStyle: { color: CHART_COLORS.darkBlue, width: 2 } }, axisTick: { show: false } },
+        axisLabel: AXIS_STYLE.labelBold,
+        axisLine: { lineStyle: AXIS_STYLE.lineStyle }, axisTick: { show: false } },
     series: [
       { name: 'Диагнозы', type: 'bar', xAxisIndex: 0, data: mockDistrictData.map(item => item.numberOfDiagnoses), itemStyle: { color: CHART_COLORS.primaryBlue, borderRadius: [0, 2, 2, 0] }, barGap: '10%' },
       { name: 'Экология', type: 'bar', xAxisIndex: 1, data: mockDistrictData.map(item => item.EcologyData), itemStyle: { color: CHART_COLORS.ecology, borderRadius: [0, 2, 2, 0] } }
