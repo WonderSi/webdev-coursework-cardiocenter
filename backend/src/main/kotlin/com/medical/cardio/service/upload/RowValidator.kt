@@ -1,5 +1,7 @@
 package com.medical.cardio.service.upload
 
+import com.medical.cardio.validation.MedicalConstraints
+
 object RowValidator {
 
     data class ValidationResult(val valid: Boolean, val reason: String = "")
@@ -27,7 +29,8 @@ object RowValidator {
         if (ageStr.isNullOrEmpty()) return ValidationResult(false, "Обязательное поле 'age' отсутствует")
         val age = ageStr.toIntOrNull()
             ?: return ValidationResult(false, "Поле 'age' должно быть числом")
-        if (age <= 0 || age > 150) return ValidationResult(false, "Недопустимое значение 'age': $age")
+        if (age < MedicalConstraints.AGE_MIN || age > MedicalConstraints.AGE_MAX)
+            return ValidationResult(false, "Недопустимое значение 'age': $age")
 
         for ((col, glossary) in GLOSSARY_FIELDS) {
             val str = row[col]?.trim()
@@ -50,7 +53,7 @@ object RowValidator {
             if (!str.isNullOrEmpty()) {
                 val year = str.toIntOrNull()
                     ?: return ValidationResult(false, "Год '$col' должен быть числом")
-                if (year < 1900 || year > 2100)
+                if (year < MedicalConstraints.YEAR_MIN || year > MedicalConstraints.YEAR_MAX)
                     return ValidationResult(false, "Недопустимый год '$col': $year")
             }
         }
