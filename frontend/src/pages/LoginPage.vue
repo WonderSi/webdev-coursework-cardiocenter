@@ -40,12 +40,14 @@
         </div>
       </div>
 
-      <p v-if="error" class="login-error">{{ error }}</p>
+      <div class="login-btn-and-error">
+        <p class="login-error">{{ error }}</p>
 
-      <button class="login-btn" :disabled="loading" @click="handleLogin">
+        <button class="login-btn" :disabled="loading" @click="handleLogin">
         {{ loading ? 'Вход...' : 'Войти' }}
-      </button>
-
+        </button>
+      </div>
+      
       <button class="backToHomePage-btn" @click="goBackHomePage"> 
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 18 9 12 15 6"></polyline>
@@ -71,8 +73,6 @@ const isPasswordVisible = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-const recoveryEmail = ref('')
-
 const eyeOpenSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z" fill="#8A8FA8"/></svg>`
 const eyeClosedSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75" stroke="#8A8FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 
@@ -87,7 +87,7 @@ const handleLogin = async () => {
   error.value = ''
   loading.value = true
   try {
-    await userStore.login(email.value, password.value, rememberMe.value)
+    await userStore.login(email.value, password.value)
     router.push('/dashboards')
   } catch {
     error.value = 'Неверный логин или пароль'
@@ -96,15 +96,6 @@ const handleLogin = async () => {
   }
 }
 
-const sendRecoveryEmail = () => {
-  if (!recoveryEmail.value) return
-
-  const adminMail = 'kseniagorbush@gmail.com' // НАДО ПОМЕНЯТЬ НА КОРПОРАТИВНЫЙ EMAIL
-  const subject = encodeURIComponent('ЗАЯВКА НА ВОССТАНОВЛЕНИЕ ПАРОЛЯ')
-  const body = encodeURIComponent(`# ЗАЯВКА НА ВОССТАНОВЛЕНИЕ ПАРОЛЯ\nEMAIL: ${recoveryEmail.value}`)
-
-  window.location.href = `mailto:${adminMail}?subject=${subject}&body=${body}`
-}
 </script>
 
 <style scoped lang="scss">
@@ -210,33 +201,38 @@ const sendRecoveryEmail = () => {
 
 // error
 
-.login-error {
-  color: #e53935;
-  font-size: 0.875rem;
-  text-align: center;
-  margin-bottom: 12px;
-}
+.login-btn-and-error {
+  margin-bottom: 36px;  // от ошибки: 17.5 + 10.5 + 8 = 36
+  margin-top: 8px;
+  .login-error {
+    color: $color-red;
+    font-size: 0.875rem;
+    text-align: center;
+    min-height: 17.5px;
+    margin-bottom: 10.5px;
+  }
 
-// buttons
+  .login-btn {
+    width: 100%;
+    border: none;
+    padding: 13px;
+    border-radius: $radius-rect-buttons;
+    background: $color-accent;
+    color: $color-white;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s ease;
 
-.login-btn {
-  width: 100%;
-  border: none;
-  margin-block: 32px;
-  padding: 13px;
-  border-radius: $radius-rect-buttons;
-  background: $color-accent;
-  color: $color-white;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: $color-accent-lighter;
+    &:hover {
+      background: $color-accent-lighter;
+    }
   }
 }
+
+
+// buttons
 
 .backToHomePage-btn {
   display: flex;
