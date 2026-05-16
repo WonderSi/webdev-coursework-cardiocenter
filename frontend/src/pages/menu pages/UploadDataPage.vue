@@ -1,20 +1,38 @@
 <template>
   <Sidebar />
 
-  <main class="upload-page">
-    <div class="page-header">
-      <h1 class="page-title">Загрузка данных</h1>
-      <button class="template-btn" @click="downloadTemplate" :disabled="templateLoading">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        {{ templateLoading ? 'Загрузка...' : 'Скачать шаблон' }}
-      </button>
+  <div class=upload-page>
+    <div class="upload-duo-cards">
+      <div class=upload-card>
+        <div class="upload-card-upper-part"></div>
+        <div class="upload-card-bottom-part">
+          <div class="text-block">
+            <p class="alert-p"></p>
+            <p class="attention-p"></p>
+          </div>
+          <div class="download-template-btn">Скачать шаблон</div>
+        </div>
+      </div>
+
+      <div class=files-list-card>
+        <div class="file-list-header">Список загружаемых файлов</div>
+        <div class="file-list">
+          
+        </div>
+        <div class="cancel-all-btn">Отменить все</div>
+        <div class="upload-btn">Загрузить</div>
+      </div>
     </div>
 
-    <div class="upload-card">
+    <div class="one-patient-input"></div>
+  </div>
+
+  <!-- <main class="upload-page">
+    <button class="download-template-btn" @click="downloadTemplate" :disabled="templateLoading">
+      {{ templateLoading ? 'Загрузка...' : 'Скачать шаблон' }}
+    </button> -->
+
+    <!-- <div class="upload-card">
       <div
         class="drop-zone"
         :class="{ 'drag-over': isDragging, 'has-file': selectedFile }"
@@ -75,9 +93,9 @@
       </button>
 
       <div v-if="uploadError" class="error-banner">{{ uploadError }}</div>
-    </div>
+    </div> -->
 
-    <div v-if="report" class="report-card">
+    <!-- <div v-if="report" class="report-card">
       <div class="report-stats">
         <div class="stat stat--saved">
           <span class="stat-value">{{ report.savedRows }}</span>
@@ -116,8 +134,8 @@
       <div v-else class="success-notice">
         Все строки успешно сохранены
       </div>
-    </div>
-  </main>
+    </div> -->
+  <!-- </main> -->
 </template>
 
 <script setup lang="ts">
@@ -251,288 +269,297 @@ function formatSize(bytes: number): string {
 
 .upload-page {
   margin-left: 240px;
-  padding: 40px 40px 40px 48px;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 64px;
+  margin-block: 40px;
+  margin-inline: 200px;
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+// .upload-page {
+//   margin-left: 240px;
+//   padding: 40px 40px 40px 48px;
+//   min-height: 100vh;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 24px;
+// }
 
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: $color-white;
-}
+// .page-header {
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+// }
 
-.template-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: 2px solid rgba($color-glass-white, 0.6);
-  border-radius: $radius-rect-buttons;
-  background: rgba($color-glass-white, 0.15);
-  color: $color-white;
-  font-size: 0.9rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s;
-  backdrop-filter: blur(8px);
+// .page-title {
+//   font-size: 1.75rem;
+//   font-weight: 700;
+//   color: $color-white;
+// }
 
-  &:hover:not(:disabled) { background: rgba($color-glass-white, 0.28); }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-}
+// .download-template-btn {
+//   display: flex;
+//   align-items: center;
+//   gap: 8px;
+//   padding: 10px 20px;
+//   border: 2px solid rgba($color-glass-white, 0.6);
+//   border-radius: $radius-rect-buttons;
+//   background: rgba($color-glass-white, 0.15);
+//   color: $color-white;
+//   font-size: 0.9rem;
+//   font-weight: 500;
+//   font-family: inherit;
+//   cursor: pointer;
+//   transition: background 0.2s;
+//   backdrop-filter: blur(8px);
 
-.upload-card {
-  background: rgba($color-glass-white, 0.35);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba($color-glass-white, 0.5);
-  border-radius: $radius-glass-card;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 640px;
-}
+//   &:hover:not(:disabled) { background: rgba($color-glass-white, 0.28); }
+//   &:disabled { opacity: 0.5; cursor: not-allowed; }
+// }
 
-.drop-zone {
-  border: 2px dashed rgba($color-glass-white, 0.5);
-  border-radius: 16px;
-  padding: 48px 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  position: relative;
-  min-height: 180px;
-  color: $color-white;
+// .upload-card {
+//   background: rgba($color-glass-white, 0.35);
+//   backdrop-filter: blur(12px);
+//   border: 1px solid rgba($color-glass-white, 0.5);
+//   border-radius: $radius-glass-card;
+//   padding: 32px;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 20px;
+//   max-width: 640px;
+// }
 
-  &:hover, &.drag-over {
-    border-color: $color-white;
-    background: rgba($color-glass-white, 0.12);
-  }
+// .drop-zone {
+//   border: 2px dashed rgba($color-glass-white, 0.5);
+//   border-radius: 16px;
+//   padding: 48px 32px;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 12px;
+//   cursor: pointer;
+//   transition: border-color 0.2s, background 0.2s;
+//   position: relative;
+//   min-height: 180px;
+//   color: $color-white;
 
-  &.has-file {
-    border-style: solid;
-    border-color: rgba($color-glass-white, 0.7);
-    flex-direction: row;
-    padding: 24px 28px;
-    min-height: auto;
-    gap: 16px;
-  }
-}
+//   &:hover, &.drag-over {
+//     border-color: $color-white;
+//     background: rgba($color-glass-white, 0.12);
+//   }
 
-.file-input-hidden {
-  display: none;
-}
+//   &.has-file {
+//     border-style: solid;
+//     border-color: rgba($color-glass-white, 0.7);
+//     flex-direction: row;
+//     padding: 24px 28px;
+//     min-height: auto;
+//     gap: 16px;
+//   }
+// }
 
-.drop-icon {
-  opacity: 0.8;
-}
+// .file-input-hidden {
+//   display: none;
+// }
 
-.drop-text {
-  font-size: 1rem;
-  font-weight: 500;
-  margin: 0;
-}
+// .drop-icon {
+//   opacity: 0.8;
+// }
 
-.drop-hint {
-  font-size: 0.8rem;
-  opacity: 0.65;
-}
+// .drop-text {
+//   font-size: 1rem;
+//   font-weight: 500;
+//   margin: 0;
+// }
 
-.file-icon {
-  flex-shrink: 0;
-  opacity: 0.9;
-}
+// .drop-hint {
+//   font-size: 0.8rem;
+//   opacity: 0.65;
+// }
 
-.file-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow: hidden;
-}
+// .file-icon {
+//   flex-shrink: 0;
+//   opacity: 0.9;
+// }
 
-.file-name {
-  font-weight: 600;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+// .file-info {
+//   flex: 1;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 4px;
+//   overflow: hidden;
+// }
 
-.file-size {
-  font-size: 0.8rem;
-  opacity: 0.65;
-}
+// .file-name {
+//   font-weight: 600;
+//   font-size: 0.95rem;
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+// }
 
-.clear-btn {
-  background: none;
-  border: none;
-  color: rgba($color-glass-white, 0.7);
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  transition: color 0.2s;
-  &:hover { color: $color-cold-red; }
-}
+// .file-size {
+//   font-size: 0.8rem;
+//   opacity: 0.65;
+// }
 
-.inline-error {
-  color: $color-cold-red;
-  font-size: 0.85rem;
-  padding: 8px 12px;
-  background: rgba($color-cold-red, 0.1);
-  border-radius: 8px;
-}
+// .clear-btn {
+//   background: none;
+//   border: none;
+//   color: rgba($color-glass-white, 0.7);
+//   cursor: pointer;
+//   padding: 4px;
+//   display: flex;
+//   align-items: center;
+//   flex-shrink: 0;
+//   transition: color 0.2s;
+//   &:hover { color: $color-cold-red; }
+// }
 
-.upload-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px;
-  border: none;
-  border-radius: $radius-rect-buttons;
-  background: $color-accent;
-  color: $color-white;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+// .inline-error {
+//   color: $color-cold-red;
+//   font-size: 0.85rem;
+//   padding: 8px 12px;
+//   background: rgba($color-cold-red, 0.1);
+//   border-radius: 8px;
+// }
 
-  &:hover:not(:disabled) { background: $color-blue-dark; }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
-}
+// .upload-btn {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 8px;
+//   padding: 14px;
+//   border: none;
+//   border-radius: $radius-rect-buttons;
+//   background: $color-accent;
+//   color: $color-white;
+//   font-size: 1rem;
+//   font-weight: 600;
+//   font-family: inherit;
+//   cursor: pointer;
+//   transition: background 0.2s, opacity 0.2s;
 
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba($color-glass-white, 0.35);
-  border-top-color: $color-white;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
+//   &:hover:not(:disabled) { background: $color-blue-dark; }
+//   &:disabled { opacity: 0.45; cursor: not-allowed; }
+// }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+// .spinner {
+//   width: 16px;
+//   height: 16px;
+//   border: 2px solid rgba($color-glass-white, 0.35);
+//   border-top-color: $color-white;
+//   border-radius: 50%;
+//   animation: spin 0.7s linear infinite;
+//   flex-shrink: 0;
+// }
 
-.error-banner {
-  padding: 12px 16px;
-  background: rgba($color-cold-red, 0.12);
-  border: 1px solid rgba($color-cold-red, 0.4);
-  border-radius: 10px;
-  color: $color-cold-red;
-  font-size: 0.9rem;
-}
+// @keyframes spin {
+//   to { transform: rotate(360deg); }
+// }
 
-.report-card {
-  background: rgba($color-glass-white, 0.35);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba($color-glass-white, 0.5);
-  border-radius: $radius-glass-card;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-width: 640px;
-}
+// .error-banner {
+//   padding: 12px 16px;
+//   background: rgba($color-cold-red, 0.12);
+//   border: 1px solid rgba($color-cold-red, 0.4);
+//   border-radius: 10px;
+//   color: $color-cold-red;
+//   font-size: 0.9rem;
+// }
 
-.report-stats {
-  display: flex;
-  gap: 16px;
-}
+// .report-card {
+//   background: rgba($color-glass-white, 0.35);
+//   backdrop-filter: blur(12px);
+//   border: 1px solid rgba($color-glass-white, 0.5);
+//   border-radius: $radius-glass-card;
+//   padding: 32px;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 24px;
+//   max-width: 640px;
+// }
 
-.stat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 12px;
-  border-radius: 14px;
-  background: rgba($color-glass-white, 0.2);
+// .report-stats {
+//   display: flex;
+//   gap: 16px;
+// }
 
-  &--saved   { border-top: 3px solid $color-green; }
-  &--skipped { border-top: 3px solid $color-cold-red; }
-  &--total   { border-top: 3px solid $color-accent-lighter; }
-}
+// .stat {
+//   flex: 1;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   padding: 20px 12px;
+//   border-radius: 14px;
+//   background: rgba($color-glass-white, 0.2);
 
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: $color-white;
-}
+//   &--saved   { border-top: 3px solid $color-green; }
+//   &--skipped { border-top: 3px solid $color-cold-red; }
+//   &--total   { border-top: 3px solid $color-accent-lighter; }
+// }
 
-.stat-label {
-  font-size: 0.8rem;
-  color: rgba($color-glass-white, 0.75);
-  margin-top: 4px;
-}
+// .stat-value {
+//   font-size: 2rem;
+//   font-weight: 700;
+//   color: $color-white;
+// }
 
-.errors-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: $color-white;
-  margin: 0 0 12px;
-}
+// .stat-label {
+//   font-size: 0.8rem;
+//   color: rgba($color-glass-white, 0.75);
+//   margin-top: 4px;
+// }
 
-.errors-table-wrap {
-  overflow-x: auto;
-  border-radius: 10px;
-  border: 1px solid rgba($color-glass-white, 0.3);
-}
+// .errors-title {
+//   font-size: 1rem;
+//   font-weight: 600;
+//   color: $color-white;
+//   margin: 0 0 12px;
+// }
 
-.errors-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
+// .errors-table-wrap {
+//   overflow-x: auto;
+//   border-radius: 10px;
+//   border: 1px solid rgba($color-glass-white, 0.3);
+// }
 
-  th, td {
-    padding: 10px 14px;
-    text-align: left;
-    color: $color-white;
-    border-bottom: 1px solid rgba($color-glass-white, 0.15);
-  }
+// .errors-table {
+//   width: 100%;
+//   border-collapse: collapse;
+//   font-size: 0.875rem;
 
-  th {
-    background: rgba($color-glass-white, 0.15);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
+//   th, td {
+//     padding: 10px 14px;
+//     text-align: left;
+//     color: $color-white;
+//     border-bottom: 1px solid rgba($color-glass-white, 0.15);
+//   }
 
-  tr:last-child td { border-bottom: none; }
+//   th {
+//     background: rgba($color-glass-white, 0.15);
+//     font-weight: 600;
+//     font-size: 0.8rem;
+//     text-transform: uppercase;
+//     letter-spacing: 0.04em;
+//   }
 
-  .row-num {
-    font-weight: 600;
-    color: $color-cold-red;
-    white-space: nowrap;
-  }
-}
+//   tr:last-child td { border-bottom: none; }
 
-.success-notice {
-  text-align: center;
-  color: $color-green-light;
-  font-weight: 500;
-  font-size: 0.95rem;
-  padding: 12px;
-  background: rgba($color-green, 0.1);
-  border-radius: 10px;
-}
+//   .row-num {
+//     font-weight: 600;
+//     color: $color-cold-red;
+//     white-space: nowrap;
+//   }
+// }
+
+// .success-notice {
+//   text-align: center;
+//   color: $color-green-light;
+//   font-weight: 500;
+//   font-size: 0.95rem;
+//   padding: 12px;
+//   background: rgba($color-green, 0.1);
+//   border-radius: 10px;
+// }
 </style>
