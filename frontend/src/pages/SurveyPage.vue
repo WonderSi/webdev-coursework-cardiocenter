@@ -1,8 +1,8 @@
 <template>
   <div class="survey-page">
     <Transition name="fade">
-      <div v-if="hasErrors" class="error-banner">
-        <span>Пожалуйста, проверьте введённые данные</span>
+      <div v-if="showErrors && hasErrors" class="error-banner">
+        <span>{{ currentErrorMessage }}</span>
       </div>
     </Transition>
 
@@ -37,7 +37,7 @@
             :is="stepComponent"
             :group="currentGroup"
             :answers="store.answers"
-            :errors="fieldErrors"
+            :errors="showErrors ? fieldErrors : {}"
           />
         </div>
 
@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSurveyStore } from '@/stores/survey.store'
 
@@ -72,6 +72,8 @@ const store = useSurveyStore()
 const loading = ref(true)
 
 const currentStepIndex = ref(0)
+const showErrors = ref(false)
+
 const currentGroup = computed(() =>
   store.config?.groups?.[currentStepIndex.value] ?? null
 )
@@ -113,26 +115,28 @@ const fieldErrors = computed<Record<string, string>>(() => {
       if (isNaN(num)) {
         errors[field.key] = 'Введите число'
       } else if (field.validation.min !== undefined && num < field.validation.min) {
-        errors[field.key] = `Минимум ${field.validation.min}`
+        errors[field.key] = `Введите корректное значение`
       } else if (field.validation.max !== undefined && num > field.validation.max) {
-        errors[field.key] = `Максимум ${field.validation.max}`
+        errors[field.key] = `Введите корректное значение`
       }
     }
 
-    // Year validation for yesno fields with yearKey
+    // Валидация года
     if (field.yearKey && value === 1) {
       const yearValue = store.answers[field.yearKey]
       if (yearValue !== null && yearValue !== undefined && yearValue !== '') {
+        const MINYEAR = 1900
         const year = Number(yearValue)
         const currentYear = new Date().getFullYear()
         const age = Number(store.answers.age)
-        const birthYear = age ? currentYear - (age + 1) : 1950
+        const birthYear = age ? currentYear - (age + 1) : MINYEAR
+        
         if (isNaN(year)) {
           errors[field.yearKey] = 'Введите корректный год'
-        } else if (year < 1950) {
-          errors[field.yearKey] = 'Год должен быть не ранее 1950'
+        } else if (year < MINYEAR) {
+          errors[field.yearKey] = 'Год слишком мал'
         } else if (year > currentYear) {
-          errors[field.yearKey] = `Год не может быть больше ${currentYear}`
+          errors[field.yearKey] = `Год не может быть больше текущего (${currentYear})`
         } else if (age && year < birthYear) {
           errors[field.yearKey] = `Год диагноза не может быть раньше года рождения (${birthYear})`
         }
@@ -145,10 +149,36 @@ const fieldErrors = computed<Record<string, string>>(() => {
 
 const hasErrors = computed(() => Object.keys(fieldErrors.value).length > 0)
 
-const isNextDisabled = computed(() => hasErrors.value)
+const currentErrorMessage = computed(() => {
+  const errorsList = Object.values(fieldErrors.value)
+  return errorsList.length > 0 ? errorsList[0] : 'Пожалуйста, проверьте введённые данные'
+})
+
+// Если пользователь начал что-то менять, проверяем:
+// Если ошибок больше нет (hasErrors = false), скрываем баннер и разблокируем кнопку
+watch(() => store.answers, () => {
+  if (!hasErrors.value) {
+    showErrors.value = false
+  }
+}, { deep: true })
+
+// Логика блокировки кнопки "Далее"
+const isNextDisabled = computed(() => {
+  // Кнопка заблокирована ТОЛЬКО если пользователь уже нажал "Далее", 
+  // вылезла ошибка (showErrors = true) и данные до сих пор невалидны (hasErrors = true).
+  // Во всех остальных случаях даем возможность кликнуть, чтобы отловить ошибку.
+  if (showErrors.value && hasErrors.value) return true
+  
+  return false
+})
 
 const handleNext = async () => {
-  if (isNextDisabled.value) return
+  // Если есть незаполненные обязательные поля или неверный формат
+  if (hasErrors.value) {
+    showErrors.value = true // Показываем баннер и (computed выше) блокируем кнопку
+    return
+  }
+
   if (isLastStep.value) {
     const success = await store.submit()
     if (success) {
@@ -158,11 +188,15 @@ const handleNext = async () => {
     }
   } else {
     currentStepIndex.value++
+    showErrors.value = false // Очищаем статус ошибок для нового шага
   }
 }
 
 const prevStep = () => {
-  if (currentStepIndex.value > 0) { currentStepIndex.value-- }
+  if (currentStepIndex.value > 0) {
+    currentStepIndex.value-- 
+    showErrors.value = false
+  }
 }
 
 onMounted(() => {
@@ -265,7 +299,7 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  background: #e74c3c;
+  background: $color-red;
   color: $color-white;
   padding: 12px 20px;
   font-size: 0.9rem;

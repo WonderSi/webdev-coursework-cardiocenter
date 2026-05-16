@@ -75,8 +75,8 @@ defineProps<{
     &:focus { border-color: $color-accent; }
 
     &.input-error {
-      border-color: #e74c3c;
-      background-color: #fdf2f2;
+      border-color: $color-red;
+      background-color: $color-red-bg;
     }
   }
 
