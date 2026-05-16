@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSurveyStore } from '@/stores/survey.store'
 
@@ -72,6 +72,8 @@ const store = useSurveyStore()
 const loading = ref(true)
 
 const currentStepIndex = ref(0)
+const showErrors = ref(false)
+
 const currentGroup = computed(() =>
   store.config?.groups?.[currentStepIndex.value] ?? null
 )
@@ -146,10 +148,23 @@ const fieldErrors = computed<Record<string, string>>(() => {
 
 const hasErrors = computed(() => Object.keys(fieldErrors.value).length > 0)
 
+const currentErrorMessage = computed(() => {
+  const errorsList = Object.values(fieldErrors.value)
+  return errorsList.length > 0 ? errorsList[0] : 'Пожалуйста, проверьте введённые данные'
+})
+
+watch(() => store.answers, () => {
+  showErrors.value = false
+}, { deep: true })
+
 const isNextDisabled = computed(() => hasErrors.value)
 
 const handleNext = async () => {
-  if (isNextDisabled.value) return
+  if (hasErrors.value) {
+    showErrors.value = true
+    return
+  }
+
   if (isLastStep.value) {
     const success = await store.submit()
     if (success) {
@@ -159,11 +174,16 @@ const handleNext = async () => {
     }
   } else {
     currentStepIndex.value++
+    showErrors.value = false
   }
 }
 
 const prevStep = () => {
-  if (currentStepIndex.value > 0) { currentStepIndex.value-- }
+  if (currentStepIndex.value > 0) {
+    currentStepIndex.value-- 
+    showErrors.value = false
+  }
+  
 }
 
 onMounted(() => {
