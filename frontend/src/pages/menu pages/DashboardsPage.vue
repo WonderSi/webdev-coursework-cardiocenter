@@ -135,14 +135,23 @@ const {
 .dashboards-grid-container {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-auto-rows: minmax(160px, auto);
+
+  // ИЗМЕНЕНО: Убираем minmax и fr. Задаем жесткий базовый шаг строки.
+  // Теперь карточка .row-2 будет железно занимать: (160px * 2) + gap(24px) = 344px
+  grid-auto-rows: 180px;
+
   grid-auto-flow: dense;
   align-content: start;
   min-height: 100vh;
-  margin-left: 240px; 
+  margin-left: 240px;
   padding: 40px;
   gap: 24px;
   max-width: 1600px;
+
+  & > * {
+    min-height: 0;
+    min-width: 0;
+  }
 }
 
 // KPI КОЛОНКА И КАРТОЧКИ
