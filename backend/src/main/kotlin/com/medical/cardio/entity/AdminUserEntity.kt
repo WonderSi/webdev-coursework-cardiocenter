@@ -10,11 +10,11 @@ class AdminUserEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
-    @Column(nullable = false, unique = true, length = 50)
-    val username: String,
+    @Column(nullable = false, unique = true, length = 255)
+    val email: String,
 
     @Column(name = "password_hash", nullable = false, length = 255)
-    val passwordHash: String,
+    var passwordHash: String,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

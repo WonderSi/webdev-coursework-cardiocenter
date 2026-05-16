@@ -3,6 +3,7 @@ package com.medical.cardio.config
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -19,6 +20,7 @@ import java.time.Duration
 class CacheConfig {
 
     @Bean
+    @ConditionalOnBean(RedisConnectionFactory::class)
     fun cacheManager(connectionFactory: RedisConnectionFactory): CacheManager {
         val objectMapper = com.fasterxml.jackson.databind.ObjectMapper().apply {
             registerModule(KotlinModule.Builder().build())
@@ -34,8 +36,11 @@ class CacheConfig {
                 RedisSerializationContext.SerializationPair.fromSerializer(serializer)
             )
 
+        val dashboardConfig = defaultConfig.entryTtl(Duration.ofMinutes(5))
+
         return RedisCacheManager.builder(connectionFactory)
             .cacheDefaults(defaultConfig)
+            .withCacheConfiguration("dashboard-stats", dashboardConfig)
             .build()
     }
 }

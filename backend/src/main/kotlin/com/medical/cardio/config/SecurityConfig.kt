@@ -49,8 +49,13 @@ class SecurityConfig(
      */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
+        val allowedOrigins = System.getenv("ALLOWED_ORIGINS")
+            ?.split(",")
+            ?.map { it.trim() }
+            ?: listOf("http://localhost:5173")
+
         val config = CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:5173")
+            this.allowedOrigins = allowedOrigins
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true
@@ -74,10 +79,9 @@ class SecurityConfig(
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .authorizeHttpRequests { auth ->
             auth.requestMatchers(
-                "/api/auth/**",
+                "/api/auth/login",
+                "/api/auth/logout",
                 "/api/survey/**",
-                "/api/glossaries/**",
-                "/actuator/**",
                 "/swagger-ui",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
@@ -85,7 +89,8 @@ class SecurityConfig(
                 "/v3/api-docs/**"
             ).permitAll()
             auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            auth.requestMatchers("/api/admin/**").hasRole("DOCTOR")
+            auth.requestMatchers("/api/admin/extended/**").hasRole("DOCTOR_EXTENDED")
+            auth.requestMatchers("/api/admin/**").hasAnyRole("DOCTOR", "DOCTOR_EXTENDED")
             auth.anyRequest().authenticated()
         }
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)

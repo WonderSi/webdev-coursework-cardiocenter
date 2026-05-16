@@ -7,12 +7,10 @@
       <div class="nii-text">НИИ КПССЗ</div>
     </div>
 
-    <div class="spacer-32"></div>
     <div class="divider"></div>
-    <div class="spacer-32"></div>
 
     <nav class="main-menu">
-      <router-link to="/data-view" class="menu-item">
+      <router-link to="/view-data" class="menu-item">
         <div class="icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M17.692 9.99805C19.2433 9.31738 20.019 8.49105 20.019 7.51905C20.019 6.54705 19.2433 5.72105 17.692 5.04105C16.1407 4.36105 14.2497 4.02038 12.019 4.01905C9.78833 4.01771 7.89433 4.35838 6.337 5.04105C4.779 5.72038 4 6.54638 4 7.51905C4 8.49171 4.779 9.31805 6.337 9.99805C7.895 10.678 9.789 11.0184 12.019 11.019C14.249 11.0197 16.14 10.6794 17.692 9.99805ZM14.476 12.365C15.3153 12.2357 16.104 12.0447 16.842 11.792C17.58 11.5394 18.23 11.2264 18.792 10.853C19.354 10.4797 19.763 10.048 20.019 9.55805V12.519C19.763 13.009 19.354 13.4407 18.792 13.814C18.2307 14.188 17.5807 14.5014 16.842 14.754C16.104 15.0067 15.3153 15.1974 14.476 15.326C13.6367 15.4547 12.8113 15.519 12 15.519C11.1887 15.519 10.3633 15.4547 9.524 15.326C8.68467 15.1974 7.899 15.0067 7.167 14.754C6.435 14.5014 5.78833 14.188 5.227 13.814C4.66567 13.44 4.25667 13.0087 4 12.52V9.55805C4.256 10.0474 4.665 10.479 5.227 10.853C5.78833 11.2264 6.435 11.5397 7.167 11.793C7.899 12.045 8.68467 12.2357 9.524 12.365C10.3633 12.4944 11.1887 12.5587 12 12.558C12.8113 12.5574 13.6367 12.493 14.476 12.365ZM14.476 16.865C15.3147 16.7357 16.1033 16.5447 16.842 16.292C17.5807 16.0394 18.2307 15.7264 18.792 15.353C19.3533 14.9797 19.7623 14.548 20.019 14.058V17C19.763 17.49 19.354 17.9217 18.792 18.295C18.2307 18.6684 17.5807 18.9817 16.842 19.235C16.104 19.4877 15.3153 19.6784 14.476 19.807C13.6367 19.9357 12.8113 20 12 20C11.1887 20 10.3633 19.9357 9.524 19.807C8.68467 19.6784 7.899 19.4877 7.167 19.235C6.435 18.9824 5.78833 18.669 5.227 18.295C4.66567 17.921 4.25667 17.4894 4 17V14.058C4.25667 14.5474 4.66567 14.979 5.227 15.353C5.78833 15.727 6.435 16.0404 7.167 16.293C7.899 16.5457 8.68467 16.7364 9.524 16.865C10.3633 16.9937 11.1887 17.058 12 17.058C12.8113 17.058 13.6367 16.9944 14.476 16.865Z" stroke="currentColor" fill="currentColor"/>
@@ -21,7 +19,7 @@
         <span>Просмотр данных</span>
       </router-link>
       
-      <router-link to="/data-upload" class="menu-item">
+      <router-link to="/upload-data" class="menu-item">
         <div class="icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97933 19.8043 4.588 19.413C4.19667 19.0217 4.00067 18.5507 4 18V15H6V18H18V15H20V18C20 18.55 19.8043 19.021 19.413 19.413C19.0217 19.805 18.5507 20.0007 18 20H6Z" fill="currentColor" stroke="currentColor"/>
@@ -57,9 +55,9 @@
               <path d="M14.6667 12.8334C15.8478 12.8334 16.9832 13.2895 17.8363 14.1063C18.6894 14.9232 19.1942 16.0378 19.2454 17.2178L19.25 17.4167V18.3334C19.2501 18.7959 19.0755 19.2414 18.761 19.5805C18.4465 19.9197 18.0154 20.1274 17.5542 20.1621L17.4167 20.1667H4.58333C4.12081 20.1669 3.67531 19.9922 3.33616 19.6777C2.99701 19.3632 2.78927 18.9321 2.75458 18.4709L2.75 18.3334V17.4167C2.75007 16.2356 3.20608 15.1001 4.02294 14.2471C4.8398 13.394 5.95444 12.8892 7.13442 12.838L7.33333 12.8334H14.6667ZM11 1.83337C12.2156 1.83337 13.3814 2.31626 14.2409 3.1758C15.1004 4.03534 15.5833 5.20113 15.5833 6.41671C15.5833 7.63228 15.1004 8.79807 14.2409 9.65761C13.3814 10.5172 12.2156 11 11 11C9.78442 11 8.61864 10.5172 7.75909 9.65761C6.89955 8.79807 6.41667 7.63228 6.41667 6.41671C6.41667 5.20113 6.89955 4.03534 7.75909 3.1758C8.61864 2.31626 9.78442 1.83337 11 1.83337Z" fill="currentColor" stroke="currentColor"/>
             </svg>
           </div>
-          <span class="username">Имя Врача</span>
+          <span class="username">{{ userStore.email }}</span>
         </div>
-        <button class="logout-btn" title="Выйти">
+        <button class="logout-btn" title="Выйти" @click="handleLogout">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="4">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
           </svg>
@@ -67,7 +65,6 @@
       </div>
 
       <div class="divider"></div>
-      <div class="spacer-24"></div>
 
       <button class="support-btn">
         <div class="icon">
@@ -82,7 +79,16 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.store'
 
+const router = useRouter()
+const userStore = useUserStore()
+
+async function handleLogout() {
+  await userStore.logout()
+  router.push('/login')
+}
 </script>
 
 <style scoped lang="scss">
@@ -100,10 +106,10 @@
   padding: 24px;
   box-sizing: border-box;
 
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba($color-glass-white, 0.4);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  border-right: 1px solid rgba($color-glass-white, 0.5);
   z-index: 100;
 }
 
@@ -112,6 +118,7 @@
   align-items: center;
   gap: 8px;
   justify-content: flex-start;
+  margin-bottom: 32px;
 
   .sidebar-logo {
     width: 50px;
@@ -127,17 +134,16 @@
   }
 }
 
-.spacer-32 { height: 32px; }
-.spacer-24 { height: 24px; }
 .divider {
   width: 100%;
   height: 0;
   border-radius: 10;
-  border-top: 2px solid rgba(255, 255, 255, 0.7); ;
+  border-top: 2px solid rgba($color-glass-white, 0.7); ;
 }
 
 
 .main-menu {
+  margin-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -147,7 +153,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba($color-glass-white, 0.7);
   transition: all 0.2s ease;
 
   text-decoration: none;
@@ -169,7 +175,11 @@
   }
 
   &:hover, &.router-link-active {
-    color: $color-text;
+    color: $color-accent;
+    padding-left: 8px;
+    padding-block: 4px;
+    background-color: $color-white;
+    border-radius: 10px;
   }
 }
 
@@ -190,7 +200,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: rgba(255, 255, 255, 0.7);;
+    color: rgba($color-glass-white, 0.7);;
     font-weight: 500;
     .username {
       color: $color-white;
@@ -201,7 +211,7 @@
 .logout-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba($color-glass-white, 0.7);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -219,11 +229,12 @@
   border: none;
   display: flex;
   align-items: center;
+  margin-top: 24px;
   gap: 8px;
   svg {
     fill: none;
   }
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba($color-glass-white, 0.7);
   font-family: inherit;
   font-size: 0.85rem;
   cursor: pointer;

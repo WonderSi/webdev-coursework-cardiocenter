@@ -40,7 +40,11 @@
         </div>
       </div>
 
-      <button class="login-btn" @click="handleLogin">Войти</button>
+      <p v-if="error" class="login-error">{{ error }}</p>
+
+      <button class="login-btn" :disabled="loading" @click="handleLogin">
+        {{ loading ? 'Вход...' : 'Войти' }}
+      </button>
 
       <button class="backToHomePage-btn" @click="goBackHomePage"> 
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -55,13 +59,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.store'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 // Состояния формы
 const email = ref('')
 const password = ref('')
 const isPasswordVisible = ref(false)
+const loading = ref(false)
+const error = ref('')
 
 const recoveryEmail = ref('')
 
@@ -75,18 +83,26 @@ const togglePasswordVisibility = () => {
   isPasswordVisible.value = !isPasswordVisible.value
 }
 
-const handleLogin = () => {
-  console.log('Авторизация:', email.value, password.value)
-  // Здесь будет вызов API
+const handleLogin = async () => {
+  error.value = ''
+  loading.value = true
+  try {
+    await userStore.login(email.value, password.value, rememberMe.value)
+    router.push('/dashboards')
+  } catch {
+    error.value = 'Неверный логин или пароль'
+  } finally {
+    loading.value = false
+  }
 }
 
 const sendRecoveryEmail = () => {
-  if (!recoveryEmail.value) return alert('Введите Email')
-  
-  const adminMail = 'kseniagorbush@gmail.com' // НАДО ПОМЕНЯТЬ НА КОРПОРАТИВНЫЙ EMAIL или чёт такое
+  if (!recoveryEmail.value) return
+
+  const adminMail = 'kseniagorbush@gmail.com' // НАДО ПОМЕНЯТЬ НА КОРПОРАТИВНЫЙ EMAIL
   const subject = encodeURIComponent('ЗАЯВКА НА ВОССТАНОВЛЕНИЕ ПАРОЛЯ')
   const body = encodeURIComponent(`# ЗАЯВКА НА ВОССТАНОВЛЕНИЕ ПАРОЛЯ\nEMAIL: ${recoveryEmail.value}`)
-  
+
   window.location.href = `mailto:${adminMail}?subject=${subject}&body=${body}`
 }
 </script>
@@ -190,6 +206,15 @@ const sendRecoveryEmail = () => {
     color: $color-text;
     text-align: justify;
   }
+}
+
+// error
+
+.login-error {
+  color: #e53935;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 // buttons
