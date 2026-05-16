@@ -126,7 +126,7 @@ services:
     container_name: cardio_frontend
     ports:
     # prod: - "80:80"
-      - "5173:5173"
+      - "80:5173"
     volumes: # весь блок добавлен для реал-тайм редактирования
       - ../frontend:/app
       - /app/node_modules
