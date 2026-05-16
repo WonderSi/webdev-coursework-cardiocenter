@@ -47,7 +47,6 @@ export function useDashboardCharts() {
     }]
   }));
 
-  // Частые диагнозы (Horizontal Bar)
 // Частые диагнозы (Horizontal Bar)
 const chartDiagnoses = computed(() => {
   return {
@@ -60,7 +59,7 @@ const chartDiagnoses = computed(() => {
       backgroundColor: 'rgba(255, 255, 255, 0.9)',
       borderColor: 'rgba(13, 60, 129, 0.2)',
       borderWidth: 1,
-      textStyle: { color: '#0f356e', fontSize: 14 },
+      textStyle: { color: CHART_COLORS.darkBlue, fontSize: 14 },
       formatter: (params: any) => {
         const data = mockMostDiagnosedData[params[0].dataIndex];
         return `
@@ -82,30 +81,30 @@ const chartDiagnoses = computed(() => {
       name: 'число пациентов',
       nameLocation: 'center',
       nameGap: 40,
-      nameTextStyle: { color: '#0f356e', fontWeight: 400, fontSize: 16},
+      nameTextStyle: { color: CHART_COLORS.darkBlue, fontWeight: 400, fontSize: 16},
       splitLine: { lineStyle: { color: '#8AB3F1' } }, // $color-accent-lighter 
-      axisLabel: { color: '#0f356e', fontWeight: 400, fontSize: 14 },
+      axisLabel: { color: CHART_COLORS.darkBlue, fontWeight: 400, fontSize: 14 },
     },
     yAxis: { 
       type: 'category', 
       z: 10,
       inverse: true, 
       data: mockMostDiagnosedData.map(item => item.diagName),
-      axisLabel: { color: '#0f356e', fontWeight: 600, fontSize: 16 },
-      axisLine: { lineStyle: { color: '#0f356e', width: 2 } },
+      axisLabel: { color: CHART_COLORS.darkBlue, fontWeight: 600, fontSize: 16 },
+      axisLine: { lineStyle: { color: CHART_COLORS.darkBlue, width: 2 } },
       axisTick: { show: false }
     },
     series: [{
       name: 'Случаи',
       type: 'bar',
       data: mockMostDiagnosedData.map(item => item.diagnosedCount),
-      itemStyle: { color: '#1567E2', borderRadius: [0, 4, 4, 0] },
-      barWidth: 30,
+      itemStyle: { color: '#1567E2', borderRadius: [0, 2, 2, 0] },
+      barWidth: 25,
       label: { 
         show: true, 
         position: 'right', 
-        formatter: '{c}%', // Обрати внимание: если нужны только числа, убери '%'
-        color: '#0f356e', 
+        formatter: '{c}',
+        color: CHART_COLORS.darkBlue, 
         fontWeight: 600,
         fontSize: 16
       }
@@ -125,7 +124,7 @@ const chartAgeGender = computed(() => {
       borderColor: 'rgba(32, 92, 182, 0.35)',
       borderWidth: 1,
       textStyle: {
-        color: '#0f356e',
+        color: CHART_COLORS.darkBlue,
         fontSize: 16,
         fontFamily: 'Inter, sans-serif'
       },

@@ -1,5 +1,5 @@
 export const CHART_COLORS = {
-  primaryBlue: '#1567E2',
+  primaryBlue: 'rgb(21, 103, 226)',
   darkBlue: '#0f356e',
   lightBlue: '#76a5f0',
   red: '#DF2242',

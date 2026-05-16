@@ -190,7 +190,7 @@ const {
 .card-number-total-records {
   font-size: 3rem;
   font-weight: 700;
-  color: $color-text;
+  color: $color-blue-dark;
   line-height: 1;
   align-self: center;
   margin-top: auto;
