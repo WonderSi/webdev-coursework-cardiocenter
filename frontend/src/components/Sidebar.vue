@@ -118,7 +118,6 @@ async function handleLogout() {
   align-items: center;
   gap: 8px;
   justify-content: flex-start;
-  margin-bottom: 32px;
 
   .sidebar-logo {
     width: 50px;
@@ -138,12 +137,13 @@ async function handleLogout() {
   width: 100%;
   height: 0;
   border-radius: 10;
-  border-top: 2px solid rgba($color-glass-white, 0.7); ;
+  border-top: 2px solid rgba($color-glass-white, 0.7);
+  margin-top: 24px;
+  margin-bottom: 32px;
 }
 
 
 .main-menu {
-  margin-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 24px;
