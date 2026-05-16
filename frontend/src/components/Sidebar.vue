@@ -49,31 +49,18 @@
 
     <div class="sidebar-footer">
       <div class="user-profile">
-        <div class="user-info">
-          <div class="icon">
-            <svg width="18" height="18" viewBox="1 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14.6667 12.8334C15.8478 12.8334 16.9832 13.2895 17.8363 14.1063C18.6894 14.9232 19.1942 16.0378 19.2454 17.2178L19.25 17.4167V18.3334C19.2501 18.7959 19.0755 19.2414 18.761 19.5805C18.4465 19.9197 18.0154 20.1274 17.5542 20.1621L17.4167 20.1667H4.58333C4.12081 20.1669 3.67531 19.9922 3.33616 19.6777C2.99701 19.3632 2.78927 18.9321 2.75458 18.4709L2.75 18.3334V17.4167C2.75007 16.2356 3.20608 15.1001 4.02294 14.2471C4.8398 13.394 5.95444 12.8892 7.13442 12.838L7.33333 12.8334H14.6667ZM11 1.83337C12.2156 1.83337 13.3814 2.31626 14.2409 3.1758C15.1004 4.03534 15.5833 5.20113 15.5833 6.41671C15.5833 7.63228 15.1004 8.79807 14.2409 9.65761C13.3814 10.5172 12.2156 11 11 11C9.78442 11 8.61864 10.5172 7.75909 9.65761C6.89955 8.79807 6.41667 7.63228 6.41667 6.41671C6.41667 5.20113 6.89955 4.03534 7.75909 3.1758C8.61864 2.31626 9.78442 1.83337 11 1.83337Z" fill="currentColor" stroke="currentColor"/>
-            </svg>
-          </div>
-          <span class="username">{{ userStore.email }}</span>
+        <div class="icon">
+          <svg width="18" height="18" viewBox="1 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.6667 12.8334C15.8478 12.8334 16.9832 13.2895 17.8363 14.1063C18.6894 14.9232 19.1942 16.0378 19.2454 17.2178L19.25 17.4167V18.3334C19.2501 18.7959 19.0755 19.2414 18.761 19.5805C18.4465 19.9197 18.0154 20.1274 17.5542 20.1621L17.4167 20.1667H4.58333C4.12081 20.1669 3.67531 19.9922 3.33616 19.6777C2.99701 19.3632 2.78927 18.9321 2.75458 18.4709L2.75 18.3334V17.4167C2.75007 16.2356 3.20608 15.1001 4.02294 14.2471C4.8398 13.394 5.95444 12.8892 7.13442 12.838L7.33333 12.8334H14.6667ZM11 1.83337C12.2156 1.83337 13.3814 2.31626 14.2409 3.1758C15.1004 4.03534 15.5833 5.20113 15.5833 6.41671C15.5833 7.63228 15.1004 8.79807 14.2409 9.65761C13.3814 10.5172 12.2156 11 11 11C9.78442 11 8.61864 10.5172 7.75909 9.65761C6.89955 8.79807 6.41667 7.63228 6.41667 6.41671C6.41667 5.20113 6.89955 4.03534 7.75909 3.1758C8.61864 2.31626 9.78442 1.83337 11 1.83337Z" fill="currentColor" stroke="currentColor"/>
+          </svg>
         </div>
+        <span class="username">{{ userStore.email }}</span>
         <button class="logout-btn" title="Выйти" @click="handleLogout">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="4">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
           </svg>
         </button>
       </div>
-
-      <div class="divider"></div>
-
-      <button class="support-btn">
-        <div class="icon">
-          <svg width="26" height="24" viewBox="0 0 26 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5.10254 5H20.8975C21.5113 5.00001 22.0701 5.20203 22.4561 5.51953C22.8365 5.83255 23 6.21095 23 6.55273V15.835C22.9999 16.1766 22.8363 16.5543 22.4561 16.8672C22.0701 17.1847 21.5114 17.3877 20.8975 17.3877H8.44336C7.77888 17.3877 7.10326 17.6335 6.625 18.126L3.99609 20.8301C3.85622 20.9731 3.5867 21.0497 3.2959 20.9658C3.16106 20.9269 3.07592 20.8658 3.03516 20.8213C3.00355 20.7867 3.00002 20.7677 3 20.7451V6.55273C3 6.21095 3.16348 5.83255 3.54395 5.51953C3.92991 5.20202 4.48868 5.00001 5.10254 5Z" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </div>
-        <span>Сообщить о проблеме</span>
-      </button>
     </div>
   </aside>
 </template>
@@ -106,7 +93,7 @@ async function handleLogout() {
   padding: 24px;
   box-sizing: border-box;
 
-  background: rgba($color-glass-white, 0.4);
+  background: rgba($color-glass-white, 0.35);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba($color-glass-white, 0.5);
@@ -118,7 +105,6 @@ async function handleLogout() {
   align-items: center;
   gap: 8px;
   justify-content: flex-start;
-  margin-bottom: 32px;
 
   .sidebar-logo {
     width: 50px;
@@ -138,12 +124,13 @@ async function handleLogout() {
   width: 100%;
   height: 0;
   border-radius: 10;
-  border-top: 2px solid rgba($color-glass-white, 0.7); ;
+  border-top: 2px solid rgba($color-glass-white, 0.7);
+  margin-top: 24px;
+  margin-bottom: 32px;
 }
 
 
 .main-menu {
-  margin-top: 32px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -187,60 +174,36 @@ async function handleLogout() {
   margin-top: auto; // Прижимает футер к низу
   display: flex;
   flex-direction: column;
+  margin-bottom: 16px;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 24px;
-
-  .user-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: rgba($color-glass-white, 0.7);;
-    font-weight: 500;
-    .username {
-      color: $color-white;
-    }
+  gap: 4px;
+  color: rgba($color-glass-white, 0.7);
+  .username {
+    color: $color-white;
+    padding-left: 4px;
   }
-}
+  font-weight: 500;
 
-.logout-btn {
+  .logout-btn {
   background: none;
   border: none;
   color: rgba($color-glass-white, 0.7);
   cursor: pointer;
-  padding: 4px;
+  padding-left: 4px;
   display: flex;
   align-items: center;
   transition: color 0.2s;
   &:hover { color: $color-cold-red; }
-  svg {
-    fill: none;
-    stroke-width: 2px;
+    svg {
+      fill: none;
+      stroke-width: 2px;
+    }
   }
 }
 
-.support-btn {
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  margin-top: 24px;
-  gap: 8px;
-  svg {
-    fill: none;
-  }
-  color: rgba($color-glass-white, 0.7);
-  font-family: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-  
-  &:hover { color: $color-white; }
-}
 </style>
