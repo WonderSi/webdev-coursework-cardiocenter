@@ -16,6 +16,7 @@ defineProps<{
 .background {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: background-color 0.5s ease;

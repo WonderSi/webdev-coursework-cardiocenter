@@ -75,9 +75,9 @@ const goToLogin = () => {
 
   max-width: 1000px;
   width: 90%;
-  margin: 0 auto;
+  margin: 40px auto;
   min-height: 50vh;
-  max-height: 80vh;
+  // max-height: 80vh;
 
   padding: 48px;
   border-radius: $radius-glass-card;
@@ -197,6 +197,16 @@ height: 128px;
 
   .intro-header {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .glass-card {
+    padding: 24px;
+    margin: 24px auto;
+  }
+  .intro {
+    gap: 40px;
   }
 }
 
