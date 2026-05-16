@@ -96,6 +96,7 @@ services:
       ML_SERVICE_URL: ${ML_SERVICE_URL}
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
       BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
     ports:
       - "8080:8080" # Swagger
     networks:
@@ -132,6 +133,7 @@ services:
       - /app/node_modules
     environment: # блок добавлен для реал-тайм редактирования
       - CHOKIDAR_USEPOLLING=true
+      - BACKEND_URL=http://backend:8080
     networks:
       - internal
     depends_on:

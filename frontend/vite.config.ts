@@ -12,7 +12,7 @@ export default defineConfig({
     },                      // +
     proxy: {
       '/api': {
-        target: 'http://backend:8080', // изменено с //localhost:8080 для реалтайма
+        target: process.env.BACKEND_URL ?? 'http://localhost:8080',
         changeOrigin: true
       }
     }
