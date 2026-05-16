@@ -2,7 +2,7 @@
   <div class="survey-page">
     <Transition name="fade">
       <div v-if="hasErrors" class="error-banner">
-        <span>Пожалуйста, проверьте введённые данные</span>
+        <span>{{ currentErrorMessage }}</span>
       </div>
     </Transition>
 
@@ -119,18 +119,19 @@ const fieldErrors = computed<Record<string, string>>(() => {
       }
     }
 
-    // Year validation for yesno fields with yearKey
+    // Валидация года
     if (field.yearKey && value === 1) {
       const yearValue = store.answers[field.yearKey]
       if (yearValue !== null && yearValue !== undefined && yearValue !== '') {
+        const MINYEAR = 1900
         const year = Number(yearValue)
         const currentYear = new Date().getFullYear()
         const age = Number(store.answers.age)
-        const birthYear = age ? currentYear - (age + 1) : 1950
+        const birthYear = age ? currentYear - (age + 1) : MINYEAR
         if (isNaN(year)) {
           errors[field.yearKey] = 'Введите корректный год'
-        } else if (year < 1950) {
-          errors[field.yearKey] = 'Год должен быть не ранее 1950'
+        } else if (year < MINYEAR) {
+          errors[field.yearKey] = 'Год должен быть не ранее 1900'
         } else if (year > currentYear) {
           errors[field.yearKey] = `Год не может быть больше ${currentYear}`
         } else if (age && year < birthYear) {
@@ -265,7 +266,7 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  background: #e74c3c;
+  background: $color-red;
   color: $color-white;
   padding: 12px 20px;
   font-size: 0.9rem;
