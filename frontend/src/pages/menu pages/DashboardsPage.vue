@@ -136,8 +136,6 @@ const {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
 
-  // ИЗМЕНЕНО: Убираем minmax и fr. Задаем жесткий базовый шаг строки.
-  // Теперь карточка .row-2 будет железно занимать: (160px * 2) + gap(24px) = 344px
   grid-auto-rows: 180px;
 
   grid-auto-flow: dense;

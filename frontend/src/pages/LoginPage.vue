@@ -106,10 +106,12 @@ const handleLogin = async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  width: 100%;
+  overflow-y: auto;
   padding: 20px;
   gap: 24px;
+  box-sizing: border-box;
 }
 
 .login-form {
@@ -156,17 +158,17 @@ const handleLogin = async () => {
   }
 }
 
-// CARD REDO
-
 .login-card {
-  flex: 0 0 420px;
+  width: 100%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
 
   background: $color-white;
   border-radius: $radius-basic-card;
   padding: 40px 50px;
-  filter: drop-shadow(0 5 20 #070E2C, 0.2); // поправить
+  filter: drop-shadow(0 5 20 rgba(7, 14, 44, 0.2));
+  box-sizing: border-box;
 }
 
 .login-card-header {
