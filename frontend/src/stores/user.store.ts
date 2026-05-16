@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import router from '@/router'
 
 export const useUserStore = defineStore('user', () => {
   const email = ref<string | null>(null)
@@ -35,6 +36,7 @@ export const useUserStore = defineStore('user', () => {
     await fetch('/api/auth/logout', { method: 'POST' })
     email.value = null
     role.value = null
+    router.push('/login')
   }
 
   return { email, role, isAuthenticated, isExtended, login, fetchMe, logout }

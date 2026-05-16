@@ -1,0 +1,56 @@
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(35, 36, 43, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  padding: 40px;
+  border-radius: $radius-basic-card;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-description {
+  text-align: center;
+  color: $color-secondary;
+  font-size: 1rem;
+  font-weight: 300;
+  padding-top: 10px;
+  padding-bottom: 32px;
+}
+
+.modal-sent-btn {
+  margin: 20px 0px 40px 0px;
+  background: $color-accent;
+  color: $color-white;
+  padding: 13px;
+  border: none;
+  border-radius: $radius-rect-buttons;
+  font-size: 1rem;
+  cursor: pointer;
+  &:hover {
+    background: $color-accent-lighter;
+  }
+}
+
+.modal-back-btn {
+  background: none;
+  border: none;
+  color: $color-accent;
+  font-size: 1rem;
+  cursor: pointer;
+  &:hover { color: rgba($color-accent, 0.7); }
+}

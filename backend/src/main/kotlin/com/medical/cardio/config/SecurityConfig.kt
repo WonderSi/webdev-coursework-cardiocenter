@@ -49,8 +49,13 @@ class SecurityConfig(
      */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
+        val allowedOrigins = System.getenv("ALLOWED_ORIGINS")
+            ?.split(",")
+            ?.map { it.trim() }
+            ?: listOf("http://localhost:5173")
+
         val config = CorsConfiguration().apply {
-            allowedOrigins = listOf("http://localhost:5173")
+            this.allowedOrigins = allowedOrigins
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true
@@ -77,8 +82,6 @@ class SecurityConfig(
                 "/api/auth/login",
                 "/api/auth/logout",
                 "/api/survey/**",
-                "/api/glossaries/**",
-                "/actuator/**",
                 "/swagger-ui",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
