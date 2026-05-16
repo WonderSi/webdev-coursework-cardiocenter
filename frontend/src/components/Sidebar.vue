@@ -241,6 +241,6 @@ async function handleLogout() {
   padding: 0;
   text-align: left;
   
-  &:hover { color: #ffffff; }
+  &:hover { color: $color-white; }
 }
 </style>

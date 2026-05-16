@@ -265,14 +265,14 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  background: #e74c3c;
-  color: #fff;
-  padding: 12px 20px;
+  background: $color-red;
+  color: $color-white;
+  padding: 14px 20px;
   font-size: 0.9rem;
   font-weight: 600;
   text-align: center;
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
 }
 
 .fade-enter-active { animation: fadeIn 0.3s ease; }

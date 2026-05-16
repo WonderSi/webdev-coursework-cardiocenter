@@ -94,7 +94,7 @@ const goToLogin = () => {
   display: flex;
   flex-direction: column;
   gap: 100px;
-  color: #ffffff;
+  color: $color-white;
 }
 
 .logo-and-text {
