@@ -21,7 +21,7 @@ abstract class BaseIntegrationTest {
             withDatabaseName("cardio_test")
             withUsername("test_user")
             withPassword("test_pass")
-            withReuse(true)
+            withReuse(false)
         }
 
         @DynamicPropertySource
