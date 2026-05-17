@@ -28,7 +28,7 @@ class AuthControllerTest : ControllerTestBase() {
         testUser = adminUserRepository.save(
             AdminUserEntity(
                 email = "auth-test@cardio.ru",
-                passwordHash = passwordEncoder.encode("ValidPass@2024"),
+                passwordHash = passwordEncoder.encode("ValidPass@2000"),
                 role = Role.DOCTOR
             )
         )
@@ -66,7 +66,7 @@ class AuthControllerTest : ControllerTestBase() {
     fun `login with invalid email format returns 400`() {
         mockMvc.post("/api/auth/login") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"email":"not-an-email","password":"ValidPass@2024"}"""
+            content = """{"email":"not-an-email","password":"ValidPass@2000"}"""
         }.andExpect {
             status { isBadRequest() }
         }
@@ -96,6 +96,27 @@ class AuthControllerTest : ControllerTestBase() {
         mockMvc.post("/api/auth/logout").andExpect {
             status { isOk() }
             header { string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")) }
+        }
+    }
+
+    @Test
+    fun `login with non-existent email returns 401`() {
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"nobody@cardio.ru","password":"ValidPass@2000"}"""
+        }.andExpect {
+            status { isUnauthorized() }
+        }
+    }
+
+    @Test
+    fun `login with rememberMe true includes Max-Age in Set-Cookie`() {
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2000","rememberMe":true}"""
+        }.andExpect {
+            status { isOk() }
+            header { string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=2592000")) }
         }
     }
 }

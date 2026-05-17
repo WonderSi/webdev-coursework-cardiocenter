@@ -3,6 +3,7 @@ package com.medical.cardio.controller
 import com.medical.cardio.entity.AdminUserEntity
 import com.medical.cardio.entity.Role
 import com.medical.cardio.repository.AdminUserRepository
+import com.medical.cardio.repository.PatientRepository
 import com.medical.cardio.support.ControllerTestBase
 import org.hamcrest.Matchers.containsString
 import org.junit.jupiter.api.AfterEach
@@ -21,6 +22,9 @@ class UploadControllerTest : ControllerTestBase() {
     private lateinit var adminUserRepository: AdminUserRepository
 
     @Autowired
+    private lateinit var patientRepository: PatientRepository
+
+    @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
 
     private lateinit var testUser: AdminUserEntity
@@ -30,7 +34,7 @@ class UploadControllerTest : ControllerTestBase() {
         testUser = adminUserRepository.save(
             AdminUserEntity(
                 email = "upload-test@cardio.ru",
-                passwordHash = passwordEncoder.encode("ValidPass@2024"),
+                passwordHash = passwordEncoder.encode("ValidPass@2000"),
                 role = Role.DOCTOR
             )
         )
@@ -38,6 +42,8 @@ class UploadControllerTest : ControllerTestBase() {
 
     @AfterEach
     fun tearDown() {
+        // Delete patients first (diagnoses cascade via ON DELETE CASCADE), then the admin user
+        patientRepository.deleteAll()
         adminUserRepository.delete(testUser)
     }
 
@@ -88,6 +94,86 @@ class UploadControllerTest : ControllerTestBase() {
             file(file)
         }.andExpect {
             status { isUnauthorized() }
+        }
+    }
+
+    @Test
+    fun `upload valid CSV returns 200 with upload report`() {
+        val cookie = authCookie(testUser)
+        val csvContent = "gender,age\n1,45"
+        val file = MockMultipartFile(
+            "file",
+            "patients.csv",
+            "text/csv",
+            csvContent.toByteArray(Charsets.UTF_8)
+        )
+        mockMvc.multipart("/api/admin/upload") {
+            file(file)
+            cookie(cookie)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.totalRows") { value(1) }
+            jsonPath("$.savedRows") { value(1) }
+            jsonPath("$.skippedRows") { value(0) }
+        }
+    }
+
+    @Test
+    fun `upload empty file returns 400`() {
+        val cookie = authCookie(testUser)
+        val file = MockMultipartFile(
+            "file",
+            "empty.csv",
+            "text/csv",
+            ByteArray(0)
+        )
+        mockMvc.multipart("/api/admin/upload") {
+            file(file)
+            cookie(cookie)
+        }.andExpect {
+            status { isBadRequest() }
+        }
+    }
+
+    @Test
+    fun `upload CSV with invalid gender code skips the row`() {
+        val cookie = authCookie(testUser)
+        val csvContent = "gender,age\n99,45"
+        val file = MockMultipartFile(
+            "file",
+            "patients.csv",
+            "text/csv",
+            csvContent.toByteArray(Charsets.UTF_8)
+        )
+        mockMvc.multipart("/api/admin/upload") {
+            file(file)
+            cookie(cookie)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.totalRows") { value(1) }
+            jsonPath("$.savedRows") { value(0) }
+            jsonPath("$.skippedRows") { value(1) }
+        }
+    }
+
+    @Test
+    fun `upload CSV with age below minimum skips the row`() {
+        val cookie = authCookie(testUser)
+        val csvContent = "gender,age\n1,10"
+        val file = MockMultipartFile(
+            "file",
+            "patients.csv",
+            "text/csv",
+            csvContent.toByteArray(Charsets.UTF_8)
+        )
+        mockMvc.multipart("/api/admin/upload") {
+            file(file)
+            cookie(cookie)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.totalRows") { value(1) }
+            jsonPath("$.savedRows") { value(0) }
+            jsonPath("$.skippedRows") { value(1) }
         }
     }
 }

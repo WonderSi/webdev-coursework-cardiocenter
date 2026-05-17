@@ -35,13 +35,13 @@ class AdminServiceTest : BaseIntegrationTest() {
         val user = adminUserRepository.save(
             AdminUserEntity(
                 email = "service-reset-test@cardio.ru",
-                passwordHash = passwordEncoder.encode("OldPassword@2024"),
+                passwordHash = passwordEncoder.encode("OldPassword@2000"),
                 role = Role.DOCTOR
             )
         )
         savedUser = user
 
-        val newPassword = "NewValidPass@2024"
+        val newPassword = "NewValidPass@2000"
         adminService.resetPassword(user.id, newPassword)
 
         val updated = adminUserRepository.findById(user.id).orElseThrow()
@@ -51,7 +51,7 @@ class AdminServiceTest : BaseIntegrationTest() {
     @Test
     fun `resetPassword with non-existent user throws NoSuchElementException`() {
         assertThrows<NoSuchElementException> {
-            adminService.resetPassword(Long.MAX_VALUE, "ValidNewPass@2024")
+            adminService.resetPassword(Long.MAX_VALUE, "ValidNewPass@2000")
         }
     }
 }
