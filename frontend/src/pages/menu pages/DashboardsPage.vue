@@ -12,7 +12,7 @@
           </div>
           <div class="card-title">Всего записей</div>
         </div>
-        <span class="card-number-total-records">{{ mockKpiData.totalRecords }}</span>
+        <span class="card-number-total-records">{{ stats?.totalPatients ?? '—' }}</span>
       </div>
 
       <div class="dashboard-card kpi-card">
@@ -26,12 +26,12 @@
         </div>
         <div class="card-two-numbers">
           <div class="percentage">
-            <span class="card-number color-blue">{{ mockGenderDiagnosesData[0].malePercent }}%</span>
-            <span class="sub-label color-blue">{{ mockGenderDiagnosesData[0].maleDiagnosed }} чел (М)</span>
+            <span class="card-number color-blue">{{ stats?.genderDiagnoses.malePercent ?? '—' }}%</span>
+            <span class="sub-label color-blue">{{ stats?.genderDiagnoses.maleDiagnosed ?? '—' }} чел (М)</span>
           </div>
           <div class="percentage">
-            <span class="card-number color-pink">{{ mockGenderDiagnosesData[1].femalePercent }}%</span>
-            <span class="sub-label color-pink">{{ mockGenderDiagnosesData[1].femaleDiagnosed }} чел (Ж)</span>
+            <span class="card-number color-pink">{{ stats?.genderDiagnoses.femalePercent ?? '—' }}%</span>
+            <span class="sub-label color-pink">{{ stats?.genderDiagnoses.femaleDiagnosed ?? '—' }} чел (Ж)</span>
           </div>
         </div>
       </div>
@@ -54,7 +54,7 @@
     <ChartCard title="Корреляция веса и ССЗ" :option="chartWeight" gridClass="col-3 row-2">
       <template #legend>
         <div class="custom-legend">
-          <span style="color: #1567E2">●</span> Здоровые 
+          <span style="color: #1567E2">●</span> Здоровые
           <span style="color: #DF2242; margin-left: 10px">●</span> ССЗ
         </div>
       </template>
@@ -70,7 +70,7 @@
       </template>
     </ChartCard>
 
-    <ChartCard title="Районы и Экология" :option="chartDistricts" gridClass="col-6 row-2">
+    <!-- <ChartCard title="Районы и Экология" :option="chartDistricts" gridClass="col-6 row-2">
       <template #legend>
         <div class="custom-legend-ecology">
           <span class="legend-diagnoses-label">диагнозы</span>
@@ -78,7 +78,8 @@
           <span class="legend-ecology-label">экология</span>
         </div>
       </template>
-    </ChartCard>
+    </ChartCard> -->
+    <ChartCard title="Районы" :option="chartDistricts" gridClass="col-6 row-2" />
 
   </div>
 </template>
@@ -87,7 +88,6 @@
 import Sidebar from '@/components/Sidebar.vue';
 import ChartCard from '@/components/dashboards/ChartCard.vue';
 import { useDashboardCharts } from '@/composables/useDashboardsCharts';
-import { mockKpiData, mockGenderDiagnosesData } from '@/mocks/dashboardsData';
 
 // ECharts
 import { use } from 'echarts/core';
@@ -97,13 +97,14 @@ import { GridComponent, TooltipComponent } from 'echarts/components';
 
 use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent]);
 
-const { 
-  chartAlcohol, 
-  chartDiagnoses, 
-  chartAgeGender, 
-  chartWeight, 
-  chartProfessions, 
-  chartDistricts 
+const {
+  stats,
+  chartAlcohol,
+  chartDiagnoses,
+  chartAgeGender,
+  chartWeight,
+  chartProfessions,
+  chartDistricts
 } = useDashboardCharts();
 </script>
 
