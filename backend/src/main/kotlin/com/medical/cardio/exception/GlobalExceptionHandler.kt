@@ -29,4 +29,9 @@ class GlobalExceptionHandler {
     fun handleFileTooLarge(): ResponseEntity<Map<String, String>> =
         ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
             .body(mapOf("error" to "Файл превышает допустимый размер 10 МБ"))
+
+    @ExceptionHandler(NoSuchElementException::class)
+    fun handleNotFound(ex: NoSuchElementException): ResponseEntity<Map<String, String>> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(mapOf("error" to (ex.message ?: "Not found")))
 }
