@@ -43,7 +43,7 @@ class AuthControllerTest : ControllerTestBase() {
     fun `login with valid credentials returns 200 and cookie`() {
         mockMvc.post("/api/auth/login") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2024"}"""
+            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2000"}"""
         }.andExpect {
             status { isOk() }
             jsonPath("$.email") { value("auth-test@cardio.ru") }
