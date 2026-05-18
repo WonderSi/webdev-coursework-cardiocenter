@@ -199,7 +199,7 @@ const getRiskIconSize = (risk: number) => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-block: 32px;
+  margin-bottom: 32px;
 
   .risk-element {
     display: flex;
@@ -263,8 +263,11 @@ const getRiskIconSize = (risk: number) => {
   color: $color-cold-red;
   text-align: left;
   gap: 20px;
-  margin-bottom: 24px;
-  
+  margin-block: 16px;
+  padding-block: 12px;
+  border-radius: $radius-basic-card;
+  background-color: $color-lighter-red;
+
   @media (max-width: 768px) {
     gap: 12px;
   }
