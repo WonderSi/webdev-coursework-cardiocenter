@@ -29,37 +29,42 @@
 
 
       <div class=files-list-card>
-        <div class="files-progress-bar">
-          <div class="progress-fill" style="width: 100%;"></div>
-        </div>
-        <div class="main-content-files-list">
+        <!-- COL = HEADER + LIST + ACTIONS -->
+         <!-- ROW = LIST = PROGRESS-BAR + LIST-MAIN -->
+        <div class="wrapper_column">
           <div class="file-list-header">Список загружаемых файлов</div>
-          
-          <div class="file-list">
-            <div class="file-item">
-              <div class="file-item-main">
-                <div class="file-icon">
-                  <span class="file-extension">xlsx</span>
-                </div>
 
-                <div class="file-details">
-                  <p class="file-name">Пациенты.xlsx</p>
-                  <p class="file-size">1.2 MB</p>
-                </div>
+          <div class="wrapper_row">
+            <div class="files-progress-bar">
+              <div class="progress-fill" style="height: 90%;"></div>
+            </div>
+            <div class="main-content-files-list">
+              <div class="file-list">
+                <div class="file-item">
+                  <div class="file-item-main">
+                    <div class="file-icon"> <span class="file-extension">xlsx</span> </div>
+                  
+                    <div class="file-details">
+                      <p class="file-name">Пациенты.xlsx</p>
+                      
+                    </div>
 
-                <button class="delete-file-btn">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z"/>
-                  </svg>
-                </button>
+                    <div class="file-right-side">
+                      <p class="file-size">1.2 MB</p>
+                      <button class="delete-file-btn">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-
             </div>
           </div>
-
           <div class="files-list-actions">
             <div class="cancel-all-btn">Отменить все</div>
-           <div class="upload-btn">Загрузить</div>
+            <div class="upload-btn">Загрузить</div>
           </div>
         </div>
       </div>
@@ -308,7 +313,22 @@ function formatSize(bytes: number): string {
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
-// ПОДЧЁРКИВАНИЯ: 
+// --------- УТИЛИТИ
+.wrapper_column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.wrapper_row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+}
+
+// ---- ПОДЧЁРКИВАНИЯ: 
 .underlined {
   text-decoration: underline;
   text-decoration-color: #0f356e;
@@ -326,14 +346,14 @@ function formatSize(bytes: number): string {
   }
 }
 
-// КОНТЕЙНЕР СТРАНИЦЫ
+// -------------------------- КОНТЕЙНЕР СТРАНИЦЫ
 .upload-page {
   margin-left: 240px;
   display: flex;
   flex-direction: column;
   gap: 64px;
   margin-block: 40px;
-  margin-inline: 200px;
+  margin-inline: 100px;
 }
 
 .upload-duo-cards {
@@ -345,11 +365,20 @@ function formatSize(bytes: number): string {
 }
 
 // КАРТОЧКА СПИСКА ФАЙЛОВ (ПРАВО ВЕРХ)
+
+.file-list-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: $color-blue-dark;
+  margin-bottom: 24px;
+}
+
 .files-list-card {
   display: flex;
   flex-direction: row;
   flex: 1;
-  min-width: 400px;
+  min-width: 500px;
   padding: 32px;
 
   background-color: rgba($color-glass-white, 0.8);
@@ -361,51 +390,68 @@ function formatSize(bytes: number): string {
   .files-progress-bar {
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     color: $color-accent;
     background: rgba($color-secondary, 0.3);
     border-radius: 1000px;
-    margin-right: 8px;
-    width: 20px;
+    margin-right: 16px;
+    width: 10px;
     height: 100%;
     overflow: hidden;
+    flex-shrink: 0;
 
     .progress-fill {
-
+      width: 100%;
+      background: $color-accent;
+      transition: height 0.3s ease;
     }
   }
 
   .main-content-files-list {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 
-    .file-list-header {
-      font-size: 1.5rem;
-      font-weight: 600;
-      white-space: nowrap;
-      color: $color-blue-dark;
-      margin-bottom: 24px;
-    }
     .file-list {
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 8px;
       flex-grow: 1;
-      margin-bottom: 16px;
+      margin-bottom: 4px;
 
       overflow-y: auto;
-      padding-right: 8px; // место под скролл
+      padding-right: 12px; // место под скролл
+
+      // НОВОЕ: Кастомный скроллбар
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      &::-webkit-scrollbar-track {
+        background: rgba($color-secondary, 0.1);
+        border-radius: 10px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: rgba($color-secondary, 0.4);
+        border-radius: 10px;
+        transition: background 0.2s ease;
+        
+        &:hover {
+          background: rgba($color-secondary, 0.6);
+        }
+      }
     
       // СТИЛЬ ОДНОГО ФАЙЛА
       .file-item {
         display: flex;
         flex-direction: row;
         background: none;
-        border-radius: 10;
+        border-radius: 10px;
         margin: 0;
+        width: 100%;
 
         &:hover {
-          border: 2.5px solid rgba($color-secondary, 0.3); 
-          border-radius: 100;
+          border: 2px solid rgba($color-secondary, 0.3); 
           cursor: pointer
         }
 
@@ -415,6 +461,7 @@ function formatSize(bytes: number): string {
           align-items: center;
           padding: 8px;
           gap: 16px;
+          width: 100%;
 
           .file-icon {
             display: flex;
@@ -431,25 +478,39 @@ function formatSize(bytes: number): string {
             }
           }
         
+          .file-right-side {
+            align-items: center;
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            flex-shrink: 0;
+
+            .file-size {
+              font-weight: 400;
+              color: $color-secondary-text;
+              font-size: 1rem;
+              margin: 0;
+            }
+          }
+
           .file-details {
             flex-grow: 1;
             display: flex;
             flex-direction: row;
-            gap: 24px;
+            gap: 4px;
 
             .file-name {
               font-weight: 600;
               color: $color-blue-dark;
               font-size: 1rem;
-            }
-            .file-size {
-              font-weight: 400;
-              color: $color-secondary-text;
-              font-size: 1rem;
+              margin: 0;
             }
           }
 
           .delete-file-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: transparent;
             border: none;
             color: $color-secondary-text;
@@ -464,11 +525,51 @@ function formatSize(bytes: number): string {
         }
       }
     }
+  }
+  .files-list-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 24px;
+  flex-shrink: 0;
 
-    .files-list-actions {
-
+  .cancel-all-btn {
+    justify-content: center;
+    align-items: center;
+    color: $color-accent;
+    width: 100%;
+    display: flex;
+    padding: 13px;
+    background: transparent;
+    border: 2px solid $color-accent;
+    border-radius: $radius-rect-buttons;
+    white-space: nowrap;
+    font-weight: 600;
+    &:hover {
+      background: $color-accent;
+      color: $color-white;
+      cursor: pointer;
     }
   }
+
+  .upload-btn {
+    justify-content: center;
+    display: flex;
+    padding: 13px;
+    width: 100%;
+    background: $color-accent;
+    white-space: nowrap;
+    border-radius: $radius-rect-buttons;
+    color: $color-white;
+    font-weight: 600;
+    &:hover {
+      background: $color-accent-lighter;
+      cursor: pointer;
+    }
+  }
+  
+}
 
 }
 
@@ -589,203 +690,4 @@ function formatSize(bytes: number): string {
   }
 }
 
-
-// .upload-page {
-//   margin-left: 240px;
-//   padding: 40px 40px 40px 48px;
-//   min-height: 100vh;
-//   display: flex;
-//   flex-direction: column;
-//   gap: 24px;
-// }
-
-
-// .file-input-hidden {
-//   display: none;
-// }
-
-// .file-icon {
-//   flex-shrink: 0;
-//   opacity: 0.9;
-// }
-
-// .file-info {
-//   flex: 1;
-//   display: flex;
-//   flex-direction: column;
-//   gap: 4px;
-//   overflow: hidden;
-// }
-
-// .file-name {
-//   font-weight: 600;
-//   font-size: 0.95rem;
-//   white-space: nowrap;
-//   overflow: hidden;
-//   text-overflow: ellipsis;
-// }
-
-// .file-size {
-//   font-size: 0.8rem;
-//   opacity: 0.65;
-// }
-
-// .clear-btn {
-//   background: none;
-//   border: none;
-//   color: rgba($color-glass-white, 0.7);
-//   cursor: pointer;
-//   padding: 4px;
-//   display: flex;
-//   align-items: center;
-//   flex-shrink: 0;
-//   transition: color 0.2s;
-//   &:hover { color: $color-cold-red; }
-// }
-
-// .inline-error {
-//   color: $color-cold-red;
-//   font-size: 0.85rem;
-//   padding: 8px 12px;
-//   background: rgba($color-cold-red, 0.1);
-//   border-radius: 8px;
-// }
-
-// .upload-btn {
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   gap: 8px;
-//   padding: 14px;
-//   border: none;
-//   border-radius: $radius-rect-buttons;
-//   background: $color-accent;
-//   color: $color-white;
-//   font-size: 1rem;
-//   font-weight: 600;
-//   font-family: inherit;
-//   cursor: pointer;
-//   transition: background 0.2s, opacity 0.2s;
-
-//   &:hover:not(:disabled) { background: $color-blue-dark; }
-//   &:disabled { opacity: 0.45; cursor: not-allowed; }
-// }
-
-// .spinner {
-//   width: 16px;
-//   height: 16px;
-//   border: 2px solid rgba($color-glass-white, 0.35);
-//   border-top-color: $color-white;
-//   border-radius: 50%;
-//   animation: spin 0.7s linear infinite;
-//   flex-shrink: 0;
-// }
-
-// @keyframes spin {
-//   to { transform: rotate(360deg); }
-// }
-
-// .error-banner {
-//   padding: 12px 16px;
-//   background: rgba($color-cold-red, 0.12);
-//   border: 1px solid rgba($color-cold-red, 0.4);
-//   border-radius: 10px;
-//   color: $color-cold-red;
-//   font-size: 0.9rem;
-// }
-
-// .report-card {
-//   background: rgba($color-glass-white, 0.35);
-//   backdrop-filter: blur(12px);
-//   border: 1px solid rgba($color-glass-white, 0.5);
-//   border-radius: $radius-glass-card;
-//   padding: 32px;
-//   display: flex;
-//   flex-direction: column;
-//   gap: 24px;
-//   max-width: 640px;
-// }
-
-// .report-stats {
-//   display: flex;
-//   gap: 16px;
-// }
-
-// .stat {
-//   flex: 1;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   padding: 20px 12px;
-//   border-radius: 14px;
-//   background: rgba($color-glass-white, 0.2);
-
-//   &--saved   { border-top: 3px solid $color-green; }
-//   &--skipped { border-top: 3px solid $color-cold-red; }
-//   &--total   { border-top: 3px solid $color-accent-lighter; }
-// }
-
-// .stat-value {
-//   font-size: 2rem;
-//   font-weight: 700;
-//   color: $color-white;
-// }
-
-// .stat-label {
-//   font-size: 0.8rem;
-//   color: rgba($color-glass-white, 0.75);
-//   margin-top: 4px;
-// }
-
-// .errors-title {
-//   font-size: 1rem;
-//   font-weight: 600;
-//   color: $color-white;
-//   margin: 0 0 12px;
-// }
-
-// .errors-table-wrap {
-//   overflow-x: auto;
-//   border-radius: 10px;
-//   border: 1px solid rgba($color-glass-white, 0.3);
-// }
-
-// .errors-table {
-//   width: 100%;
-//   border-collapse: collapse;
-//   font-size: 0.875rem;
-
-//   th, td {
-//     padding: 10px 14px;
-//     text-align: left;
-//     color: $color-white;
-//     border-bottom: 1px solid rgba($color-glass-white, 0.15);
-//   }
-
-//   th {
-//     background: rgba($color-glass-white, 0.15);
-//     font-weight: 600;
-//     font-size: 0.8rem;
-//     text-transform: uppercase;
-//     letter-spacing: 0.04em;
-//   }
-
-//   tr:last-child td { border-bottom: none; }
-
-//   .row-num {
-//     font-weight: 600;
-//     color: $color-cold-red;
-//     white-space: nowrap;
-//   }
-// }
-
-// .success-notice {
-//   text-align: center;
-//   color: $color-green-light;
-//   font-weight: 500;
-//   font-size: 0.95rem;
-//   padding: 12px;
-//   background: rgba($color-green, 0.1);
-//   border-radius: 10px;
-// }
 </style>
