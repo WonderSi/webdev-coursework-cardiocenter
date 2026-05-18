@@ -111,41 +111,41 @@
 
           <div class="section-info">
             <div class="input-row">
-              <div class="patient-subheader">Пол:</div>
-              <div class="radio-group-horizontal">
+              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.gender }">Пол:</div>
+              <div class="radio-group-horizontal" :class="{ 'group-error': showPatientErrors && patientFieldErrors.gender }">
                 <label class="radio-label">Мужской<input type="radio" v-model="singlePatient.gender" :value="1"></label>
                 <label class="radio-label">Женский<input type="radio" v-model="singlePatient.gender" :value="2"></label>
               </div>
             </div>
 
             <div class="input-row">
-              <div class="patient-subheader">Возраст:</div>
+              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.age }">Возраст:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="27" v-model="singlePatient.age">
+                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.age }" placeholder="27" v-model="singlePatient.age">
                 <span class="unit">лет</span>
               </div>
             </div>
 
             <div class="input-row">
-              <div class="patient-subheader">Рост:</div>
+              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.height }">Рост:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="165" v-model="singlePatient.height">
+                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.height }" placeholder="165" v-model="singlePatient.height">
                 <span class="unit">см</span>
               </div>
             </div>
 
             <div class="input-row">
-              <div class="patient-subheader">Вес:</div>
+              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.weight }">Вес:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="60" v-model="singlePatient.weight">
+                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.weight }" placeholder="60" v-model="singlePatient.weight">
                 <span class="unit">кг</span>
               </div>
             </div>
 
             <div class="input-row">
-              <div class="patient-subheader">Объём бёдер:</div>
+              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.hipMeasurement }">Объём бёдер:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="90" v-model="singlePatient.hipMeasurement">
+                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.hipMeasurement }" placeholder="90" v-model="singlePatient.hipMeasurement">
                 <span class="unit">см</span>
               </div>
             </div>
@@ -153,8 +153,8 @@
 
           <div class="div-line"></div>
 
-          <div class="patient-subheader">Алкоголь:</div>
-          <div class="radio-group-vertical">
+          <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.alcohol }">Алкоголь:</div>
+          <div class="radio-group-vertical" :class="{ 'group-error-vert': showPatientErrors && patientFieldErrors.alcohol }">
             <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="3"> Употребляю</label>
             <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="2"> Употреблял ранее</label>
             <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="1"> Никогда не употреблял</label>
@@ -162,9 +162,9 @@
         </div>
         
         <div class="input-patient-one-col2">
-          <div class="patient-subheader" style="flex-shrink: 0;">Основной род деятельности:</div>
+          <div class="patient-subheader" style="flex-shrink: 0;" :class="{ 'label-error': showPatientErrors && patientFieldErrors.profession }">Основной род деятельности:</div>
 
-          <div class="list-wrapper">
+          <div class="list-wrapper" :class="{ 'group-error-vert': showPatientErrors && patientFieldErrors.profession }">
             <div class="scrollable-radio-list radio-group-vertical" style="margin-top: 0;">
               <label class="radio-label" v-for="prof in PROFESSIONS" :key="prof.valueId">
                 <input type="radio" v-model="singlePatient.profession" :value="prof.valueId">
@@ -180,9 +180,9 @@
       <div class="input-patient-part-two">
         <div class="part-two-columns">
           <div class="part-two-col1">
-            <div class="patient-subheader">Район проживания:</div>
+            <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.region }">Район проживания:</div>
             <div class="div-line-small"></div>
-            <div class="radio-group-vertical">
+            <div class="radio-group-vertical" :class="{ 'group-error-vert': showPatientErrors && patientFieldErrors.region }">
               <label class="radio-label" v-for="reg in REGIONS" :key="reg.valueId">
                 <input type="radio" v-model="singlePatient.region" :value="reg.valueId">
                 {{ reg.label }}
@@ -221,9 +221,9 @@
                   
                     <Transition name="fade">
                       <div v-if="singlePatient[disease.key] === 1" class="inline-year-input">
-                        <span class="lab-label inline-label">Год:</span>
+                        <span class="lab-label inline-label" :class="{ 'label-error': showPatientErrors && patientFieldErrors[disease.yearKey] }">Год:</span>
                         <div class="input-group">
-                          <input type="number" class="input-field year-field" placeholder="2018" v-model="singlePatient[disease.yearKey]">
+                          <input type="number" class="input-field year-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors[disease.yearKey] }" placeholder="2018" v-model="singlePatient[disease.yearKey]">
                         </div>
                       </div>
                     </Transition>
@@ -235,8 +235,15 @@
         </div>
 
         <div class="submit-patient-action">
-          <p class="patient-success-msg" :class="{ visible: patientSuccess }">Пациент успешно добавлен</p>
-          <button class="upload-btn" @click="submitSinglePatient" :disabled="submittingPatient">
+          <p class="patient-form-msg"
+             :class="{
+               'msg-visible': (showPatientErrors && (patientHasErrors || patientBackendError)) || patientSuccess,
+               'msg-error': showPatientErrors && (patientHasErrors || patientBackendError)
+             }">
+            {{ showPatientErrors && (patientHasErrors || patientBackendError) ? patientCurrentError : 'Пациент успешно добавлен' }}
+          </p>
+          <button class="upload-btn" @click="submitSinglePatient"
+            :disabled="submittingPatient || (showPatientErrors && patientHasErrors)">
             {{ submittingPatient ? 'Сохранение...' : 'Внести пациента' }}
           </button>
         </div>
@@ -366,30 +373,91 @@ const singlePatient = reactive({
   arterialHypertensionYear: null as number | null,
 })
 
+// --- ВАЛИДАЦИЯ ФОРМЫ ПАЦИЕНТА
+const showPatientErrors = ref(false)
+const patientBackendError = ref<string | null>(null)
+
+const patientFieldErrors = computed<Record<string, string>>(() => {
+  const errors: Record<string, string> = {}
+  const p = singlePatient
+  const currentYear = new Date().getFullYear()
+
+  if (p.gender === null) errors.gender = 'Укажите пол'
+
+  const ageVal = p.age !== null && (p.age as any) !== '' ? Number(p.age) : null
+  if (ageVal === null) errors.age = 'Укажите возраст'
+  else if (isNaN(ageVal) || ageVal < 18 || ageVal > 120) errors.age = 'Возраст: 18–120 лет'
+
+  if (p.alcohol === null) errors.alcohol = 'Укажите употребление алкоголя'
+  if (p.profession === null) errors.profession = 'Укажите род деятельности'
+  if (p.region === null) errors.region = 'Укажите район проживания'
+
+  const rangeChecks: { key: keyof typeof p; required: boolean; min: number; max: number; empty: string; range: string }[] = [
+    { key: 'height',         required: true,  min: 50,  max: 250, empty: 'Укажите рост',        range: 'Рост: 50–250 см' },
+    { key: 'weight',         required: true,  min: 20,  max: 300, empty: 'Укажите вес',         range: 'Вес: 20–300 кг' },
+    { key: 'hipMeasurement', required: false, min: 40,  max: 200, empty: '',                    range: 'Объём бёдер: 40–200 см' },
+  ]
+  for (const { key, required, min, max, empty, range } of rangeChecks) {
+    const v = p[key]
+    const isEmpty = v === null || (v as any) === ''
+    if (isEmpty) {
+      if (required) errors[key] = empty
+    } else {
+      const n = Number(v)
+      if (isNaN(n) || n < min || n > max) errors[key] = range
+    }
+  }
+
+  for (const { key, yearKey } of DISEASES) {
+    const yearVal = p[yearKey]
+    if (p[key] === 1 && yearVal !== null && (yearVal as any) !== '') {
+      const y = Number(yearVal)
+      if (isNaN(y) || y < 1900 || y > currentYear) errors[yearKey] = `Год: 1900–${currentYear}`
+    }
+  }
+
+  return errors
+})
+
+const patientHasErrors = computed(() => Object.keys(patientFieldErrors.value).length > 0)
+
+const patientCurrentError = computed(() =>
+  patientBackendError.value ?? Object.values(patientFieldErrors.value)[0] ?? ''
+)
+
+watch(singlePatient, () => {
+  if (!patientHasErrors.value) showPatientErrors.value = false
+}, { deep: true })
+
 async function submitSinglePatient() {
-  if (singlePatient.gender === null || singlePatient.age === null) {
-    globalError.value = 'Укажите пол и возраст пациента'
-    showErrors.value = true
+  patientBackendError.value = null
+
+  if (patientHasErrors.value) {
+    showPatientErrors.value = true
     return
   }
 
   submittingPatient.value = true
-  globalError.value = null
+  showPatientErrors.value = false
 
   try {
+    const payload = Object.fromEntries(
+      Object.entries(singlePatient).map(([k, v]) => [k, v === '' ? null : v])
+    )
+
     const res = await fetch('/api/admin/patients', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(singlePatient),
+      body: JSON.stringify(payload),
       credentials: 'include',
     })
 
     if (!res.ok) {
       const body = await res.json().catch(() => null)
-      globalError.value = (res.status === 401 || res.status === 403)
+      patientBackendError.value = (res.status === 401 || res.status === 403)
         ? 'Сессия истекла — войдите заново'
         : body?.error ?? `Ошибка при сохранении пациента (${res.status})`
-      showErrors.value = true
+      showPatientErrors.value = true
       return
     }
 
@@ -404,11 +472,12 @@ async function submitSinglePatient() {
       myocardialInfarction: null, myocardialInfarctionYear: null,
       arterialHypertension: null, arterialHypertensionYear: null,
     })
+    patientBackendError.value = null
     patientSuccess.value = true
     setTimeout(() => { patientSuccess.value = false }, 3000)
   } catch {
-    globalError.value = 'Ошибка соединения с сервером'
-    showErrors.value = true
+    patientBackendError.value = 'Ошибка соединения с сервером'
+    showPatientErrors.value = true
   } finally {
     submittingPatient.value = false
   }
@@ -1335,18 +1404,36 @@ input[type="radio"] {
 }
 
 
-.patient-success-msg {
-  color: $color-accent;
+.patient-form-msg {
   font-size: 1rem;
   font-weight: 500;
   margin: 0 0 12px;
   text-align: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  color: $color-accent;
 
-  &.visible {
-    opacity: 1;
-  }
+  &.msg-visible { opacity: 1; }
+  &.msg-error { color: $color-red; }
+}
+
+.input-field.field-error {
+  border-color: $color-red;
+}
+
+.radio-group-horizontal.group-error {
+  box-shadow: 0 0 0 1.5px $color-red;
+  border-radius: 8px;
+}
+
+.radio-group-vertical.group-error-vert,
+.list-wrapper.group-error-vert {
+  box-shadow: 0 0 0 1.5px $color-red;
+  border-radius: 8px;
+}
+
+.label-error {
+  color: $color-red;
 }
 
 .submit-patient-action {
