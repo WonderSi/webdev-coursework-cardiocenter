@@ -109,12 +109,12 @@
         <div class="input-patient-one-col1">
           <div class="section-header">Ввести одного пациента</div>
 
-          <div class="section-basic-info">
+          <div class="section-info">
             <div class="input-row">
               <div class="patient-subheader">Пол:</div>
               <div class="radio-group-horizontal">
-                <label class="radio-label">Мужской<input type="radio" v-model="singlePatient.gender" value="male"></label>
-                <label class="radio-label">Женский<input type="radio" v-model="singlePatient.gender" value="female"></label>
+                <label class="radio-label">Мужской<input type="radio" v-model="singlePatient.gender" :value="1"></label>
+                <label class="radio-label">Женский<input type="radio" v-model="singlePatient.gender" :value="2"></label>
               </div>
             </div>
 
@@ -145,7 +145,7 @@
             <div class="input-row">
               <div class="patient-subheader">Объём бёдер:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="86" v-model="singlePatient.hips">
+                <input type="number" class="input-field" placeholder="90" v-model="singlePatient.hipMeasurement">
                 <span class="unit">см</span>
               </div>
             </div>
@@ -155,30 +155,84 @@
 
           <div class="patient-subheader">Алкоголь:</div>
           <div class="radio-group-vertical">
-            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drinks"> Употребляю</label>
-            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drank_before"> Употреблял ранее</label>
-            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="never"> Никогда не употреблял</label>
+            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="3"> Употребляю</label>
+            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="2"> Употреблял ранее</label>
+            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="1"> Никогда не употреблял</label>
           </div>
         </div>
         
         <div class="input-patient-one-col2">
-          <div class="patient-subheader">Род деятельности:</div>
+          <div class="patient-subheader">Основной род деятельности:</div>
 
           <div class="list-wrapper">
             <div class="scrollable-radio-list radio-group-vertical">
-              <label class="radio-label" v-for="i in 14" :key="i">
-                <input type="radio" v-model="singlePatient.jobId" :value="i">
-                Руководители учреждений, организаций и предприятий (вариант {{ i }})
+              <label class="radio-label" v-for="prof in PROFESSIONS" :key="prof.valueId">
+                <input type="radio" v-model="singlePatient.profession" :value="prof.valueId">
+                {{ prof.label }}
               </label>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="div-line"></div>
+      <div class="div-line2"></div>
 
       <div class="input-patient-part-two">
+        <div class="part-two-columns">
+          <div class="part-two-col1">
+            <div class="patient-subheader">Район проживания:</div>
+            <div class="radio-group-vertical">
+              <label class="radio-label" v-for="reg in REGIONS" :key="reg.valueId">
+                <input type="radio" v-model="singlePatient.region" :value="reg.valueId">
+                {{ reg.label }}
+              </label>
+            </div>
+          </div>
+
+          <div class="part-two-col2">
+            <div class="patient-subheader">Лабораторные параметры:</div>
+            <div class="lab-inputs" style="margin-top: 16px;">
+              <div class="input-row" v-for="lab in LABS" :key="lab.key">
+                <div class="lab-label">{{ lab.label }}:</div>
+                <div class="input-group">
+                  <input type="number" class="input-field" :placeholder="lab.placeholder" v-model="singlePatient[lab.key]">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="part-two-col3">
+            <div class="patient-subheader">Хронические заболевания и диагнозы:</div>
+            
+            <div class="lab-inputs" style="margin-top: 16px;">
+              <div v-for="disease in DISEASES" :key="disease.key" style="border-bottom: 1px solid rgba(36, 41, 66, 0.1); padding-bottom: 16px;">
+                <div class="lab-label" style="margin-bottom: 12px; line-height: 1.4;">{{ disease.label }}</div>
+                
+                <div class="radio-group-horizontal">
+                  <label class="radio-label">Да<input type="radio" v-model="singlePatient[disease.key]" :value="1"></label>
+                  <label class="radio-label">Нет<input type="radio" v-model="singlePatient[disease.key]" :value="0"></label>
+                </div>
+                
+                <Transition name="fade">
+                  <div v-if="singlePatient[disease.key] === 1" class="input-row nested-input" style="margin-top: 12px;">
+                    <div class="lab-label">Год:</div>
+                    <div class="input-group">
+                      <input type="number" class="input-field year-field" placeholder="2018" v-model="singlePatient[disease.yearKey]">
+                      <span class="unit">год</span>
+                    </div>
+                  </div>
+                </Transition>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div class="submit-patient-action">
+          <button class="upload-btn" @click="submitSinglePatient">
+            Внести пациента
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -216,16 +270,96 @@ const uploadProgress = ref(0)
 const templateLoading = ref(false)
 const reports = ref<UploadReport[]>([])
 
-// --- СОСТОЯНИЕ ФОРМЫ (ОДИН ПАЦИЕНТ)
+// --- СПРАВОЧНИКИ ИЗ survey.config.ts
+const PROFESSIONS = [
+  { valueId: 14, label: 'Представители законодательных органов власти, высокопоставленные должностные лица, менеджеры и руководители' },
+  { valueId: 10, label: 'Квалифицированные специалисты сельского хозяйства и рыболовного' },
+  { valueId: 4, label: 'Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд' },
+  { valueId: 1, label: 'Ведение домашнего хозяйства' },
+  { valueId: 2, label: 'Вооруженные силы' },
+  { valueId: 5, label: 'Операторы и монтажники установок и машинного оборудования' },
+  { valueId: 6, label: 'Служащие, сфера обслуживания, работники среднего звена' },
+  { valueId: 7, label: 'Никогда не работающие домохозяйки' },
+  { valueId: 8, label: 'Дипломированные специалисты, умственный труд' },
+  { valueId: 3, label: 'Лица свободных профессий' },
+  { valueId: 11, label: 'Пенсионеры' },
+  { valueId: 12, label: 'Ремесленники и представители других отраслей промышленности' },
+  { valueId: 13, label: 'Техники и младшие специалисты' },
+  { valueId: 9, label: 'Другое' },
+]
+
+const REGIONS = [
+  { valueId: 6, label: 'Сельская местность' },
+  { valueId: 2, label: 'Центральный' },
+  { valueId: 3, label: 'Заводской' },
+  { valueId: 1, label: 'Рудничный' },
+  { valueId: 4, label: 'Кировский' },
+  { valueId: 5, label: 'Ленинский' },
+]
+
+type PatientKeys = keyof typeof singlePatient;
+
+const LABS: { key: PatientKeys, label: string, placeholder: string }[] = [
+  { key: 'glucose', label: 'Глюкоза', placeholder: '4,5' },
+  { key: 'cholesterol', label: 'Холестерин', placeholder: '5,3' },
+  { key: 'nonHdlCholesterol', label: 'Холестерин не-ЛПВП', placeholder: '3,2' },
+  { key: 'vldlCholesterol', label: 'Холестерин ЛПОНП', placeholder: '0,8' },
+  { key: 'hdlCholesterol', label: 'Холестерин ЛПВП', placeholder: '1,2' },
+  { key: 'ldlCholesterol', label: 'Холестерин ЛПНП', placeholder: '3,0' },
+  { key: 'apolipoproteinA', label: 'Апо А', placeholder: '1,5' },
+  { key: 'apolipoproteinB', label: 'Апо B', placeholder: '0,9' },
+  { key: 'triglycerides', label: 'Триглицериды', placeholder: '1,7' },
+]
+
+const DISEASES: { key: PatientKeys, yearKey: PatientKeys, label: string }[] = [
+  { key: 'stroke', yearKey: 'strokeYear', label: 'Диагностировался ли инсульт?' },
+  { key: 'heartFailure', yearKey: 'heartFailureYear', label: 'Диагностировалась ли сердечная недостаточность (СН)?' },
+  { key: 'cad', yearKey: 'cadYear', label: 'Диагностировалось ли нарушение ритма или другие ИБС?' },
+  { key: 'angina', yearKey: 'anginaYear', label: 'Диагностировалась ли стенокардия?' },
+  { key: 'myocardialInfarction', yearKey: 'myocardialInfarctionYear', label: 'Диагностировался ли инфаркт миокарда?' },
+  { key: 'arterialHypertension', yearKey: 'arterialHypertensionYear', label: 'Диагностировалась ли артериальная гипертензия (АГ)?' },
+]
+
+// --- СОСТОЯНИЕ ФОРМЫ ПАЦИЕНТА (СООТВЕТСТВИЕ survey.config.ts)
 const singlePatient = reactive({
-  gender: '',
+  gender: null as number | null,
   age: null as number | null,
   height: null as number | null,
   weight: null as number | null,
-  hips: null as number | null,
-  alcohol: '',
-  jobId: null as number | null
+  hipMeasurement: null as number | null,
+  
+  alcohol: null as number | null,
+  profession: null as number | null,
+  region: null as number | null,
+
+  glucose: null as number | null,
+  cholesterol: null as number | null,
+  nonHdlCholesterol: null as number | null,
+  vldlCholesterol: null as number | null,
+  hdlCholesterol: null as number | null,
+  ldlCholesterol: null as number | null,
+  apolipoproteinA: null as number | null,
+  apolipoproteinB: null as number | null,
+  triglycerides: null as number | null,
+
+  stroke: null as number | null, 
+  strokeYear: null as number | null,
+  heartFailure: null as number | null, 
+  heartFailureYear: null as number | null,
+  cad: null as number | null, 
+  cadYear: null as number | null,
+  angina: null as number | null, 
+  anginaYear: null as number | null,
+  myocardialInfarction: null as number | null, 
+  myocardialInfarctionYear: null as number | null,
+  arterialHypertension: null as number | null, 
+  arterialHypertensionYear: null as number | null,
 })
+
+async function submitSinglePatient() {
+  console.log('Данные пациента на отправку:', singlePatient)
+  // тут будет fetch('/api/patients', ...)
+}
 
 // --- ЛОГИКА БАННЕРА ОШИБОК
 const showErrors = ref(false)
@@ -239,17 +373,9 @@ watch(globalError, (newVal) => {
 const fieldErrors = computed<Record<string, string>>(() => {
   const errors: Record<string, string> = {}
   
-  // Ошибки файлов
   if (globalError.value) {
     errors['file'] = globalError.value
   }
-
-  // Ошибки формы (по аналогии с опросником)
-  // if (showErrors.value) {
-  //   if (singlePatient.age !== null && singlePatient.age < 0) {
-  //     errors['age'] = 'Возраст не может быть отрицательным'
-  //   }
-  // }
 
   return errors
 })
@@ -429,6 +555,23 @@ async function downloadTemplate() {
 @use '@/styles/variables' as *;
 
 // --------- УТИЛИТИ
+
+.div-line {
+  width: 100%;
+  border-top: 2px solid $color-accent;
+  border-radius: 1000px;
+  height: 0;
+  margin-block: 24px;
+}
+
+.div-line2 {
+  width: 100%;
+  border-top: 2px solid $color-accent;
+  border-radius: 1000px;
+  height: 0;
+  margin-block: 64px;
+}
+
 .wrapper_column {
   position: absolute;
   inset: 0;
@@ -881,7 +1024,7 @@ async function downloadTemplate() {
       justify-content: flex-start;
       flex: 0 0 360px;
 
-      .section-basic-info {
+      .section-info {
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -894,14 +1037,8 @@ async function downloadTemplate() {
           width: 100%;
         }
       }
-      .div-line {
-        width: 100%;
-        border-top: 2px solid $color-accent;
-        border-radius: 1000px;
-        height: 0;
-        margin-block: 24px;
-      }
     }
+
     .input-patient-one-col2 {
       display: flex;
       flex-direction: column;
@@ -933,11 +1070,6 @@ async function downloadTemplate() {
         &:hover { background: rgba($color-secondary, 1); }
       }
     }
-  }
-
-  .input-patient-part-two {
-    display: flex; 
-    flex-direction: row;
   }
 }
 
@@ -1039,6 +1171,75 @@ input[type="radio"] {
 
 .error-banner {
   margin-left: 240px;
+}
+
+// --- СТИЛИ ДЛЯ ПАЦИЕНТА, ДОПОЛНИТЕЛЬНЫЕ
+.input-patient-part-two {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+}
+
+.part-two-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.lab-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  
+  .input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.lab-label {
+  font-size: 1rem;
+  color: $color-text;
+  font-weight: 500;
+}
+
+.nested-input {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  
+  .year-field {
+    width: 80px;
+  }
+}
+
+.submit-patient-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+
+  .upload-btn {
+    justify-content: center;
+    display: flex;
+    padding: 13px;
+    width: 100%;
+    background: $color-accent;
+    white-space: nowrap;
+    border: none;
+    border-radius: $radius-rect-buttons;
+    color: $color-white;
+    font-weight: 600;
+    font-size: 1rem;
+    &:hover {
+      background: $color-accent-lighter;
+      cursor: pointer;
+    }
+  }
 }
 
 </style>
