@@ -162,10 +162,10 @@
         </div>
         
         <div class="input-patient-one-col2">
-          <div class="patient-subheader">Основной род деятельности:</div>
+          <div class="patient-subheader" style="flex-shrink: 0;">Основной род деятельности:</div>
 
           <div class="list-wrapper">
-            <div class="scrollable-radio-list radio-group-vertical">
+            <div class="scrollable-radio-list radio-group-vertical" style="margin-top: 0;">
               <label class="radio-label" v-for="prof in PROFESSIONS" :key="prof.valueId">
                 <input type="radio" v-model="singlePatient.profession" :value="prof.valueId">
                 {{ prof.label }}
@@ -196,6 +196,7 @@
                 <div class="lab-label">{{ lab.label }}:</div>
                 <div class="input-group">
                   <input type="number" class="input-field" :placeholder="lab.placeholder" v-model="singlePatient[lab.key]">
+                  <span class="unit" style="width: auto; margin-left: 4px;">{{ lab.unit }}</span>
                 </div>
               </div>
             </div>
@@ -205,23 +206,25 @@
             <div class="patient-subheader">Хронические заболевания и диагнозы:</div>
             
             <div class="lab-inputs" style="margin-top: 16px;">
-              <div v-for="disease in DISEASES" :key="disease.key" style="border-bottom: 1px solid rgba(36, 41, 66, 0.1); padding-bottom: 16px;">
-                <div class="lab-label" style="margin-bottom: 12px; line-height: 1.4;">{{ disease.label }}</div>
+              <div v-for="disease in DISEASES" :key="disease.key" class="disease-item">
+                <div class="lab-label disease-label">{{ disease.label }}</div>
                 
-                <div class="radio-group-horizontal">
-                  <label class="radio-label">Да<input type="radio" v-model="singlePatient[disease.key]" :value="1"></label>
-                  <label class="radio-label">Нет<input type="radio" v-model="singlePatient[disease.key]" :value="0"></label>
-                </div>
-                
-                <Transition name="fade">
-                  <div v-if="singlePatient[disease.key] === 1" class="input-row nested-input" style="margin-top: 12px;">
-                    <div class="lab-label">Год:</div>
-                    <div class="input-group">
-                      <input type="number" class="input-field year-field" placeholder="2018" v-model="singlePatient[disease.yearKey]">
-                      <span class="unit">год</span>
-                    </div>
+                <div class="disease-controls">
+                  <div class="radio-group-horizontal">
+                    <label class="radio-label">Нет<input type="radio" v-model="singlePatient[disease.key]" :value="0"></label>
+                    <label class="radio-label">Да<input type="radio" v-model="singlePatient[disease.key]" :value="1"></label>
                   </div>
-                </Transition>
+                  
+                  <Transition name="fade">
+                    <div v-if="singlePatient[disease.key] === 1" class="inline-year-input">
+                      <span class="lab-label inline-label">Год:</span>
+                      <div class="input-group">
+                        <input type="number" class="input-field year-field" placeholder="2018" v-model="singlePatient[disease.yearKey]">
+                        <span class="unit">г.</span>
+                      </div>
+                    </div>
+                  </Transition>
+                </div>
               </div>
             </div>
           </div>
@@ -299,16 +302,16 @@ const REGIONS = [
 
 type PatientKeys = keyof typeof singlePatient;
 
-const LABS: { key: PatientKeys, label: string, placeholder: string }[] = [
-  { key: 'glucose', label: 'Глюкоза', placeholder: '4,5' },
-  { key: 'cholesterol', label: 'Холестерин', placeholder: '5,3' },
-  { key: 'nonHdlCholesterol', label: 'Холестерин не-ЛПВП', placeholder: '3,2' },
-  { key: 'vldlCholesterol', label: 'Холестерин ЛПОНП', placeholder: '0,8' },
-  { key: 'hdlCholesterol', label: 'Холестерин ЛПВП', placeholder: '1,2' },
-  { key: 'ldlCholesterol', label: 'Холестерин ЛПНП', placeholder: '3,0' },
-  { key: 'apolipoproteinA', label: 'Апо А', placeholder: '1,5' },
-  { key: 'apolipoproteinB', label: 'Апо B', placeholder: '0,9' },
-  { key: 'triglycerides', label: 'Триглицериды', placeholder: '1,7' },
+const LABS: { key: PatientKeys, label: string, placeholder: string, unit: string }[] = [
+  { key: 'glucose', label: 'Глюкоза', placeholder: '4,5', unit: 'ммоль/л' },
+  { key: 'cholesterol', label: 'Холестерин', placeholder: '5,3', unit: 'ммоль/л' },
+  { key: 'nonHdlCholesterol', label: 'Холестерин не-ЛПВП', placeholder: '3,2', unit: 'ммоль/л' },
+  { key: 'vldlCholesterol', label: 'Холестерин ЛПОНП', placeholder: '0,8', unit: 'ммоль/л' },
+  { key: 'hdlCholesterol', label: 'Холестерин ЛПВП', placeholder: '1,2', unit: 'ммоль/л' },
+  { key: 'ldlCholesterol', label: 'Холестерин ЛПНП', placeholder: '3,0', unit: 'ммоль/л' },
+  { key: 'apolipoproteinA', label: 'Апо А', placeholder: '1,5', unit: 'г/л' },
+  { key: 'apolipoproteinB', label: 'Апо B', placeholder: '0,9', unit: 'г/л' },
+  { key: 'triglycerides', label: 'Триглицериды', placeholder: '1,7', unit: 'ммоль/л' },
 ]
 
 const DISEASES: { key: PatientKeys, yearKey: PatientKeys, label: string }[] = [
@@ -593,7 +596,7 @@ async function downloadTemplate() {
 // ---- ПОДЧЁРКИВАНИЯ: 
 .underlined {
   text-decoration: underline;
-  text-decoration-color: #0f356e;
+  text-decoration-color: $color-blue-dark;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -601,7 +604,7 @@ async function downloadTemplate() {
 .underlined-hover {
   &:hover {
     text-decoration: underline;
-    text-decoration-color: #0f356e;
+    text-decoration-color: $color-blue-dark;
     text-decoration-thickness: 2px;
     text-underline-offset: 2px;
     cursor: pointer;
@@ -1012,7 +1015,7 @@ async function downloadTemplate() {
     color: $color-text;
   }
 
-    .input-patient-part-one {
+  .input-patient-part-one {
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -1043,6 +1046,7 @@ async function downloadTemplate() {
       display: flex;
       flex-direction: column;
       flex: 1;
+      min-height: 0;
     }
 
     .patient-subheader {
@@ -1051,14 +1055,8 @@ async function downloadTemplate() {
     }
 
     .list-wrapper {
-      margin-left: 456px;
-      margin-top: 60px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 32px;
-      bottom: 32px;
-
+      margin-top: 16px;
+      flex-grow: 1;
       overflow-y: auto;
       padding-right: 16px;
 
@@ -1135,7 +1133,7 @@ async function downloadTemplate() {
   }
 }
 
-/* ГЛОБАЛЬНЫЙ СТИЛЬ РАДИО-КНОПОК */
+// ГЛОБАЛЬНЫЙ СТИЛЬ РАДИО-КНОПОК
 input[type="radio"] {
   appearance: none; 
   -webkit-appearance: none; 
@@ -1183,7 +1181,7 @@ input[type="radio"] {
 
 .part-two-columns {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1.2fr 1.5fr 2.5fr;
   gap: 32px;
   align-items: start;
 }
@@ -1206,17 +1204,51 @@ input[type="radio"] {
   font-weight: 500;
 }
 
-.nested-input {
-  margin-top: 24px;
+
+// --- Стили для заболеваний с инлайн-инпутом
+.disease-item {
+  border-bottom: 1px solid rgba($color-secondary, 0.1);
+  padding-bottom: 16px;
+}
+
+.disease-label {
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.disease-controls {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  min-height: 34px;
+}
+
+.inline-year-input {
+  display: flex;
+  align-items: center;
   gap: 12px;
+  margin-left: 32px;
   
+  .inline-label {
+    margin: 0;
+    color: $color-secondary-text;
+    font-size: 0.95rem;
+  }
+
   .year-field {
-    width: 80px;
+    width: 70px;
   }
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 
 .submit-patient-action {
   display: flex;
