@@ -10,7 +10,7 @@ from loguru import logger
 from app.config import settings
 from app.services.predictions import REGION_DATA, load_region_data
 from app.services.predictions import load_all_models
-from app.train_patients_ap_multi_models import train_models
+from app.services.training import train_models
 
 
 _LOCK = threading.Lock()

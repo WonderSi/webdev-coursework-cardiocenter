@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import argparse
 import json
 from dataclasses import dataclass, field
@@ -600,7 +598,8 @@ def train_models(
 
 
 def main() -> None:
-    base_dir = Path(__file__).resolve().parent
+    # Keep CLI paths relative to the app package root (../), not services/.
+    base_dir = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
         description="Train multiple CatBoost models for Patients dataset (ecology from region_data.json)."
     )
