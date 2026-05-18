@@ -769,9 +769,8 @@ function formatSize(bytes: number): string {
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      margin-bottom: 32px;
+      right: 32px;
+      bottom: 32px;
 
       overflow-y: auto;
       padding-right: 16px;
@@ -779,7 +778,7 @@ function formatSize(bytes: number): string {
       &::-webkit-scrollbar { width: 10px; }
       &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
       &::-webkit-scrollbar-thumb {
-        background: rgba($color-secondary, 0.5);
+        background: rgba($color-secondary, 0.8);
         border-radius: 10px;
         &:hover { background: rgba($color-secondary, 1); }
       }
@@ -821,7 +820,7 @@ function formatSize(bytes: number): string {
     padding: 8px 12px;
     background: rgba($color-white, 0.5);
     border: 1.5px solid $color-secondary;
-    border-radius: 8px;
+    border-radius: 100px;
     font-size: 1rem;
     font-family: inherit;
     text-align: center;
@@ -830,7 +829,7 @@ function formatSize(bytes: number): string {
     color: $color-text;
 
     &::placeholder {
-      color: rgba($color-secondary, 0.8);
+      color: rgba($color-secondary, 0.5);
       font-weight: 400;
     }
 
@@ -846,8 +845,11 @@ function formatSize(bytes: number): string {
   }
 
   .unit {
-    color: $color-secondary;
+    color: $color-secondary-text;
+    align-content: flex-end;
     font-size: 1rem;
+    width: 25px;
+    text-align: right;
   }
 }
 
