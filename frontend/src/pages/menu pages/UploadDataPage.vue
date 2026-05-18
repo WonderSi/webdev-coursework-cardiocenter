@@ -235,8 +235,9 @@
         </div>
 
         <div class="submit-patient-action">
-          <button class="upload-btn" @click="submitSinglePatient">
-            Внести пациента
+          <p class="patient-success-msg" :class="{ visible: patientSuccess }">Пациент успешно добавлен</p>
+          <button class="upload-btn" @click="submitSinglePatient" :disabled="submittingPatient">
+            {{ submittingPatient ? 'Сохранение...' : 'Внести пациента' }}
           </button>
         </div>
       </div>
@@ -276,6 +277,8 @@ const uploading = ref(false)
 const uploadProgress = ref(0)
 const templateLoading = ref(false)
 const reports = ref<UploadReport[]>([])
+const submittingPatient = ref(false)
+const patientSuccess = ref(false)
 
 // --- СПРАВОЧНИКИ ИЗ survey.config.ts
 const PROFESSIONS = [
@@ -364,8 +367,51 @@ const singlePatient = reactive({
 })
 
 async function submitSinglePatient() {
-  console.log('Данные пациента на отправку:', singlePatient)
-  // тут будет fetch('/api/patients', ...)
+  if (singlePatient.gender === null || singlePatient.age === null) {
+    globalError.value = 'Укажите пол и возраст пациента'
+    showErrors.value = true
+    return
+  }
+
+  submittingPatient.value = true
+  globalError.value = null
+
+  try {
+    const res = await fetch('/api/admin/patients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(singlePatient),
+      credentials: 'include',
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      globalError.value = (res.status === 401 || res.status === 403)
+        ? 'Сессия истекла — войдите заново'
+        : body?.error ?? `Ошибка при сохранении пациента (${res.status})`
+      showErrors.value = true
+      return
+    }
+
+    Object.assign(singlePatient, {
+      gender: null, age: null, height: null, weight: null,
+      hipMeasurement: null, alcohol: null, profession: null, region: null,
+      glucose: null, cholesterol: null, nonHdlCholesterol: null,
+      vldlCholesterol: null, hdlCholesterol: null, ldlCholesterol: null,
+      apolipoproteinA: null, apolipoproteinB: null, triglycerides: null,
+      stroke: null, strokeYear: null, heartFailure: null, heartFailureYear: null,
+      cad: null, cadYear: null, angina: null, anginaYear: null,
+      myocardialInfarction: null, myocardialInfarctionYear: null,
+      arterialHypertension: null, arterialHypertensionYear: null,
+    })
+    patientSuccess.value = true
+    setTimeout(() => { patientSuccess.value = false }, 3000)
+  } catch {
+    globalError.value = 'Ошибка соединения с сервером'
+    showErrors.value = true
+  } finally {
+    submittingPatient.value = false
+  }
 }
 
 // --- ЛОГИКА БАННЕРА ОШИБОК
@@ -1289,9 +1335,24 @@ input[type="radio"] {
 }
 
 
+.patient-success-msg {
+  color: $color-accent;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 12px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
 .submit-patient-action {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-top: 16px;
 
   .upload-btn {
