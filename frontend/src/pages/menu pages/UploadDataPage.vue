@@ -181,6 +181,7 @@
         <div class="part-two-columns">
           <div class="part-two-col1">
             <div class="patient-subheader">Район проживания:</div>
+            <div class="div-line-small"></div>
             <div class="radio-group-vertical">
               <label class="radio-label" v-for="reg in REGIONS" :key="reg.valueId">
                 <input type="radio" v-model="singlePatient.region" :value="reg.valueId">
@@ -191,6 +192,7 @@
 
           <div class="part-two-col2">
             <div class="patient-subheader">Лабораторные параметры:</div>
+            <div class="div-line-small"></div>
             <div class="lab-inputs" style="margin-top: 16px;">
               <div class="input-row" v-for="lab in LABS" :key="lab.key">
                 <div class="lab-label">{{ lab.label }}:</div>
@@ -204,7 +206,7 @@
           
           <div class="part-two-col3">
             <div class="patient-subheader">Хронические заболевания и диагнозы:</div>
-            
+            <div class="div-line-small"></div>
             <div class="lab-inputs" style="margin-top: 16px;">
               <div v-for="disease in DISEASES" :key="disease.key" class="disease-item">
                 <div class="lab-label disease-label">{{ disease.label }}</div>
@@ -569,10 +571,18 @@ async function downloadTemplate() {
 
 .div-line2 {
   width: 100%;
+  border-top: 1px solid $color-secondary;
+  border-radius: 1000px;
+  height: 0;
+  margin-block: 32px;
+}
+
+.div-line-small {
+  width: 100%;
   border-top: 2px solid $color-accent;
   border-radius: 1000px;
   height: 0;
-  margin-block: 64px;
+  margin-block: 8px;
 }
 
 .wrapper_column {
@@ -713,7 +723,6 @@ async function downloadTemplate() {
         border-radius: 10px;
         &:hover { background: rgba($color-secondary, 1); }
       }
-      
     
       // СТИЛЬ ОДНОГО ФАЙЛА
       .file-item {
@@ -1013,6 +1022,7 @@ async function downloadTemplate() {
     font-weight: 600;
     font-size: 1rem;
     color: $color-text;
+    white-space: nowrap;
   }
 
   .input-patient-part-one {
@@ -1026,6 +1036,14 @@ async function downloadTemplate() {
       flex-direction: column;
       justify-content: flex-start;
       flex: 0 0 360px;
+
+        .unit {
+        color: $color-secondary-text;
+        align-content: flex-end;
+        font-size: 1rem;
+        min-width: 24px;
+        text-align: right;
+      }
 
       .section-info {
         display: flex;
@@ -1128,7 +1146,7 @@ async function downloadTemplate() {
     color: $color-secondary-text;
     align-content: flex-end;
     font-size: 1rem;
-    width: 25px;
+    min-width: 70px;
     text-align: right;
   }
 }
@@ -1181,9 +1199,12 @@ input[type="radio"] {
 
 .part-two-columns {
   display: grid;
-  grid-template-columns: 1.2fr 1.5fr 2.5fr;
+  grid-template-columns: 1fr 1.7fr 2fr;
   gap: 32px;
   align-items: start;
+
+  .part-two-col1 {
+  }
 }
 
 .lab-inputs {
