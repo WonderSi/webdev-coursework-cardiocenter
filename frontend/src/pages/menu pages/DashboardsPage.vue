@@ -93,9 +93,9 @@ import { useDashboardCharts } from '@/composables/useDashboardsCharts';
 import { use } from 'echarts/core';
 import { SVGRenderer } from 'echarts/renderers';
 import { BarChart, PieChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 
-use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent]);
+use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent]);
 
 const {
   stats,
