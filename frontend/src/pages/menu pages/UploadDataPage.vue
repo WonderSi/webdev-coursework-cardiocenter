@@ -207,27 +207,29 @@
           <div class="part-two-col3">
             <div class="patient-subheader">Хронические заболевания и диагнозы:</div>
             <div class="div-line-small"></div>
-            <div class="lab-inputs" style="margin-top: 16px;">
-              <div v-for="disease in DISEASES" :key="disease.key" class="disease-item">
-                <div class="lab-label disease-label">{{ disease.label }}</div>
+
+            <div class="disease-list-wrapper">
+              <div class="lab-inputs" style="margin-top: 16px;">
+                <div v-for="disease in DISEASES" :key="disease.key" class="disease-item">
+                  <div class="lab-label disease-label">{{ disease.label }}</div>
                 
-                <div class="disease-controls">
-                  <div class="radio-group-horizontal">
-                    <label class="radio-label">Нет<input type="radio" v-model="singlePatient[disease.key]" :value="0"></label>
-                    <label class="radio-label">Да<input type="radio" v-model="singlePatient[disease.key]" :value="1"></label>
-                  </div>
-                  
-                  <Transition name="fade">
-                    <div v-if="singlePatient[disease.key] === 1" class="inline-year-input">
-                      <span class="lab-label inline-label">Год:</span>
-                      <div class="input-group">
-                        <input type="number" class="input-field year-field" placeholder="2018" v-model="singlePatient[disease.yearKey]">
-                        <span class="unit">г.</span>
-                      </div>
+                  <div class="disease-controls">
+                    <div class="radio-group-horizontal">
+                      <label class="radio-label">Нет<input type="radio" v-model="singlePatient[disease.key]" :value="0"></label>
+                      <label class="radio-label">Да<input type="radio" v-model="singlePatient[disease.key]" :value="1"></label>
                     </div>
-                  </Transition>
+                  
+                    <Transition name="fade">
+                      <div v-if="singlePatient[disease.key] === 1" class="inline-year-input">
+                        <span class="lab-label inline-label">Год:</span>
+                        <div class="input-group">
+                          <input type="number" class="input-field year-field" placeholder="2018" v-model="singlePatient[disease.yearKey]">
+                        </div>
+                      </div>
+                    </Transition>
+                  </div>
                 </div>
-              </div>
+              </div> 
             </div>
           </div>
         </div>
@@ -571,7 +573,7 @@ async function downloadTemplate() {
 
 .div-line2 {
   width: 100%;
-  border-top: 1px solid $color-secondary;
+  border-top: 1px solid $color-accent-lighter2;
   border-radius: 1000px;
   height: 0;
   margin-block: 32px;
@@ -1077,6 +1079,8 @@ async function downloadTemplate() {
       flex-grow: 1;
       overflow-y: auto;
       padding-right: 16px;
+      
+      max-height: 360px;
 
       &::-webkit-scrollbar { width: 10px; }
       &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
@@ -1199,11 +1203,25 @@ input[type="radio"] {
 
 .part-two-columns {
   display: grid;
-  grid-template-columns: 1fr 1.7fr 2fr;
+  grid-template-columns: 0.85fr 1.5fr 2fr;
   gap: 32px;
   align-items: start;
 
   .part-two-col1 {
+  }
+}
+
+.disease-list-wrapper {
+  overflow-y: auto;
+  padding-right: 16px;
+  max-height: 360px;
+
+  &::-webkit-scrollbar { width: 10px; }
+  &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
+  &::-webkit-scrollbar-thumb {
+    background: rgba($color-secondary, 0.8);
+    border-radius: 10px;
+    &:hover { background: rgba($color-secondary, 1); }
   }
 }
 
@@ -1252,7 +1270,7 @@ input[type="radio"] {
   .inline-label {
     margin: 0;
     color: $color-secondary-text;
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 
   .year-field {
