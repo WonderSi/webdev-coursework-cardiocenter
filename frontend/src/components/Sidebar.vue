@@ -1,10 +1,12 @@
 <template>
   <aside class="sidebar-glass">
     <div class="sidebar-header">
+      <router-link to="/" class="logo-link">
       <div class="logo">
         <img src="@/assets/logo-sidebar.png" alt="logo"/>
       </div>
       <div class="nii-text">НИИ КПССЗ</div>
+      </router-link>
     </div>
 
     <div class="divider"></div>
@@ -103,8 +105,20 @@ async function handleLogout() {
 .sidebar-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   justify-content: flex-start;
+
+  .logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 
   .sidebar-logo {
     width: 50px;
