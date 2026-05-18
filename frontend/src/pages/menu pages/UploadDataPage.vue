@@ -2,6 +2,12 @@
   <Sidebar />
 
   <div class="upload-page">
+    <Transition name="fade">
+      <div v-if="showErrors && hasErrors" class="error-banner">
+        <span>{{ currentErrorMessage }}</span>
+      </div>
+    </Transition>
+
     <div class="upload-duo-cards">
       <div class="upload-card">
         <div 
@@ -40,7 +46,6 @@
           <div class="bottom-card-text-block">
             <p class="alert-p">Пожалуйста, перед загрузкой убедитесь, что ваши данные соответствуют <b>шаблону</b></p>
             <p class="attention-p">Обратите внимание на лист <b>«<span class="underlined">справочник</span>»</b></p>
-            <p v-if="globalError" style="color: #DF2242; font-size: 0.875rem; margin-top: 8px;">{{ globalError }}</p>
           </div>
           <button class="download-template-btn" @click="downloadTemplate" :disabled="templateLoading">
             {{ templateLoading ? 'Загрузка...' : 'Скачать шаблон' }}
@@ -181,7 +186,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 
 // --- ИНТЕРФЕЙСЫ И КОНСТАНТЫ
@@ -224,7 +229,49 @@ const singlePatient = reactive({
   jobId: null as number | null
 })
 
-// --- ЛОГИКА И DRAG & DROP
+// --- ЛОГИКА БАННЕРА ОШИБОК
+const showErrors = ref(false)
+
+watch(globalError, (newVal) => {
+  if (newVal) {
+    showErrors.value = true
+  }
+})
+
+const fieldErrors = computed<Record<string, string>>(() => {
+  const errors: Record<string, string> = {}
+  
+  // Ошибки файлов
+  if (globalError.value) {
+    errors['file'] = globalError.value
+  }
+
+  // Ошибки формы (по аналогии с опросником)
+  // if (showErrors.value) {
+  //   if (singlePatient.age !== null && singlePatient.age < 0) {
+  //     errors['age'] = 'Возраст не может быть отрицательным'
+  //   }
+  // }
+
+  return errors
+})
+
+const hasErrors = computed(() => Object.keys(fieldErrors.value).length > 0)
+
+const currentErrorMessage = computed(() => {
+  const errorsList = Object.values(fieldErrors.value)
+  return errorsList.length > 0 ? errorsList[0] : 'Пожалуйста, проверьте введённые данные'
+})
+
+// Сбрасываем показ баннера, если ошибок больше нет
+watch([() => singlePatient, globalError], () => {
+  if (!hasErrors.value) {
+    showErrors.value = false
+  }
+}, { deep: true })
+
+
+// --- ЛОГИКА ВЫБОРА И DRAG & DROP
 function triggerFileInput() {
   if (!uploading.value) fileInputRef.value?.click()
 }
@@ -234,7 +281,7 @@ function handleFileChange(e: Event) {
   if (input.files?.length) {
     addFiles(Array.from(input.files))
   }
-  input.value = '' // Сбрасываем input, чтобы можно было выбрать тот же файл еще раз
+  input.value = ''
 }
 
 function handleDrop(e: DragEvent) {
@@ -246,19 +293,19 @@ function handleDrop(e: DragEvent) {
 
 function addFiles(newFiles: File[]) {
   globalError.value = null
-  let hasErrors = false
+  let hasErrorsInBatch = false
 
   const validFiles = newFiles.filter(file => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase()
     
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
-      globalError.value = `Формат файлов недопустим. Разрешены: ${ALLOWED_EXTENSIONS.join(', ')}`
-      hasErrors = true
+      globalError.value = `Недопустимый формат. Разрешены: ${ALLOWED_EXTENSIONS.join(', ')}`
+      hasErrorsInBatch = true
       return false
     }
     if (file.size > MAX_SIZE_BYTES) {
       globalError.value = 'Один или несколько файлов превышают лимит в 10 МБ'
-      hasErrors = true
+      hasErrorsInBatch = true
       return false
     }
     return true
@@ -279,6 +326,7 @@ function addFiles(newFiles: File[]) {
 function removeFile(index: number) {
   files.value.splice(index, 1)
   if (files.value.length === 0) uploadProgress.value = 0
+  globalError.value = null // Очищаем ошибку, если она была, при удалении файла
 }
 
 function cancelAll() {
@@ -986,6 +1034,10 @@ input[type="radio"] {
       border-radius: 50%;
     }
   }
+}
+
+.error-banner {
+  margin-left: 240px;
 }
 
 </style>
