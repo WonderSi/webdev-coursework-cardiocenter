@@ -21,6 +21,14 @@
             </div>
             <p class="upload-main-p"><span class=underlined-hover>Выберите</span> или перетащите файлы</p>
             <p class="upload-formats-p">.xlsx, .xls, .csv — до 10 МБ</p>
+
+            <input
+              type="file"
+              ref="fileInputRef"
+              style="display: none"
+              multiple
+              accept=".xlsx,.xls,.csv"
+              @change="handleFileChange"
           </div>
         </div>
 
