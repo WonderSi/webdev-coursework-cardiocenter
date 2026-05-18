@@ -2,38 +2,59 @@
   <div class="results-page">
     <div class="logo-container">
       <router-link to="/" class="logo-link">
-      <img src="@/assets/logo.png" alt="logo" class="logo" />
+        <img src="@/assets/logo.png" alt="logo" class="logo" />
       </router-link>
     </div>
-
+    
     <div class="results-card">
       <h1 class="title">Прогнозирование риска развития<br>сердечно-сосудистых заболеваний</h1>
       <div class="div-line"></div>
+      
       <div class="results-text-block">
         <h2 class="results-title">РЕЗУЛЬТАТЫ</h2>
         <p class="regular-text">Спасибо за прохождение опроса!</p>
-        <p class="regular-text">Пожалуйста, обратите внимание на ваши риски и проконсультируйтесь со специалистом. Берегите себя!</p>
+        <p class="regular-text">Пожалуйста, обратите внимание на ваши риски и проконсультируйтесь со специалистом. <b>Берегите себя!</b></p>
       </div>
-      <div class="results-content">
-        <div class="risk-element">
-          <div class="risk-icon"></div>
-          <label class="risk-percent"></label>
-          <label class="risk-name"></label>
-        </div> <!-- Всегда 7 штук -->
-        
-
-
-          <!-- <div class="heart-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#EA566F"/> </svg>
-          </div> -->
-      </div>
-
       
-
-
-        <button class="btn-home-page" @click="goHome">На главную</button>
+      <div class="results-content">
+        <div class="risk-element-general-risk">
+          <svg 
+              :width=90
+              :height=90 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            > 
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#EA566F"/> 
+            </svg>
+            <label class="risk-percent-general-risk">{{ GENERALRISK.risk }}%</label>
+            <label class="risk-name-general-risk">{{  GENERALRISK.name }}</label>
+        </div>
+        <div 
+          v-for="(item, index) in DISEASESMOCK" 
+          :key="index"
+          class="risk-element"
+          :class="getRiskClass(item.risk)"
+        >
+          <div class="risk-icon">
+            <svg 
+              :width="getRiskIconSize(item.risk).width" 
+              :height="getRiskIconSize(item.risk).height" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect width="100%" height="100%" fill="currentColor" />
+            </svg>
+          </div>
+          
+          <label class="risk-percent">{{ item.risk }}%</label>
+          <label class="risk-name">{{ item.name }}</label>
+        </div>
       </div>
+      
+      <button class="btn-home-page" @click="goHome">На главную</button>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -48,34 +69,36 @@ const goHome = () => {
   router.push('/')
 }
 
-// const DISEASES: { mlKey: string, label: string }[] = [
-//   { mlKey: 'general', label: 'Общий Риск' },
-//   { mlKey: 'stroke', label: 'Инсульт' },
-//   { mlKey: 'heart_failure', label: 'Сердечная Недостаточность (СН)' },
-//   { mlKey: 'arrhythmia_or_ihd', label: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)' },
-//   { mlKey: 'angina', label: 'Стенокардия' },
-//   { mlKey: 'mi', label: 'Инфаркт Миокарда' },
-//   { mlKey: 'ah', label: 'Артериальная Гипертензия (АГ)' },
-// ]
+const GENERALRISK = { name: 'Общий Риск', risk: 100 };
 
-// данные сразу поданы в формате ОБЩИЙ РИСК И ДАЛЬШЕ ПО УБЫВАНИЮ. РОВНО ТАК,
-// В КАКОМ ПОРЯДКЕ НУЖНО ОТОБРАЖАТЬ
 const DISEASESMOCK: { name: string, risk: number }[] = [
-  { name: 'Общий Риск', risk: 95 },
-  { name: 'Инсульт', risk: 53 },
-  { name: 'Сердечная Недостаточность (СН)', risk: 45 },
-  { name: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)', risk: 34 },
-  { name: 'Стенокардия', risk: 26 },
+  { name: 'Инсульт', risk: 93 },
+  { name: 'Сердечная Недостаточность (СН)', risk: 70 },
+  { name: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)', risk: 59 },
+  { name: 'Стенокардия', risk: 30 },
   { name: 'Инфаркт Миокарда', risk: 19 },
   { name: 'Артериальная Гипертензия (АГ)', risk: 5 },
 ]
 
+// Функция для определения CSS-класса на основе риска
+const getRiskClass = (risk: number) => {
+  if (risk >= 70) return 'risk-severe';
+  if (risk >= 50) return 'risk-high';
+  if (risk >= 30) return 'risk-medium';
+  return 'risk-low';
+}
+
+
+const getRiskIconSize = (risk: number) => {
+  if (risk >= 70) return { height: 87, width: 66 };
+  if (risk >= 50) return { height: 72, width: 44 };
+  if (risk >= 30) return { height: 54, width: 29 };
+  return { height: 46, width: 19 };
+}
 </script>
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
-
-// стили сверху вниз в порядке элементов страницы
 
 .results-page {
   display: flex;
@@ -155,24 +178,98 @@ const DISEASESMOCK: { name: string, risk: number }[] = [
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 0px;
+  margin-block: 32px;
 
   .risk-element {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 20px;
+   
+    // --- ДИНАМИЧЕСКИЕ СТИЛИ 
+    &.risk-severe {
+      color: $color-text;
+      font-size: 2rem;
+      font-weight: 800;
+    }
     
+    &.risk-high {
+      color: $color-blue-dark;
+      font-size: 1.65rem;
+      font-weight: 800;
+    }
+    
+    &.risk-medium {
+      color: $color-accent;
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+    
+    &.risk-low {
+      color: $color-accent-lighter;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
     .risk-icon {
-
+      display: flex;
+      justify-content: left;
+      align-items: left;
+      width: 87px; // по макс. ширине
+      flex-shrink: 0;
     }
+    
     .risk-percent {
-
+      min-width: 90px;
+      font-weight: inherit; 
+      text-align: center;
+      .general-risk {
+        color: $color-cold-red;
+      }
     }
+    
     .risk-name {
-
+      font-weight: inherit;
     }
   }
 }
 
+// general risk
+  .risk-element-general-risk {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  color: $color-cold-red;
+  text-align: left;
+  gap: 20px;
+}
 
+.risk-icon-general-risk {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  color: $color-cold-red;
+  width: 87px;
+  flex-shrink: 0
+}
+
+.risk-percent-general-risk {
+  font-size: 2.2rem;
+  min-width: 90px;
+  font-weight: 800; 
+  text-align: center;
+  color: $color-cold-red;
+  font-weight: 800;
+}
+
+.risk-name-general-risk {
+  font-size: 2.2rem;
+  font-weight: 800; 
+  text-align: center;
+}
 
 .btn-home-page {
   padding: 13px 48px;
@@ -182,12 +279,13 @@ const DISEASESMOCK: { name: string, risk: number }[] = [
   color: $color-white;
   font-size: 1rem;
   font-weight: 600;
-
+  margin-top: 16px;
   cursor: pointer;
   transition: background 0.2s;
-    &:hover {
-      background: $color-accent-lighter;
-    }
+  
+  &:hover {
+    background: $color-accent-lighter;
+  }
 }
 
 </style>
