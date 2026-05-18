@@ -153,13 +153,11 @@
 
           <div class="div-line"></div>
 
-          <div class="section-alcohol">
-            <div class="patient-subheader">Алкоголь:</div>
-            <div class="radio-group-vertical">
-              <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drinks"> Употребляю</label>
-              <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drank_before"> Употреблял ранее</label>
-              <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="never"> Никогда не употреблял</label>
-            </div>
+          <div class="patient-subheader">Алкоголь:</div>
+          <div class="radio-group-vertical">
+            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drinks"> Употребляю</label>
+            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drank_before"> Употреблял ранее</label>
+            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="never"> Никогда не употреблял</label>
           </div>
         </div>
         
@@ -912,7 +910,7 @@ async function downloadTemplate() {
 
     .patient-subheader {
       flex-shrink: 0;
-      margin-bottom: 16px;
+      margin-bottom: 0px;
     }
 
     .list-wrapper {
