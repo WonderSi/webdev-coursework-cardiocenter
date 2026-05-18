@@ -4,7 +4,13 @@
   <div class=upload-page>
     <div class="upload-duo-cards">
       <div class=upload-card>
-        <div class="upload-card-upper-part">
+        <div class="upload-card-upper-part"
+          :class="{ 'drag-over': isDragging }"
+          @dragover.prevent="isDragging = true"
+          @dragleave.prevent="isDragging = false"
+          @drop.prevent="handleDrop"
+          @click="triggerFileInput"
+        >
           <div class="upload-border">
             <div class="upload-icon">
               <svg width="77" height="76" viewBox="0 0 78 76" fill="none" xmlns="http://www.w3.org/2000/svg">
