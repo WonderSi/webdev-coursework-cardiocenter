@@ -131,10 +131,13 @@
         </div>
         <div class="input-patient-one-col2">
           <div class="patient-subheader">Род деятельности:</div>
-          <div class="radio-group-vertical">
-            <label class="radio-label" v-for="i in 14" :key="i">
-              <input type="radio" name="job" :value="i">Руководители учреждений, организаций и предприятий (вариант {{ i }})
-            </label>
+
+          <div class="list-wrapper">
+            <div class="scrollable-radio-list radio-group-vertical">
+              <label class="radio-label" v-for="i in 14" :key="i">
+                <input type="radio" name="job" :value="i">Руководители учреждений, организаций и предприятий (вариант {{ i }})
+              </label>
+            </div>
           </div>
         </div>
 
@@ -640,7 +643,6 @@ function formatSize(bytes: number): string {
   .bottom-card-text-block {
     flex-grow: 1;
     
-
     .alert-p {
       margin-top: 12px;
       font-size: 1rem;
@@ -694,39 +696,6 @@ function formatSize(bytes: number): string {
     font-size: 1rem;
     color: $color-secondary-text;
     line-height: 1.4;
-
-    input[type="radio"] {
-      appearance: none;
-      -webkit-appearance: none;
-      flex-shrink: 0;
-      margin-top: 3px;
-      cursor: pointer;
-
-      width: 18px;
-      height: 18px;
-      accent-color: $color-accent;
-      border: 2px solid rgba($color-secondary, 1);
-      border-radius: 100%;
-      position: relative;
-      transition: all 0.2s ease;
-      background: rgba($color-white, 0.5);
-
-      &:checked {
-        border-color: $color-accent;
-    
-        &::after {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 10px;
-          height: 10px;
-          background-color: $color-accent;
-          border-radius: 50%;
-        }
-      }
-    }
   }
 }
 
@@ -786,7 +755,34 @@ function formatSize(bytes: number): string {
     .input-patient-one-col2 {
       display: flex;
       flex-direction: column;
+      flex: 1;
+    }
 
+    .patient-subheader {
+      flex-shrink: 0;
+      margin-bottom: 16px;
+    }
+
+    .list-wrapper {
+      margin-left: 456px;
+      margin-top: 60px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-bottom: 32px;
+
+      overflow-y: auto;
+      padding-right: 16px;
+
+      &::-webkit-scrollbar { width: 10px; }
+      &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
+      &::-webkit-scrollbar-thumb {
+        background: rgba($color-secondary, 0.5);
+        border-radius: 10px;
+        &:hover { background: rgba($color-secondary, 1); }
+      }
     }
   }
 
@@ -810,16 +806,6 @@ function formatSize(bytes: number): string {
     gap: 8px;
     cursor: pointer;
     color: $color-secondary-text;
-
-    input[type="radio"] {
-      background-color: transparent; // у радио кнопки всё ещё есть фон, нужно убрать (кроме случая, когда она нажата, тогда color-accent, как сейчас и есть)
-      flex-shrink: 0;
-      cursor: pointer;
-      width: 16px;
-      height: 16px;
-      accent-color: $color-accent;
-      border-color: $color-accent; // нужпо сменить цвет обводки
-    }
   }
 }
 
@@ -862,6 +848,40 @@ function formatSize(bytes: number): string {
   .unit {
     color: $color-secondary;
     font-size: 1rem;
+  }
+}
+
+/* ГЛОБАЛЬНЫЙ СТИЛЬ РАДИО-КНОПОК */
+input[type="radio"] {
+  appearance: none; 
+  -webkit-appearance: none; 
+  background-color: rgba($color-white, 0.5);
+  
+  margin: 0;
+  flex-shrink: 0;
+  width: 18px; 
+  height: 18px;
+  
+  border: 2px solid rgba($color-secondary, 0.5); 
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:checked {
+    border-color: $color-accent;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      background-color: $color-accent; 
+      border-radius: 50%;
+    }
   }
 }
 
