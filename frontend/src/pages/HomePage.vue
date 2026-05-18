@@ -109,7 +109,7 @@ height: 128px;
 }
 
 .nii-text {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 600;
   color: $color-white;
 }
@@ -129,7 +129,7 @@ height: 128px;
 
 .intro-subtext {
   font-size: 1.2rem;
-  line-height: 1.6;
+  line-height: 1.8;
   color: rgba($color-white, 0.85);
   white-space: nowrap;
 }
