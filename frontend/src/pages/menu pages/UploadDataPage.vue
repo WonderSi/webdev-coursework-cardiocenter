@@ -8,7 +8,7 @@
           <div class="upload-border">
             <div class="upload-icon">
               <svg width="77" height="76" viewBox="0 0 78 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="38.5" cy="37.8032" rx="38.5" ry="37.8032" fill="#0f356e"/>
+                <ellipse cx="38.5" cy="37.8032" rx="38.5" ry="37.8032" fill="#242942"/>
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M28.6863 55.0743C26.0839 55.0743 23.5881 54.0405 21.748 52.2003C19.9078 50.3602 18.874 47.8644 18.874 45.262V39.3747C18.874 38.8542 19.0808 38.355 19.4488 37.987C19.8168 37.619 20.316 37.4122 20.8365 37.4122C21.3569 37.4122 21.8561 37.619 22.2241 37.987C22.5922 38.355 22.7989 38.8542 22.7989 39.3747V45.262C22.7989 46.8234 23.4192 48.3209 24.5233 49.425C25.6274 50.5291 27.1248 51.1494 28.6863 51.1494H48.3107C49.8722 51.1494 51.3696 50.5291 52.4737 49.425C53.5778 48.3209 54.1981 46.8234 54.1981 45.262V39.3747C54.1981 38.8542 54.4048 38.355 54.7729 37.987C55.1409 37.619 55.6401 37.4122 56.1605 37.4122C56.681 37.4122 57.1802 37.619 57.5482 37.987C57.9162 38.355 58.123 38.8542 58.123 39.3747V45.262C58.123 47.8644 57.0892 50.3602 55.249 52.2003C53.4089 54.0405 50.9131 55.0743 48.3107 55.0743H28.6863Z" fill="white"/>
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M28.2661 31.7203C28.0857 31.536 27.9434 31.3179 27.8473 31.0786C27.7512 30.8392 27.7033 30.5833 27.7062 30.3254C27.7091 30.0675 27.7628 29.8127 27.8643 29.5756C27.9657 29.3384 28.113 29.1237 28.2975 28.9435L37.1285 20.3087C37.4952 19.9503 37.9875 19.7496 38.5003 19.7496C39.013 19.7496 39.5054 19.9503 39.872 20.3087L48.703 28.9435C48.8912 29.1227 49.042 29.3375 49.1465 29.5754C49.251 29.8134 49.3073 30.0697 49.3119 30.3296C49.3166 30.5894 49.2696 30.8476 49.1736 31.0891C49.0777 31.3307 48.9347 31.5507 48.7531 31.7366C48.5714 31.9224 48.3546 32.0703 48.1153 32.1717C47.876 32.2731 47.6189 32.3259 47.3591 32.3271C47.0992 32.3284 46.8416 32.278 46.6014 32.1788C46.3611 32.0797 46.143 31.9339 45.9595 31.7498L40.4627 26.3746V43.2988C40.4627 43.8192 40.256 44.3184 39.8879 44.6864C39.5199 45.0545 39.0207 45.2612 38.5003 45.2612C37.9798 45.2612 37.4806 45.0545 37.1126 44.6864C36.7446 44.3184 36.5378 43.8192 36.5378 43.2988V26.3746L31.043 31.7498C30.8586 31.9302 30.6406 32.0725 30.4012 32.1686C30.1619 32.2646 29.9059 32.3126 29.648 32.3097C29.3901 32.3068 29.1353 32.253 28.8982 32.1516C28.6611 32.0501 28.4463 31.9029 28.2661 31.7184V31.7203Z" fill="white"/>
               </svg>
@@ -32,7 +32,7 @@
         <!-- COL = HEADER + LIST + ACTIONS -->
          <!-- ROW = LIST = PROGRESS-BAR + LIST-MAIN -->
         <div class="wrapper_column">
-          <div class="file-list-header">Список загружаемых файлов</div>
+          <div class="section-header">Список загружаемых файлов</div>
 
           <div class="wrapper_row">
             <div class="files-progress-bar">
@@ -70,118 +70,85 @@
       </div>
     </div>
 
-    <div class="one-patient-input"></div>
-  </div>
+    <div class="one-patient-input-card">
 
-  <!-- <main class="upload-page">
-    <button class="download-template-btn" @click="downloadTemplate" :disabled="templateLoading">
-      {{ templateLoading ? 'Загрузка...' : 'Скачать шаблон' }}
-    </button> -->
+      <div class="input-patient-part-one"> 
+        <div class="input-patient-one-col1">
+          <div class="section-header">Ввести одного пациента</div>
 
-    <!-- <div class="upload-card">
-      <div
-        class="drop-zone"
-        :class="{ 'drag-over': isDragging, 'has-file': selectedFile }"
-        @dragover.prevent="isDragging = true"
-        @dragleave.prevent="isDragging = false"
-        @drop.prevent="handleDrop"
-        @click="triggerFileInput"
-      >
-        <input
-          ref="fileInputRef"
-          type="file"
-          accept=".xlsx,.xls,.csv"
-          class="file-input-hidden"
-          @change="handleFileChange"
-        />
+          <div class="section-basic-info">
+            <div class="input-row">
+              <div class="patient-subheader">Пол:</div>
+              <div class="radio-group-horizontal">
+                <label class="radio-label">Мужской<input type="radio" name="gender" value="male"></label>
+                <label class="radio-label">Женский<input type="radio" name="gender" value="female"></label>
+              </div>
+            </div>
 
-        <template v-if="!selectedFile">
-          <svg class="drop-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          <p class="drop-text">Перетащите файл или нажмите для выбора</p>
-          <span class="drop-hint">.xlsx, .xls, .csv — до 10 МБ</span>
-        </template>
+            <div class="input-row">
+              <div class="patient-subheader">Возраст:</div>
+              <div class="input-group">
+                <input type="number" class="input-field" placeholder="27">
+                <span class="unit">лет</span>
+              </div>
+            </div>
 
-        <template v-else>
-          <svg class="file-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <div class="file-info">
-            <span class="file-name">{{ selectedFile.name }}</span>
-            <span class="file-size">{{ formatSize(selectedFile.size) }}</span>
+            <div class="input-row">
+              <div class="patient-subheader">Рост:</div>
+              <div class="input-group">
+                <input type="number" class="input-field" placeholder="165">
+                <span class="unit">см</span>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <div class="patient-subheader">Вес:</div>
+              <div class="input-group">
+                <input type="number" class="input-field" placeholder="60">
+                <span class="unit">кг</span>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <div class="patient-subheader">Объём бёдер:</div>
+              <div class="input-group">
+                <input type="number" class="input-field" placeholder="60">
+                <span class="unit">см</span>
+              </div>
+            </div>
           </div>
-          <button class="clear-btn" @click.stop="clearFile" title="Удалить файл">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </template>
+
+          <div class="div-line"></div>
+
+          <div class="section-alcohol">
+            <div class="patient-subheader">Алкоголь:</div>
+            <div class="radio-group-vertical">
+              <label class="radio-label"><input type="radio" name="alcohol" value="none"> Употребляю</label>
+              <label class="radio-label"><input type="radio" name="alcohol" value="none"> Употреблял ранее</label>
+              <label class="radio-label"><input type="radio" name="alcohol" value="none"> Никогда не употреблял</label>
+            </div>
+          </div>
+        </div>
+        <div class="input-patient-one-col2">
+          <div class="patient-subheader">Род деятельности:</div>
+          <div class="radio-group-vertical">
+            <label class="radio-label" v-for="i in 14" :key="i">
+              <input type="radio" name="job" :value="i">Руководители учреждений, организаций и предприятий (вариант {{ i }})
+            </label>
+          </div>
+        </div>
+
       </div>
 
-      <div v-if="fileError" class="inline-error">{{ fileError }}</div>
+      <div class="div-line"></div>
 
-      <button
-        class="upload-btn"
-        :disabled="!selectedFile || uploading"
-        @click="uploadFile"
-      >
-        <svg v-if="!uploading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-        <span class="spinner" v-else></span>
-        {{ uploading ? 'Обработка...' : 'Загрузить' }}
-      </button>
+      <div class="input-patient-part-two">
+        <!-- высота = высота part-one -->
 
-      <div v-if="uploadError" class="error-banner">{{ uploadError }}</div>
-    </div> -->
-
-    <!-- <div v-if="report" class="report-card">
-      <div class="report-stats">
-        <div class="stat stat--saved">
-          <span class="stat-value">{{ report.savedRows }}</span>
-          <span class="stat-label">сохранено</span>
-        </div>
-        <div class="stat stat--skipped">
-          <span class="stat-value">{{ report.skippedRows }}</span>
-          <span class="stat-label">пропущено</span>
-        </div>
-        <div class="stat stat--total">
-          <span class="stat-value">{{ report.totalRows }}</span>
-          <span class="stat-label">всего строк</span>
-        </div>
       </div>
 
-      <div v-if="report.errors.length > 0" class="errors-section">
-        <h3 class="errors-title">Ошибки валидации</h3>
-        <div class="errors-table-wrap">
-          <table class="errors-table">
-            <thead>
-              <tr>
-                <th>Строка</th>
-                <th>Причина</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="err in report.errors" :key="err.row">
-                <td class="row-num">{{ err.row }}</td>
-                <td>{{ err.reason }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div v-else class="success-notice">
-        Все строки успешно сохранены
-      </div>
-    </div> -->
-  <!-- </main> -->
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -354,7 +321,7 @@ function formatSize(bytes: number): string {
 
   display: flex;
   flex-direction: column;
-  gap: 64px;
+  gap: 32px;
   margin-block: 40px;
 
   @media (max-width: 1200px) {
@@ -383,11 +350,11 @@ function formatSize(bytes: number): string {
 
 // КАРТОЧКА СПИСКА ФАЙЛОВ (ПРАВО ВЕРХ)
 
-.file-list-header {
+.section-header {
   font-size: 1.25rem;
   font-weight: 600;
   white-space: nowrap;
-  color: $color-blue-dark;
+  color: $color-text;
   margin-bottom: 24px;
 }
 
@@ -629,7 +596,7 @@ function formatSize(bytes: number): string {
       }
       .upload-main-p {
         margin: 0;
-        color: $color-blue-dark;
+        color: $color-text;
         font-weight: 600;
         font-size: 1rem;
         margin-bottom: 8px;
@@ -662,7 +629,7 @@ function formatSize(bytes: number): string {
     padding: 32px;
     border-radius: 0 0 $radius-glass-card $radius-glass-card;
 
-    background: rgba($color-glass-white, 0.35);
+    background: rgba($color-glass-white, 0.5);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba($color-glass-white, 0.4);
@@ -706,6 +673,195 @@ function formatSize(bytes: number): string {
     &:hover {
       background: $color-accent-lighter;
     }
+  }
+}
+
+// -------------- КАРТОЧКА ОДНОГО ПАЦИЕНТА
+
+.radio-group-vertical {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+
+  .radio-label {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: $color-secondary-text;
+    line-height: 1.4;
+
+    input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      flex-shrink: 0;
+      margin-top: 3px;
+      cursor: pointer;
+
+      width: 18px;
+      height: 18px;
+      accent-color: $color-accent;
+      border: 2px solid rgba($color-secondary, 1);
+      border-radius: 100%;
+      position: relative;
+      transition: all 0.2s ease;
+      background: rgba($color-white, 0.5);
+
+      &:checked {
+        border-color: $color-accent;
+    
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 10px;
+          height: 10px;
+          background-color: $color-accent;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+}
+
+
+.one-patient-input-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    padding: 32px;
+
+    background-color: rgba($color-glass-white, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba($color-glass-white, 0.4);
+    border-radius: $radius-glass-card;
+
+  .patient-subheader {
+    font-weight: 600;
+    font-size: 1rem;
+    color: $color-text;
+  }
+
+    .input-patient-part-one {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 64px;
+
+    .input-patient-one-col1 {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      flex: 0 0 360px;
+
+      .section-basic-info {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .input-row {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+        }
+      }
+      .div-line {
+        width: 100%;
+        border-top: 2px solid $color-accent;
+        border-radius: 1000px;
+        height: 0;
+        margin-block: 24px;
+      }
+    }
+    .input-patient-one-col2 {
+      display: flex;
+      flex-direction: column;
+
+    }
+  }
+
+  .input-patient-part-two {
+    display: flex; 
+    flex-direction: row;
+  }
+}
+
+
+// --- кнопочки 
+.radio-group-horizontal {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+
+  .radio-label {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: $color-secondary-text;
+
+    input[type="radio"] {
+      background-color: transparent; // у радио кнопки всё ещё есть фон, нужно убрать (кроме случая, когда она нажата, тогда color-accent, как сейчас и есть)
+      flex-shrink: 0;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      accent-color: $color-accent;
+      border-color: $color-accent; // нужпо сменить цвет обводки
+    }
+  }
+}
+
+/* Текстовые инпуты */
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .input-field {
+    width: 60px;
+    height: 24px;
+    padding: 8px 12px;
+    background: rgba($color-white, 0.5);
+    border: 1.5px solid $color-secondary;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    color: $color-text;
+
+    &::placeholder {
+      color: rgba($color-secondary, 0.8);
+      font-weight: 400;
+    }
+
+    &:focus {
+      border-color: $color-accent;
+    }
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  .unit {
+    color: $color-secondary;
+    font-size: 1rem;
   }
 }
 
