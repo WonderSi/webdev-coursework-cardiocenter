@@ -20,8 +20,8 @@
         <div class="risk-element-general-risk">
           <div class="risk-icon-general-risk">
             <svg 
-              width="90"
-              height="90" 
+              width="72"
+              height="72" 
               viewBox="0 0 24 24" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
@@ -92,10 +92,10 @@ const getRiskClass = (risk: number) => {
 }
 
 const getRiskIconSize = (risk: number) => {
-  if (risk >= 70) return { height: 87, width: 66 };
-  if (risk >= 50) return { height: 72, width: 44 };
-  if (risk >= 30) return { height: 54, width: 29 };
-  return { height: 46, width: 19 };
+  if (risk >= 70) return { height: 70, width: 66 };
+  if (risk >= 50) return { height: 60, width: 44 };
+  if (risk >= 30) return { height: 48, width: 29 };
+  return { height: 36, width: 19 };
 }
 </script>
 
@@ -138,14 +138,13 @@ const getRiskIconSize = (risk: number) => {
   border-radius: 24px;
   padding: 48px 60px;
   width: 100%;
-  max-width: 900px; //
+  max-width: 1000px; //
   box-shadow: 0 10px 30px rgba(7, 14, 44, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   
-  /* Адаптивные отступы внутри карточки */
   @media (max-width: 768px) {
     padding: 32px 24px;
   }
@@ -210,10 +209,10 @@ const getRiskIconSize = (risk: number) => {
     gap: 20px;
     
     // --- ДИНАМИЧЕСКИЕ СТИЛИ 
-    &.risk-severe { color: $color-text; font-size: 2rem; font-weight: 800; }
+    &.risk-severe { color: $color-text; font-size: 1.8rem; font-weight: 800; }
     &.risk-high { color: $color-blue-dark; font-size: 1.65rem; font-weight: 800; }
-    &.risk-medium { color: $color-accent; font-size: 1.35rem; font-weight: 600; }
-    &.risk-low { color: $color-accent-lighter; font-size: 1rem; font-weight: 600; }
+    &.risk-medium { color: $color-accent; font-size: 1.45rem; font-weight: 600; }
+    &.risk-low { color: $color-accent-lighter; font-size: 1.15rem; font-weight: 600; }
 
     @media (max-width: 768px) {
       gap: 12px;
@@ -276,7 +275,7 @@ const getRiskIconSize = (risk: number) => {
   justify-content: flex-start;
   align-items: center;
   color: $color-cold-red;
-  width: 87px;
+  width: 72px;
   flex-shrink: 0;
   
   @media (max-width: 768px) {
@@ -287,7 +286,7 @@ const getRiskIconSize = (risk: number) => {
 }
 
 .risk-percent-general-risk {
-  font-size: 2.2rem;
+  font-size: 2rem;
   min-width: 90px;
   font-weight: 800; 
   text-align: center;
@@ -301,7 +300,7 @@ const getRiskIconSize = (risk: number) => {
 }
 
 .risk-name-general-risk {
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 800; 
   text-align: left;
   line-height: 1.2;
