@@ -1,10 +1,11 @@
 <template>
   <Sidebar />
 
-  <div class=upload-page>
+  <div class="upload-page">
     <div class="upload-duo-cards">
-      <div class=upload-card>
-        <div class="upload-card-upper-part"
+      <div class="upload-card">
+        <div 
+          class="upload-card-upper-part"
           :class="{ 'drag-over': isDragging }"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
@@ -19,53 +20,62 @@
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M28.2661 31.7203C28.0857 31.536 27.9434 31.3179 27.8473 31.0786C27.7512 30.8392 27.7033 30.5833 27.7062 30.3254C27.7091 30.0675 27.7628 29.8127 27.8643 29.5756C27.9657 29.3384 28.113 29.1237 28.2975 28.9435L37.1285 20.3087C37.4952 19.9503 37.9875 19.7496 38.5003 19.7496C39.013 19.7496 39.5054 19.9503 39.872 20.3087L48.703 28.9435C48.8912 29.1227 49.042 29.3375 49.1465 29.5754C49.251 29.8134 49.3073 30.0697 49.3119 30.3296C49.3166 30.5894 49.2696 30.8476 49.1736 31.0891C49.0777 31.3307 48.9347 31.5507 48.7531 31.7366C48.5714 31.9224 48.3546 32.0703 48.1153 32.1717C47.876 32.2731 47.6189 32.3259 47.3591 32.3271C47.0992 32.3284 46.8416 32.278 46.6014 32.1788C46.3611 32.0797 46.143 31.9339 45.9595 31.7498L40.4627 26.3746V43.2988C40.4627 43.8192 40.256 44.3184 39.8879 44.6864C39.5199 45.0545 39.0207 45.2612 38.5003 45.2612C37.9798 45.2612 37.4806 45.0545 37.1126 44.6864C36.7446 44.3184 36.5378 43.8192 36.5378 43.2988V26.3746L31.043 31.7498C30.8586 31.9302 30.6406 32.0725 30.4012 32.1686C30.1619 32.2646 29.9059 32.3126 29.648 32.3097C29.3901 32.3068 29.1353 32.253 28.8982 32.1516C28.6611 32.0501 28.4463 31.9029 28.2661 31.7184V31.7203Z" fill="white"/>
               </svg>
             </div>
-            <p class="upload-main-p"><span class=underlined-hover>Выберите</span> или перетащите файлы</p>
+            <p class="upload-main-p">
+              <span class="underlined-hover">Выберите</span> или перетащите файлы
+            </p>
             <p class="upload-formats-p">.xlsx, .xls, .csv — до 10 МБ</p>
-
-            <input
-              type="file"
-              ref="fileInputRef"
-              style="display: none"
-              multiple
-              accept=".xlsx,.xls,.csv"
-              @change="handleFileChange"
+            
+            <input 
+              type="file" 
+              ref="fileInputRef" 
+              style="display: none" 
+              multiple 
+              accept=".xlsx,.xls,.csv" 
+              @change="handleFileChange" 
+            />
           </div>
         </div>
 
         <div class="upload-card-bottom-part">
           <div class="bottom-card-text-block">
             <p class="alert-p">Пожалуйста, перед загрузкой убедитесь, что ваши данные соответствуют <b>шаблону</b></p>
-            <p class="attention-p">Обратите внимание на лист <b>«<span class=underlined>справочник</span>»</b></p>
+            <p class="attention-p">Обратите внимание на лист <b>«<span class="underlined">справочник</span>»</b></p>
+            <p v-if="globalError" style="color: #DF2242; font-size: 0.875rem; margin-top: 8px;">{{ globalError }}</p>
           </div>
-          <div class="download-template-btn">Скачать шаблон</div>
+          <button class="download-template-btn" @click="downloadTemplate" :disabled="templateLoading">
+            {{ templateLoading ? 'Загрузка...' : 'Скачать шаблон' }}
+          </button>
         </div>
       </div>
 
-
-      <div class=files-list-card>
-        <!-- COL = HEADER + LIST + ACTIONS -->
-         <!-- ROW = LIST = PROGRESS-BAR + LIST-MAIN -->
+      <div class="files-list-card">
         <div class="wrapper_column">
           <div class="section-header">Список загружаемых файлов</div>
 
           <div class="wrapper_row">
             <div class="files-progress-bar">
-              <div class="progress-fill" style="height: 90%;"></div>
+              <div class="progress-fill" :style="{ height: uploadProgress + '%' }"></div>
             </div>
+            
             <div class="main-content-files-list">
               <div class="file-list">
-                <div class="file-item">
+                <p v-if="files.length === 0" style="color: #8A8FA8; margin: auto; font-size: 1rem;">
+                  Нет выбранных файлов
+                </p>
+
+                <div class="file-item" v-for="(file, index) in files" :key="index">
                   <div class="file-item-main">
-                    <div class="file-icon"> <span class="file-extension">xlsx</span> </div>
+                    <div class="file-icon"> 
+                      <span class="file-extension">{{ getFileExtension(file.name) }}</span> 
+                    </div>
                   
                     <div class="file-details">
-                      <p class="file-name">Пациенты.xlsx</p>
-                      
+                      <p class="file-name">{{ file.name }}</p>
                     </div>
 
                     <div class="file-right-side">
-                      <p class="file-size">1.2 MB</p>
-                      <button class="delete-file-btn">
+                      <p class="file-size">{{ formatSize(file.size) }}</p>
+                      <button class="delete-file-btn" @click="removeFile(index)" :disabled="uploading">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                           <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z"/>
                         </svg>
@@ -76,16 +86,20 @@
               </div>
             </div>
           </div>
+          
           <div class="files-list-actions">
-            <div class="cancel-all-btn">Отменить все</div>
-            <div class="upload-btn">Загрузить</div>
+            <button class="cancel-all-btn" @click="cancelAll" :disabled="uploading || files.length === 0">
+              Отменить все
+            </button>
+            <button class="upload-btn" @click="uploadFiles" :disabled="uploading || files.length === 0">
+              {{ uploading ? 'Загрузка...' : 'Загрузить' }}
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <div class="one-patient-input-card">
-
       <div class="input-patient-part-one"> 
         <div class="input-patient-one-col1">
           <div class="section-header">Ввести одного пациента</div>
@@ -94,15 +108,15 @@
             <div class="input-row">
               <div class="patient-subheader">Пол:</div>
               <div class="radio-group-horizontal">
-                <label class="radio-label">Мужской<input type="radio" name="gender" value="male"></label>
-                <label class="radio-label">Женский<input type="radio" name="gender" value="female"></label>
+                <label class="radio-label">Мужской<input type="radio" v-model="singlePatient.gender" value="male"></label>
+                <label class="radio-label">Женский<input type="radio" v-model="singlePatient.gender" value="female"></label>
               </div>
             </div>
 
             <div class="input-row">
               <div class="patient-subheader">Возраст:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="27">
+                <input type="number" class="input-field" placeholder="27" v-model="singlePatient.age">
                 <span class="unit">лет</span>
               </div>
             </div>
@@ -110,7 +124,7 @@
             <div class="input-row">
               <div class="patient-subheader">Рост:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="165">
+                <input type="number" class="input-field" placeholder="165" v-model="singlePatient.height">
                 <span class="unit">см</span>
               </div>
             </div>
@@ -118,7 +132,7 @@
             <div class="input-row">
               <div class="patient-subheader">Вес:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="60">
+                <input type="number" class="input-field" placeholder="60" v-model="singlePatient.weight">
                 <span class="unit">кг</span>
               </div>
             </div>
@@ -126,7 +140,7 @@
             <div class="input-row">
               <div class="patient-subheader">Объём бёдер:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="60">
+                <input type="number" class="input-field" placeholder="60" v-model="singlePatient.hips">
                 <span class="unit">см</span>
               </div>
             </div>
@@ -137,47 +151,47 @@
           <div class="section-alcohol">
             <div class="patient-subheader">Алкоголь:</div>
             <div class="radio-group-vertical">
-              <label class="radio-label"><input type="radio" name="alcohol" value="none"> Употребляю</label>
-              <label class="radio-label"><input type="radio" name="alcohol" value="none"> Употреблял ранее</label>
-              <label class="radio-label"><input type="radio" name="alcohol" value="none"> Никогда не употреблял</label>
+              <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drinks"> Употребляю</label>
+              <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="drank_before"> Употреблял ранее</label>
+              <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" value="never"> Никогда не употреблял</label>
             </div>
           </div>
         </div>
+        
         <div class="input-patient-one-col2">
           <div class="patient-subheader">Род деятельности:</div>
 
           <div class="list-wrapper">
             <div class="scrollable-radio-list radio-group-vertical">
               <label class="radio-label" v-for="i in 14" :key="i">
-                <input type="radio" name="job" :value="i">Руководители учреждений, организаций и предприятий (вариант {{ i }})
+                <input type="radio" v-model="singlePatient.jobId" :value="i">
+                Руководители учреждений, организаций и предприятий (вариант {{ i }})
               </label>
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="div-line"></div>
 
       <div class="input-patient-part-two">
-        <!-- высота = высота part-one -->
-
-      </div>
-
+        </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 
+// --- ИНТЕРФЕЙСЫ И КОНСТАНТЫ
 interface RowError {
   row: number
   reason: string
 }
 
 interface UploadReport {
+  fileName: string
   totalRows: number
   savedRows: number
   skippedRows: number
@@ -187,77 +201,152 @@ interface UploadReport {
 const ALLOWED_EXTENSIONS = ['.xlsx', '.xls', '.csv']
 const MAX_SIZE_BYTES = 10 * 1024 * 1024
 
+// --- СОСТОЯНИЕ ФАЙЛОВ
 const fileInputRef = ref<HTMLInputElement | null>(null)
-const selectedFile  = ref<File | null>(null)
-const isDragging    = ref(false)
-const fileError     = ref<string | null>(null)
-const uploading     = ref(false)
-const uploadError   = ref<string | null>(null)
-const templateLoading = ref(false)
-const report        = ref<UploadReport | null>(null)
+const files = ref<File[]>([])
+const isDragging = ref(false)
+const globalError = ref<string | null>(null)
 
+// --- СОСТОЯНИЕ ЗАГРУЗКИ
+const uploading = ref(false)
+const uploadProgress = ref(0)
+const templateLoading = ref(false)
+const reports = ref<UploadReport[]>([])
+
+// --- СОСТОЯНИЕ ФОРМЫ (ОДИН ПАЦИЕНТ)
+const singlePatient = reactive({
+  gender: '',
+  age: null as number | null,
+  height: null as number | null,
+  weight: null as number | null,
+  hips: null as number | null,
+  alcohol: '',
+  jobId: null as number | null
+})
+
+// --- ЛОГИКА И DRAG & DROP
 function triggerFileInput() {
-  fileInputRef.value?.click()
+  if (!uploading.value) fileInputRef.value?.click()
 }
 
 function handleFileChange(e: Event) {
   const input = e.target as HTMLInputElement
-  if (input.files?.[0]) setFile(input.files[0])
+  if (input.files?.length) {
+    addFiles(Array.from(input.files))
+  }
+  input.value = '' // Сбрасываем input, чтобы можно было выбрать тот же файл еще раз
 }
 
 function handleDrop(e: DragEvent) {
   isDragging.value = false
-  const file = e.dataTransfer?.files[0]
-  if (file) setFile(file)
-}
-
-function setFile(file: File) {
-  fileError.value = null
-  report.value = null
-  uploadError.value = null
-
-  const ext = '.' + file.name.split('.').pop()?.toLowerCase()
-  if (!ALLOWED_EXTENSIONS.includes(ext)) {
-    fileError.value = `Недопустимый формат. Разрешены: ${ALLOWED_EXTENSIONS.join(', ')}`
-    return
+  if (e.dataTransfer?.files?.length && !uploading.value) {
+    addFiles(Array.from(e.dataTransfer.files))
   }
-  if (file.size > MAX_SIZE_BYTES) {
-    fileError.value = 'Файл превышает 10 МБ'
-    return
-  }
-  selectedFile.value = file
 }
 
-function clearFile() {
-  selectedFile.value = null
-  fileError.value = null
-  report.value = null
-  uploadError.value = null
-  if (fileInputRef.value) fileInputRef.value.value = ''
+function addFiles(newFiles: File[]) {
+  globalError.value = null
+  let hasErrors = false
+
+  const validFiles = newFiles.filter(file => {
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase()
+    
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      globalError.value = `Формат файлов недопустим. Разрешены: ${ALLOWED_EXTENSIONS.join(', ')}`
+      hasErrors = true
+      return false
+    }
+    if (file.size > MAX_SIZE_BYTES) {
+      globalError.value = 'Один или несколько файлов превышают лимит в 10 МБ'
+      hasErrors = true
+      return false
+    }
+    return true
+  })
+
+  // Добавляем только те файлы, которых еще нет в списке (проверка по имени и размеру)
+  validFiles.forEach(validFile => {
+    const exists = files.value.some(f => f.name === validFile.name && f.size === validFile.size)
+    if (!exists) {
+      files.value.push(validFile)
+    }
+  })
+
+  // Сбрасываем прогресс, если добавляем новые
+  if (!hasErrors) uploadProgress.value = 0
 }
 
-async function uploadFile() {
-  if (!selectedFile.value) return
+function removeFile(index: number) {
+  files.value.splice(index, 1)
+  if (files.value.length === 0) uploadProgress.value = 0
+}
+
+function cancelAll() {
+  files.value = []
+  uploadProgress.value = 0
+  globalError.value = null
+  reports.value = []
+}
+
+// --- УТИЛИТЫ
+function getFileExtension(filename: string): string {
+  return filename.split('.').pop()?.toLowerCase() || ''
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} Б`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`
+  return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
+}
+
+// --- ЛОГИКА ЗАПРОСОВ
+async function uploadFiles() {
+  if (!files.value.length) return
+  
   uploading.value = true
-  uploadError.value = null
-  report.value = null
+  globalError.value = null
+  reports.value = []
+  uploadProgress.value = 0
 
-  const formData = new FormData()
-  formData.append('file', selectedFile.value)
+  const totalFiles = files.value.length
 
   try {
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData, credentials: 'include' })
-    if (!res.ok) {
-      const body = await res.json().catch(() => null)
-      uploadError.value = (res.status === 401 || res.status === 403)
-        ? 'Сессия истекла — войдите заново'
-        : body?.error ?? `Ошибка сервера: ${res.status}`
-      return
+    for (let i = 0; i < totalFiles; i++) {
+      const file = files.value[i]
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/admin/upload', { 
+        method: 'POST', 
+        body: formData, 
+        credentials: 'include' 
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        globalError.value = (res.status === 401 || res.status === 403)
+          ? 'Сессия истекла — войдите заново'
+          : body?.error ?? `Ошибка при загрузке ${file.name}: статус ${res.status}`
+        throw new Error('Upload Interrupted')
+      }
+
+      const report = await res.json()
+      reports.value.push({ fileName: file.name, ...report })
+      
+      // Обновляем прогресс
+      uploadProgress.value = Math.round(((i + 1) / totalFiles) * 100)
     }
-    report.value = await res.json()
-    clearFile()
-  } catch {
-    uploadError.value = 'Ошибка соединения с сервером'
+
+    // Успешная загрузка всех файлов
+    setTimeout(() => {
+      files.value = []
+      uploadProgress.value = 0
+    }, 1500)
+
+  } catch (err: any) {
+    if (err.message !== 'Upload Interrupted') {
+      globalError.value = 'Ошибка соединения с сервером'
+    }
   } finally {
     uploading.value = false
   }
@@ -265,10 +354,12 @@ async function uploadFile() {
 
 async function downloadTemplate() {
   templateLoading.value = true
+  globalError.value = null
+  
   try {
     const res = await fetch('/api/admin/upload/template', { credentials: 'include' })
     if (!res.ok) {
-      uploadError.value = res.status === 401 || res.status === 403
+      globalError.value = res.status === 401 || res.status === 403
         ? 'Сессия истекла — войдите заново'
         : `Не удалось скачать шаблон (${res.status})`
       return
@@ -281,16 +372,10 @@ async function downloadTemplate() {
     a.click()
     URL.revokeObjectURL(url)
   } catch {
-    uploadError.value = 'Ошибка загрузки шаблона'
+    globalError.value = 'Ошибка загрузки шаблона'
   } finally {
     templateLoading.value = false
   }
-}
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} Б`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`
-  return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
 }
 </script>
 
@@ -560,6 +645,7 @@ function formatSize(bytes: number): string {
     width: 100%;
     background: $color-accent;
     white-space: nowrap;
+    border: none;
     border-radius: $radius-rect-buttons;
     color: $color-white;
     font-weight: 600;
@@ -675,6 +761,7 @@ function formatSize(bytes: number): string {
     font-size: 1rem;
     font-weight: 600;
     padding-inline: 22px;
+    border: none;
     border-radius: $radius-rect-buttons;
     background: $color-accent;
     color: $color-white;
