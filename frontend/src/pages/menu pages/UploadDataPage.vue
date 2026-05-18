@@ -466,7 +466,7 @@ async function downloadTemplate() {
 // -------------------------- КОНТЕЙНЕР СТРАНИЦЫ
 .upload-page {
   margin-left: 240px;
-  padding-inline: 40px;
+  padding-inline: 200px;
   box-sizing: border-box;
 
   display: flex;
@@ -484,15 +484,14 @@ async function downloadTemplate() {
 }
 
 .upload-duo-cards {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: stretch;
   gap: 32px;
   width: 100%;
 
   > .upload-card,
   > .files-list-card {
-    flex: 1 1 0;
     min-width: 0;
     width: 100%;
   }
