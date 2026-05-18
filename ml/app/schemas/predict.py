@@ -167,9 +167,9 @@ class PredictRequest(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    disease_type: str | None = Field()
-    disease_probability: float = Field(description="Вероятность заболеваня")
-    message: str = Field(description="Текст для вывода поциенту")
+    predictions: list[str] = Field(
+        description='Список строк формата "модель:вероятность заболевания"'
+    )
     model_version: str = Field(description="Версия модели")
 
 
