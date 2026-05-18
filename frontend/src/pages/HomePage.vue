@@ -130,7 +130,8 @@ height: 128px;
 .intro-subtext {
   font-size: 1.2rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba($color-white, 0.85);
+  white-space: nowrap;
 }
 
 // настройки правой стороны лежат в basic-card.scss; кнопки тоже
