@@ -140,7 +140,7 @@
             <div class="input-row">
               <div class="patient-subheader">Объём бёдер:</div>
               <div class="input-group">
-                <input type="number" class="input-field" placeholder="60" v-model="singlePatient.hips">
+                <input type="number" class="input-field" placeholder="86" v-model="singlePatient.hips">
                 <span class="unit">см</span>
               </div>
             </div>
@@ -909,7 +909,7 @@ async function downloadTemplate() {
   }
 }
 
-/* Текстовые инпуты */
+// Текстовые инпуты
 .input-group {
   display: flex;
   align-items: center;
@@ -920,7 +920,7 @@ async function downloadTemplate() {
     height: 24px;
     padding: 8px 12px;
     background: rgba($color-white, 0.5);
-    border: 1.5px solid $color-secondary;
+    border: 1.5px solid rgba($color-secondary, 0.5);
     border-radius: 100px;
     font-size: 1rem;
     font-family: inherit;
@@ -930,7 +930,7 @@ async function downloadTemplate() {
     color: $color-text;
 
     &::placeholder {
-      color: rgba($color-secondary, 0.5);
+      color: rgba($color-secondary, 0.75);
       font-weight: 400;
     }
 
