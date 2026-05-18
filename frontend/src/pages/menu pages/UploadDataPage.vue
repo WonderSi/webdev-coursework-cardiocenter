@@ -629,12 +629,17 @@ async function downloadTemplate() {
             display: flex;
             flex-direction: row;
             gap: 4px;
+            min-width: 0px;
 
             .file-name {
               font-weight: 600;
               color: $color-blue-dark;
               font-size: 1rem;
               margin: 0;
+
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
           }
 
