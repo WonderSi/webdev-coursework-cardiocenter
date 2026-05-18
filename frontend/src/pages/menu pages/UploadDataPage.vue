@@ -432,17 +432,21 @@ async function downloadTemplate() {
 
 // --------- УТИЛИТИ
 .wrapper_column {
+  position: absolute;
+  inset: 0;
+  padding: 32px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
 }
 
 .wrapper_row {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 // ---- ПОДЧЁРКИВАНИЯ: 
@@ -493,6 +497,7 @@ async function downloadTemplate() {
   > .upload-card,
   > .files-list-card {
     min-width: 0;
+    min-height: 0;
     width: 100%;
   }
 }
@@ -508,9 +513,10 @@ async function downloadTemplate() {
 }
 
 .files-list-card {
+  position: relative;
   display: flex;
-  flex-direction: row;
-  padding: 32px;
+  flex-direction: column;
+  
 
   background-color: rgba($color-glass-white, 0.8);
   backdrop-filter: blur(20px);
@@ -542,6 +548,8 @@ async function downloadTemplate() {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    min-height: 0;
+    min-width: 0;
 
     .file-list {
       width: 100%;
@@ -552,25 +560,16 @@ async function downloadTemplate() {
       margin-bottom: 4px;
 
       overflow-y: auto;
-      padding-right: 12px; // место под скролл
+      padding-right: 16px;
 
-      // НОВОЕ: Кастомный скроллбар
-      &::-webkit-scrollbar {
-        width: 6px;
-      }
-      &::-webkit-scrollbar-track {
-        background: rgba($color-secondary, 0.1);
-        border-radius: 10px;
-      }
+      &::-webkit-scrollbar { width: 10px; }
+      &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
       &::-webkit-scrollbar-thumb {
-        background: rgba($color-secondary, 0.4);
+        background: rgba($color-secondary, 0.8);
         border-radius: 10px;
-        transition: background 0.2s ease;
-        
-        &:hover {
-          background: rgba($color-secondary, 0.6);
-        }
+        &:hover { background: rgba($color-secondary, 1); }
       }
+      
     
       // СТИЛЬ ОДНОГО ФАЙЛА
       .file-item {
