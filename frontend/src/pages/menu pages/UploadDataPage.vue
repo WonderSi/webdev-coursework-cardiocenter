@@ -20,7 +20,7 @@
 
         <div class="upload-card-bottom-part">
           <div class="bottom-card-text-block">
-            <p class="alert-p">Пожалуйста, перед загрузкой убедитесь,<br>что ваши данные соответствуют <b>шаблону</b></p>
+            <p class="alert-p">Пожалуйста, перед загрузкой убедитесь, что ваши данные соответствуют <b>шаблону</b></p>
             <p class="attention-p">Обратите внимание на лист <b>«<span class=underlined>справочник</span>»</b></p>
           </div>
           <div class="download-template-btn">Скачать шаблон</div>
@@ -349,11 +349,21 @@ function formatSize(bytes: number): string {
 // -------------------------- КОНТЕЙНЕР СТРАНИЦЫ
 .upload-page {
   margin-left: 240px;
+  padding-inline: 40px;
+  box-sizing: border-box;
+
   display: flex;
   flex-direction: column;
   gap: 64px;
   margin-block: 40px;
-  margin-inline: 100px;
+
+  @media (max-width: 1200px) {
+    padding-inline: 40px;
+  }
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding-inline: 16px;
+  }
 }
 
 .upload-duo-cards {
@@ -362,12 +372,19 @@ function formatSize(bytes: number): string {
   align-items: stretch;
   gap: 32px;
   width: 100%;
+
+  > .upload-card,
+  > .files-list-card {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 // КАРТОЧКА СПИСКА ФАЙЛОВ (ПРАВО ВЕРХ)
 
 .file-list-header {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   white-space: nowrap;
   color: $color-blue-dark;
@@ -377,8 +394,6 @@ function formatSize(bytes: number): string {
 .files-list-card {
   display: flex;
   flex-direction: row;
-  flex: 1;
-  min-width: 500px;
   padding: 32px;
 
   background-color: rgba($color-glass-white, 0.8);
@@ -546,6 +561,7 @@ function formatSize(bytes: number): string {
     border-radius: $radius-rect-buttons;
     white-space: nowrap;
     font-weight: 600;
+    font-size: 1rem;
     &:hover {
       background: $color-accent;
       color: $color-white;
@@ -563,6 +579,7 @@ function formatSize(bytes: number): string {
     border-radius: $radius-rect-buttons;
     color: $color-white;
     font-weight: 600;
+    font-size: 1rem;
     &:hover {
       background: $color-accent-lighter;
       cursor: pointer;
@@ -577,7 +594,7 @@ function formatSize(bytes: number): string {
 .upload-card {
   display: flex;
   flex-direction: column;
-  // align-items: center;
+  align-items: center;
 
   // ВЕРХ
   .upload-card-upper-part {
@@ -585,7 +602,7 @@ function formatSize(bytes: number): string {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    max-width: 1000px;
+    max-width: 100%;
     padding: 32px;
 
     background-color: rgba($color-glass-white, 0.8);
@@ -614,12 +631,12 @@ function formatSize(bytes: number): string {
         margin: 0;
         color: $color-blue-dark;
         font-weight: 600;
-        font-size: 1.25rem;
+        font-size: 1rem;
         margin-bottom: 8px;
       }
       .upload-formats-p {
         margin: 0;
-        font-size: 1rem;
+        font-size: 0.875rem;
         color: $color-secondary;
       }
     }
@@ -637,8 +654,8 @@ function formatSize(bytes: number): string {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    max-width: 900px;
     width: 100%;
+    max-width: 100%;
     margin-top: -30px;
     z-index: 1;
 
@@ -654,24 +671,25 @@ function formatSize(bytes: number): string {
   }
 
   .bottom-card-text-block {
-    min-width: 400px;
+    flex-grow: 1;
     
+
     .alert-p {
       margin-top: 12px;
-      font-size: 1.25rem;
+      font-size: 1rem;
       color: $color-text;
     }
 
     .attention-p {
       margin-top: 16px;
-      font-size: 1rem;
+      font-size: 0.85rem;
       color: $color-text;
     }
   }
   .download-template-btn {
     margin-top: 16px;
     padding-block: 13px;
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 600;
     padding-inline: 22px;
     border-radius: $radius-rect-buttons;
@@ -683,6 +701,7 @@ function formatSize(bytes: number): string {
 
     white-space: nowrap;
     width: max-content;
+    flex-shrink: 0;
 
     &:hover {
       background: $color-accent-lighter;
