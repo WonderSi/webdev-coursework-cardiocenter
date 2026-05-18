@@ -25,16 +25,43 @@
           </div>
           <div class="download-template-btn">Скачать шаблон</div>
         </div>
-
       </div>
 
+
       <div class=files-list-card>
-        <div class="file-list-header">Список загружаемых файлов</div>
-        <div class="file-list">
-          
+        <div class="files-progress-bar">
+          <div class="progress-fill" style="width: 100%;"></div>
         </div>
-        <div class="cancel-all-btn">Отменить все</div>
-        <div class="upload-btn">Загрузить</div>
+        <div class="main-content-files-list">
+          <div class="file-list-header">Список загружаемых файлов</div>
+          
+          <div class="file-list">
+            <div class="file-item">
+              <div class="file-item-main">
+                <div class="file-icon">
+                  <span class="file-extension">xlsx</span>
+                </div>
+
+                <div class="file-details">
+                  <p class="file-name">Пациенты.xlsx</p>
+                  <p class="file-size">1.2 MB</p>
+                </div>
+
+                <button class="delete-file-btn">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z"/>
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="files-list-actions">
+            <div class="cancel-all-btn">Отменить все</div>
+           <div class="upload-btn">Загрузить</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -309,6 +336,142 @@ function formatSize(bytes: number): string {
   margin-inline: 200px;
 }
 
+.upload-duo-cards {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 32px;
+  width: 100%;
+}
+
+// КАРТОЧКА СПИСКА ФАЙЛОВ (ПРАВО ВЕРХ)
+.files-list-card {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 400px;
+  padding: 32px;
+
+  background-color: rgba($color-glass-white, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba($color-glass-white, 0.4);
+  border-radius: $radius-glass-card;
+
+  .files-progress-bar {
+    display: flex;
+    flex-direction: column;
+    color: $color-accent;
+    background: rgba($color-secondary, 0.3);
+    border-radius: 1000px;
+    margin-right: 8px;
+    width: 20px;
+    height: 100%;
+    overflow: hidden;
+
+    .progress-fill {
+
+    }
+  }
+
+  .main-content-files-list {
+    display: flex;
+    flex-direction: column;
+
+    .file-list-header {
+      font-size: 1.5rem;
+      font-weight: 600;
+      white-space: nowrap;
+      color: $color-blue-dark;
+      margin-bottom: 24px;
+    }
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-grow: 1;
+      margin-bottom: 16px;
+
+      overflow-y: auto;
+      padding-right: 8px; // место под скролл
+    
+      // СТИЛЬ ОДНОГО ФАЙЛА
+      .file-item {
+        display: flex;
+        flex-direction: row;
+        background: none;
+        border-radius: 10;
+        margin: 0;
+
+        &:hover {
+          border: 2.5px solid rgba($color-secondary, 0.3); 
+          border-radius: 100;
+          cursor: pointer
+        }
+
+        .file-item-main {
+          display: flex;
+          flex-grow: 1;
+          align-items: center;
+          padding: 8px;
+          gap: 16px;
+
+          .file-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 27px;
+            background: rgba($color-secondary, 0.3);
+            border-radius: 5px;
+
+            .file-extension {
+              color: $color-secondary-text;
+              font-weight: 600;
+            }
+          }
+        
+          .file-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+
+            .file-name {
+              font-weight: 600;
+              color: $color-blue-dark;
+              font-size: 1rem;
+            }
+            .file-size {
+              font-weight: 400;
+              color: $color-secondary-text;
+              font-size: 1rem;
+            }
+          }
+
+          .delete-file-btn {
+            background: transparent;
+            border: none;
+            color: $color-secondary-text;
+            padding: 4px;
+            margin-bottom: -3px; // выравнивание по центру контента
+            cursor: pointer;
+            transition: color 0.2s ease;
+            &:hover {
+              color: $color-red;
+            }
+          }
+        }
+      }
+    }
+
+    .files-list-actions {
+
+    }
+  }
+
+}
+
 // КАРТОЧКА ЗАГРУЗКИ (ЛЕВО ВЕРХ)
 .upload-card {
   display: flex;
@@ -340,7 +503,7 @@ function formatSize(bytes: number): string {
       justify-content: center;
       padding: 24px 48px;
 
-      border: 3px dashed $color-secondary;
+      border: 3px dashed rgba($color-secondary, 0.3);
       border-radius: 16px;
 
       .upload-icon {
@@ -350,11 +513,12 @@ function formatSize(bytes: number): string {
         margin: 0;
         color: $color-blue-dark;
         font-weight: 600;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+        margin-bottom: 8px;
       }
       .upload-formats-p {
         margin: 0;
-        font-size: 1.2rem;
+        font-size: 1rem;
         color: $color-secondary;
       }
     }
@@ -377,7 +541,6 @@ function formatSize(bytes: number): string {
     margin-top: -30px;
     z-index: 1;
 
-    // нужно сдвинуть bottom-part наверх, чтобы начиналась внутри upper-part
     padding: 32px;
     border-radius: 0 0 $radius-glass-card $radius-glass-card;
 
@@ -394,13 +557,13 @@ function formatSize(bytes: number): string {
     
     .alert-p {
       margin-top: 12px;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       color: $color-text;
     }
 
     .attention-p {
       margin-top: 16px;
-      font-size: 1.15rem;
+      font-size: 1rem;
       color: $color-text;
     }
   }
@@ -425,7 +588,6 @@ function formatSize(bytes: number): string {
     }
   }
 }
-
 
 
 // .upload-page {
