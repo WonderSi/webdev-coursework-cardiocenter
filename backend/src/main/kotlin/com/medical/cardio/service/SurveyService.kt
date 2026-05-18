@@ -15,8 +15,8 @@ class SurveyService(
      Принимает данные опроса, вызывает ML для прогноза, возвращает результат. Данные НЕ сохраняются в БД
     */
     fun submitSurvey(request: SurveyRequest): Mono<SurveyResponse> {
-        return mlClient.predict(request).map { prediction ->
-            SurveyResponse(prediction = prediction)
+        return mlClient.predict(request).map { predictions ->
+            SurveyResponse(predictions = predictions)
         }
     }
 }

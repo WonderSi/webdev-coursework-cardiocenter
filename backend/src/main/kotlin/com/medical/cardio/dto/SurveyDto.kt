@@ -113,13 +113,12 @@ data class DiagnosisRequest(
 )
 
 data class SurveyResponse(
-    val prediction: PredictionResult? = null
+    val predictions: List<DiseasePrediction> = emptyList()
 )
 
-data class PredictionResult(
-    val diseaseType: String?,
-    val probability: String? = null,
-    val message: String
+data class DiseasePrediction(
+    val name: String,
+    val probability: Int  // целое число 0–100
 )
 
 data class GlossaryResponse(
