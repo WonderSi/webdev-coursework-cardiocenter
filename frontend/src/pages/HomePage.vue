@@ -75,9 +75,9 @@ const goToLogin = () => {
 
   max-width: 1000px;
   width: 90%;
-  margin: 0 auto;
+  margin: 40px auto;
   min-height: 50vh;
-  max-height: 80vh;
+  // max-height: 80vh;
 
   padding: 48px;
   border-radius: $radius-glass-card;
@@ -109,7 +109,7 @@ height: 128px;
 }
 
 .nii-text {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 600;
   color: $color-white;
 }
@@ -129,10 +129,86 @@ height: 128px;
 
 .intro-subtext {
   font-size: 1.2rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
+  color: rgba($color-white, 0.85);
+  white-space: nowrap;
 }
 
-// right-side in basic-card.scss; buttons too
+// настройки правой стороны лежат в basic-card.scss; кнопки тоже
+
+// АДАПТИВНОСТЬ
+@media (max-width: 992px) {
+  .glass-card {
+    flex-direction: column;
+    max-height: none;
+    padding: 40px;
+    gap: 40px;
+  }
+
+  .intro {
+    gap: 48px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .logo-and-text {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .glass-card {
+    width: 95%;
+    padding: 24px 16px;
+    gap: 32px;
+    border-radius: 24px;
+  }
+
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .nii-text {
+    font-size: 1.8rem;
+  }
+
+  .intro {
+    gap: 32px;
+  }
+
+  .intro-header {
+    font-size: 1.8rem;
+  }
+
+  .intro-subtext {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .nii-text {
+    font-size: 1.5rem;
+  }
+
+  .intro-header {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .glass-card {
+    padding: 24px;
+    margin: 24px auto;
+  }
+  .intro {
+    gap: 40px;
+  }
+}
 
 </style>

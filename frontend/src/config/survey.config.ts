@@ -78,7 +78,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
     },
     {
       id: 4,
-      title: 'Выберите ваш основной род деятельности:',
+      title: 'Выберите Ваш основной род деятельности:',
       requiredFields: ['profession'],
       fields: [
         {

@@ -15,7 +15,7 @@ def transform_request_to_vector(
         "рост": height,
         "вес": weight,
         "имт": bmi,
-        "об1": request_data.get("hip_measurement", 0),
+        "об": request_data.get("hip_measurement", 0),
         "алкоголь": request_data["alcohol_name"],
         "профессия": request_data["job_name"],
         "район": request_data["region_name"],

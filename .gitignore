@@ -1,5 +1,4 @@
 /.vscode
 .idea
-
-docker/.env
-frontend/.env
+/docker/.env
+/frontend/.env
