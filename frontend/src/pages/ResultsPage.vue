@@ -29,20 +29,20 @@
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#EA566F"/> 
             </svg>
           </div>
-          <label class="risk-percent-general-risk">{{ GENERALRISK.risk }}%</label>
-          <label class="risk-name-general-risk">{{ GENERALRISK.name }}</label>
+          <label class="risk-percent-general-risk">{{ general?.probability }}%</label>
+          <label class="risk-name-general-risk">{{ general?.name }}</label>
         </div>
 
         <div 
-          v-for="(item, index) in DISEASESMOCK" 
+          v-for="(item, index) in diseases"
           :key="index"
           class="risk-element"
-          :class="getRiskClass(item.risk)"
+          :class="getRiskClass(item.probability)"
         >
           <div class="risk-icon">
             <svg 
-              :width="getRiskIconSize(item.risk).width" 
-              :height="getRiskIconSize(item.risk).height" 
+              :width="getRiskIconSize(item.probability).width"
+              :height="getRiskIconSize(item.probability).height"
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -50,7 +50,7 @@
             </svg>
           </div>
           
-          <label class="risk-percent">{{ item.risk }}%</label>
+          <label class="risk-percent">{{ item.probability }}%</label>
           <label class="risk-name">{{ item.name }}</label>
         </div>
       </div>
@@ -61,29 +61,21 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSurveyStore } from '@/stores/survey.store'
 
 const router = useRouter()
 const store = useSurveyStore()
 
+const general = computed(() => store.predictions[0])
+const diseases = computed(() => store.predictions.slice(1))
+
 const goHome = () => {
   store.reset()
   router.push('/')
 }
 
-const GENERALRISK = { name: 'Общий Риск', risk: 100 };
-
-const DISEASESMOCK: { name: string, risk: number }[] = [
-  { name: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)', risk: 100 },
-  { name: 'Сердечная Недостаточность (СН)', risk: 70 },
-  { name: 'Инсульт', risk: 59 },
-  { name: 'Стенокардия', risk: 30 },
-  { name: 'Инфаркт Миокарда', risk: 19 },
-  { name: 'Артериальная Гипертензия (АГ)', risk: 5 },
-]
-
-// Функция для определения CSS-класса на основе риска
 const getRiskClass = (risk: number) => {
   if (risk >= 70) return 'risk-severe';
   if (risk >= 50) return 'risk-high';
