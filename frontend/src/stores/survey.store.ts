@@ -40,16 +40,15 @@ export interface SurveyConfig {
   groups: SurveyGroup[]
 }
 
-// Результат ML: тип заболевания, вероятность и сообщение для пользователя
-export interface PredictionResult {
-  diseaseType: string | null
-  probability: string | null
-  message: string
+// Одно предсказание ML: русское название болезни и вероятность (целое 0–100)
+export interface DiseasePrediction {
+  name: string
+  probability: number
 }
 
-// Ответ от бэкенда при отправке анкеты, содержащий результат предсказания
+// Ответ от бэкенда при отправке анкеты
 export interface SurveyResponse {
-  prediction: PredictionResult | null
+  predictions: DiseasePrediction[]
 }
 
 const API_BASE = (import.meta.env.VITE_API_BASE || 'http://localhost:8080/api').replace(/\/$/, '')
@@ -68,7 +67,7 @@ export const useSurveyStore = defineStore('survey', () => {
   const config = ref<SurveyConfig | null>(null)
   const answers = reactive<Record<string, any>>({})
   const loading = ref(false)
-  const prediction = ref<PredictionResult | null>(null)
+  const predictions = ref<DiseasePrediction[]>([])
 
   // ЗАГРУЗКА С БЭКЭНДА
   /*
@@ -102,7 +101,7 @@ export const useSurveyStore = defineStore('survey', () => {
         method: 'POST',
         body: JSON.stringify(data),
       })
-      prediction.value = response.prediction ?? null
+      predictions.value = response.predictions ?? []
       return true
     } catch (e) {
       console.error('Survey submit failed:', e)
@@ -116,7 +115,7 @@ export const useSurveyStore = defineStore('survey', () => {
     for (const key of Object.keys(answers)) {
       answers[key] = null
     }
-    prediction.value = null
+    predictions.value = []
   }
 
   function buildPayload() {
@@ -156,5 +155,5 @@ export const useSurveyStore = defineStore('survey', () => {
     }
   }
 
-  return { config, answers, loading, prediction, loadConfig, submit, reset }
+  return { config, answers, loading, predictions, loadConfig, submit, reset }
 })
