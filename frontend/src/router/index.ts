@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
+import { useSurveyStore } from '@/stores/survey.store'
 import HomePage from '@/pages/HomePage.vue'
 import SurveyPage from '@/pages/SurveyPage.vue'
 import ResultsPage from '@/pages/ResultsPage.vue'
@@ -27,6 +28,7 @@ router.beforeEach((to) => {
   const { isAuthenticated } = useUserStore()
   if (to.meta.requiresAuth && !isAuthenticated) return { path: '/login' }
   if (to.path === '/login' && isAuthenticated) return { path: '/dashboards' }
+  if (to.path === '/results' && useSurveyStore().predictions.length === 0) return { path: '/' }
 })
 
 export default router
