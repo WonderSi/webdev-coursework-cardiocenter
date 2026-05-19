@@ -442,7 +442,7 @@ async function submitSinglePatient() {
 
   try {
     const payload = Object.fromEntries(
-      Object.entries(singlePatient).map(([k, v]) => [k, v === '' ? null : v])
+      Object.entries(singlePatient).map(([k, v]) => [k, (v as unknown) === '' ? null : v])
     )
 
     const res = await fetch('/api/admin/patients', {
@@ -539,19 +539,16 @@ function handleDrop(e: DragEvent) {
 
 function addFiles(newFiles: File[]) {
   globalError.value = null
-  let hasErrorsInBatch = false
 
   const validFiles = newFiles.filter(file => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase()
-    
+
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
       globalError.value = `Недопустимый формат. Разрешены: ${ALLOWED_EXTENSIONS.join(', ')}`
-      hasErrorsInBatch = true
       return false
     }
     if (file.size > MAX_SIZE_BYTES) {
       globalError.value = 'Один или несколько файлов превышают лимит в 10 МБ'
-      hasErrorsInBatch = true
       return false
     }
     return true
