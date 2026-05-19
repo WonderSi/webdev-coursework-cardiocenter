@@ -8,7 +8,7 @@ import LoginPage from '@/pages/LoginPage.vue'
 import DashboardsPage from '@/pages/menu pages/DashboardsPage.vue'
 import ViewDataPage from '@/pages/menu pages/ViewDataPage.vue'
 import UploadDataPage from '@/pages/menu pages/UploadDataPage.vue'
-// import ModelTrainingPage from '@/pages/menu pages/ModelTrainingPage.vue'
+import ModelTrainingPage from '@/pages/menu pages/ModelTrainingPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,7 +20,7 @@ const router = createRouter({
     { path: '/dashboards',     component: DashboardsPage, meta: { requiresAuth: true } },
     { path: '/view-data',      component: ViewDataPage,   meta: { requiresAuth: true } },
     { path: '/upload-data',    component: UploadDataPage, meta: { requiresAuth: true } },
-    { path: '/model-training', component: ViewDataPage,   meta: { requiresAuth: true } },
+    { path: '/model-training', component: ModelTrainingPage, meta: { requiresAuth: true } },
   ]
 })
 
