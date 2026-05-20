@@ -1,8 +1,29 @@
 <template>
   <sidebar/>
-  
+  <div class="model-training-page">
+    <div class="disaese-card">
+      <div class="header">
+        <div class="header-icon">
+          <!-- svg -->
+        </div>
+        <h1 class="disease-name">{{[DISEASELIST[1]]}}</h1>
+      </div>
+      <div class="disease-card-content">
+        <div class="col-container">
 
+        </div>
 
+        <div class="col-container">
+          
+        </div>
+
+        <div class="col-container">
+          
+        </div>
+
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -11,6 +32,10 @@ import Sidebar from '@/components/Sidebar.vue'
 import { ref, onMounted } from 'vue';
 import { fetchModelsStats, retrainModel, type FullModelsResponse } from '@/api/modeltraining.api'
 
+const DISEASELIST = [ "Общий риск", "Инсульт", "Сердечная недостаточность", "Нарушение ритма или другие ИБС", "Стенокардия", "Инфаркт миокарда", "Артериальная гипертензия" ];
+
+
+
 // import {
 //   CHART_COLORS,
 //   COMMON_TOOLTIP,
@@ -18,27 +43,6 @@ import { fetchModelsStats, retrainModel, type FullModelsResponse } from '@/api/m
 //   AXIS_STYLE,
 //   COMMON_GRID
 // } from '@/utils/chartConstants';
-
-// const GENERALRISK = { name: 'Общий Риск', risk: 100 };
-
-// const DISEASESMOCK: { name: string, risk: number }[] = [
-//   { name: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)', risk: 100 },
-//   { name: 'Сердечная Недостаточность (СН)', risk: 70 },
-//   { name: 'Инсульт', risk: 59 },
-//   { name: 'Стенокардия', risk: 30 },
-//   { name: 'Инфаркт Миокарда', risk: 19 },
-//   { name: 'Артериальная Гипертензия (АГ)', risk: 5 },
-// ]
-
-
-// МАППИНГ МЛ - РУ НАЗВАНИЕ
-//   { mlKey: 'general', label: 'Общий Риск' },
-//   { mlKey: 'stroke', label: 'Инсульт' },
-//   { mlKey: 'heart_failure', label: 'Сердечная Недостаточность (СН)' },
-//   { mlKey: 'arrhythmia_or_ihd', label: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)' },
-//   { mlKey: 'angina', label: 'Стенокардия' },
-//   { mlKey: 'mi', label: 'Инфаркт Миокарда' },
-//   { mlKey: 'ah', label: 'Артериальная Гипертензия (АГ)' },
 
 const modelData = ref<FullModelsResponse | null>(null)
 const isLoading = ref(false)
@@ -89,5 +93,34 @@ onMounted(() => {
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
+.model-training-page {
+  margin-left: 240px;
+  padding-inline: 80px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-block: 40px;
+
+  @media (max-width: 1200px) {
+    padding-inline: 40px;
+  }
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding-inline: 16px;
+  }
+}
+
+
+.disease-card {
+  background-color: rgba($color-glass-white, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba($color-glass-white, 0.4);
+  border-radius: $radius-glass-card;
+  
+  min-width: 100px;
+}
 
 </style>
