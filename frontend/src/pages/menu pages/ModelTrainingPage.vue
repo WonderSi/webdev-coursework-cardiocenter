@@ -2,7 +2,7 @@
   <sidebar/>
   
 
-  
+
 </template>
 
 <script setup lang="ts">
@@ -18,6 +18,27 @@ import { fetchModelsStats, retrainModel, type FullModelsResponse } from '@/api/m
 //   AXIS_STYLE,
 //   COMMON_GRID
 // } from '@/utils/chartConstants';
+
+// const GENERALRISK = { name: 'Общий Риск', risk: 100 };
+
+// const DISEASESMOCK: { name: string, risk: number }[] = [
+//   { name: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)', risk: 100 },
+//   { name: 'Сердечная Недостаточность (СН)', risk: 70 },
+//   { name: 'Инсульт', risk: 59 },
+//   { name: 'Стенокардия', risk: 30 },
+//   { name: 'Инфаркт Миокарда', risk: 19 },
+//   { name: 'Артериальная Гипертензия (АГ)', risk: 5 },
+// ]
+
+
+// МАППИНГ МЛ - РУ НАЗВАНИЕ
+//   { mlKey: 'general', label: 'Общий Риск' },
+//   { mlKey: 'stroke', label: 'Инсульт' },
+//   { mlKey: 'heart_failure', label: 'Сердечная Недостаточность (СН)' },
+//   { mlKey: 'arrhythmia_or_ihd', label: 'Нарушение Ритма или другие Ишемические Болезни Сердца (ИБС)' },
+//   { mlKey: 'angina', label: 'Стенокардия' },
+//   { mlKey: 'mi', label: 'Инфаркт Миокарда' },
+//   { mlKey: 'ah', label: 'Артериальная Гипертензия (АГ)' },
 
 const modelData = ref<FullModelsResponse | null>(null)
 const isLoading = ref(false)
