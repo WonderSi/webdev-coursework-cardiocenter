@@ -1,5 +1,205 @@
-export const mlModelMock = {
-  lastTrained: '01.05.2026', // дата последнего обучения
-  recordsUsed: 12050,        // на скольких записях обучена
-  accuracy: 94.2             // точность
-};
+export const retrainResponse = "ok";
+
+export const generalModelStats = {
+  modelName: "Общий риск",
+  featureCount: 98,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 5786,
+  trainNeg: 2218,
+  testPos: 2873,
+  testNeg: 1071,
+  classWeight0: 1.0,
+  classWeight1: 0.38,
+  rocAuc: 0.79,
+  prAuc: 0.90,
+  accuracy: 0.76,
+  balancedAccuracy: 0.72,
+  precision: 0.85,
+  recall: 0.82,
+  f1: 0.84,
+  logloss: 0.50,
+  brier: 0.17,
+  tn: 656,
+  fp: 415,
+  fn: 514,
+  tp: 2359
+}
+
+export const strokeModelStats = {
+  modelName: "Инсульт",
+  featureCount: 108,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 355,
+  trainNeg: 7649,
+  testPos: 134,
+  testNeg: 3810,
+  classWeight0: 1.0, 
+  classWeight1: 21.54,
+  rocAuc: 0.70,
+  prAuc: 0.06,
+  accuracy: 0.82,
+  balancedAccuracy: 0.61,
+  precision: 0.08,
+  recall: 0.40,
+  f1: 0.13,
+  logloss: 0.42,
+  brier: 0.13,
+  tn: 3164,
+  fp: 646,
+  fn: 81,
+  tp: 53
+}
+
+export const heartFailureModelStats = {
+  modelName: "Сердечная недостаточность",
+  featureCount: 108,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 503,
+  trainNeg: 7501,
+  testPos: 264,
+  testNeg: 3680,
+  classWeight0: 1.0, 
+  classWeight1: 14.91,
+  rocAuc: 0.91,
+  prAuc: 0.59,
+  accuracy: 0.95,
+  balancedAccuracy: 0.83,
+  precision: 0.60,
+  recall: 0.69,
+  f1: 0.64,
+  logloss: 0.18,
+  brier: 0.05,
+  tn: 3558,
+  fp: 122,
+  fn: 83,
+  tp: 181
+}
+
+export const arrhytmiaOrIhdModelStats = {
+  modelName: "Нарушение ритма или другие ИБС",
+  featureCount: 108,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 1014,
+  trainNeg: 6990,
+  testPos: 540,
+  testNeg: 3404,
+  classWeight0: 1.0, 
+  classWeight1: 6.89,
+  rocAuc: 0.72,
+  prAuc: 0.48,
+  accuracy: 0.84,
+  balancedAccuracy: 0.67,
+  precision: 0.42,
+  recall: 0.45,
+  f1: 0.43,
+  logloss: 0.53,
+  brier: 0.17,
+  tn: 3076,
+  fp: 328,
+  fn: 299,
+  tp: 241
+}
+
+export const anginaModelStats = {
+  modelName: "Стенокардия",
+  featureCount: 108,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 1003,
+  trainNeg: 7001,
+  testPos: 502,
+  testNeg: 3442,
+  classWeight0: 1.0, 
+  classWeight1: 6.98,
+  rocAuc: 0.96,
+  prAuc: 0.87,
+  accuracy: 0.94,
+  balancedAccuracy: 0.91,
+  precision: 0.72,
+  recall: 0.87,
+  f1: 0.79,
+  logloss: 0.19,
+  brier: 0.05,
+  tn: 3276,
+  fp: 166,
+  fn: 65,
+  tp: 437
+}
+
+export const miocardModelStats = {
+  modelName: "Инфаркт миокарда",
+  featureCount: 108,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 589,
+  trainNeg: 7415,
+  testPos: 307,
+  testNeg: 3637,
+  classWeight0: 1.0, 
+  classWeight1: 12.58,
+  rocAuc: 0.97,
+  prAuc: 0.88,
+  accuracy: 0.94,
+  balancedAccuracy: 0.93,
+  precision: 0.57,
+  recall: 0.92,
+  f1: 0.70,
+  logloss: 0.21,
+  brier: 0.054,
+  tn: 3423,
+  fp: 214,
+  fn: 24,
+  tp: 283
+}
+
+export const artetialModelStats = {
+  modelName: "Артериальная гипертензия",
+  featureCount: 108,
+  trainRows: 8004,
+  testRows: 3944,
+  trainPos: 5448,
+  trainNeg: 2556,
+  testPos: 2747,
+  testNeg: 1197,
+  classWeight0: 1.0, 
+  classWeight1: 0.47,
+  rocAuc: 0.79,
+  prAuc: 0.88,
+  accuracy: 0.74,
+  balancedAccuracy: 0.73,
+  precision: 0.85,
+  recall: 0.76,
+  f1: 0.80,
+  logloss: 0.54,
+  brier: 0.18,
+  tn: 826,
+  fp: 371,
+  fn: 658,
+  tp: 2089
+}
+
+export const mockFullModelsResponse = {
+  modelVersion: "1.0.0",
+  savedModels: [
+    "general_model.cbm",
+    "stroke_model.cbm",
+    "heart_failure_model.cbm",
+    "arrhythmia_or_ihd_model.cbm",
+    "angina_model.cbm",
+    "mi_model.cbm",
+    "arterial_model.cbm"
+  ],
+  modelsStats: [
+    generalModelStats,
+    strokeModelStats,
+    heartFailureModelStats,
+    arrhytmiaOrIhdModelStats,
+    anginaModelStats,
+    miocardModelStats,
+    artetialModelStats
+  ]
+}

@@ -1318,9 +1318,6 @@ input[type="radio"] {
   grid-template-columns: 0.85fr 1.5fr 2fr;
   gap: 32px;
   align-items: start;
-
-  .part-two-col1 {
-  }
 }
 
 .disease-list-wrapper {
