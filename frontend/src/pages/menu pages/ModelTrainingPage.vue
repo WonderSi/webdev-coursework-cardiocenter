@@ -36,6 +36,13 @@
                 </div>
                 <div class="stat-number">3944</div>
               </div>
+              <div class="diseased-healthy">
+                <div class="span-container">
+                  <span class="diseased">больные:</span><span class="diseased">1000 | 90%</span>
+                  <span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span>
+                </div>
+              </div>
+              <div class="ratio-rectangle"></div>
             </div>
 
             <div class="one-stat-ratio">
@@ -82,28 +89,28 @@
             <div class="one-stat">
               <div class="icon-and-name">
                 <div class="circle-icon"></div>
-                <span class="one-stat-name">Общая точность (ROC-AUC):</span>
+                <span class="one-stat-name">общая точность (roc-auc):</span>
               </div>
               <div class="stat-number">0.79</div>
             </div>
             <div class="one-stat">
               <div class="icon-and-name">
                 <div class="circle-icon"></div>
-                <span class="one-stat-name">Доля правильных ответов:</span>
+                <span class="one-stat-name">доля правильных ответов:</span>
               </div>
               <div class="stat-number">0.76</div>
             </div>
             <div class="one-stat">
               <div class="icon-and-name">
                 <div class="circle-icon"></div>
-                <span class="one-stat-name">Точность (Precision):</span>
+                <span class="one-stat-name">точность (precision):</span>
               </div>
               <div class="stat-number">0.85</div>
             </div>
             <div class="one-stat">
               <div class="icon-and-name">
                 <div class="circle-icon"></div>
-                <span class="one-stat-name">Полнота (Recall):</span>
+                <span class="one-stat-name">полнота (recall):</span>
               </div>
               <div class="stat-number">0.82</div>
             </div>
@@ -115,6 +122,42 @@
               <div class="stat-number">0.83</div>
             </div>
           </div>
+          <div class="subheader smaller">
+            <span>дополнительные метрики качества</span> </div>
+            <div class="stats-list">
+              <div class="one-stat">
+                <div class="icon-and-name">
+                  <div class="circle-icon"></div>
+                  <span class="one-stat-name">logloss:</span>
+                </div>
+                <div class="stat-number">0.83</div>
+              </div>
+
+              <div class="one-stat">
+                <div class="icon-and-name">
+                  <div class="circle-icon"></div>
+                  <span class="one-stat-name">brier:</span>
+                </div>
+                <div class="stat-number">0.83</div>
+              </div>
+
+              <div class="one-stat">
+                <div class="icon-and-name">
+                  <div class="circle-icon"></div>
+                  <span class="one-stat-name">pr_auc:</span>
+                </div>
+                <div class="stat-number">0.83</div>
+              </div>
+
+              <div class="one-stat">
+                <div class="icon-and-name">
+                  <div class="circle-icon"></div>
+                  <span class="one-stat-name">balanced_accuracy:</span>
+                </div>
+                <div class="stat-number">0.83</div>
+              </div>
+            </div>
+          
 
         </div>
 
@@ -288,6 +331,12 @@ onMounted(() => {
       display: flex;
       flex-direction: column;
       min-width: 0;
+
+      &.first-col {
+        .stats-list {
+          gap: 40px;
+        }
+      }
     }
 
     .div-line {
@@ -314,7 +363,10 @@ onMounted(() => {
       }
 
       &.smaller {
-        font-size: 1;
+        margin-top: 24px;
+        span {
+          font-size: 1rem;
+        }
       }
     }
 
@@ -342,14 +394,14 @@ onMounted(() => {
         gap: 8px;
 
         .cell-label {
-          font-size: 1rem;
+          font-size: 1.5rem;
           font-weight: 600;
           text-transform: lowercase;
           line-height: 1.2;
         }
 
         .cell-label-explanatory {
-          font-size: 0.8rem;
+          font-size: 0.875rem;
           font-weight: 400;
           text-transform: lowercase;
         }
@@ -395,7 +447,8 @@ onMounted(() => {
     flex-direction: column;
     gap: 2px;
     .note-header {
-      font-weight: 600;
+      text-transform: uppercase;
+      font-weight: 800;
       white-space: nowrap;
     }
     .two-weights-span {
