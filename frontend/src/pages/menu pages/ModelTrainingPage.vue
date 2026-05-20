@@ -46,10 +46,10 @@
             <div class="note-line"></div>
             <div class="note-content">
               <span class="note-header">ПРИМЕЧАНИЕ: ВЕСА МОДЕЛИ</span>
-              <span class="note-content">Веса присутствуют из-за дисбаланса размеров выборок</span>
+              <span>Веса присутствуют из-за дисбаланса размеров выборок</span>
               <div class="two-weights-span">
-                <span class="note-content">вес больных: 1.00</span>
-                <span class="note-content">вес здоровых: 0.63</span>
+                <span class="note-text-smaller">вес больных: 1.00</span>
+                <span class="note-text-smaller">вес здоровых: 0.63</span>
               </div>
             </div>
             
@@ -388,6 +388,43 @@ onMounted(() => {
           background-color: $color-accent-lighter2;
           color: $color-blue-dark;
         }
+      }
+    }
+  }
+}
+
+// примечание внизу первого столбца
+.weights-note {
+  margin-top: 40px;
+  color: $color-secondary-text;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: row;
+  .note-line {
+    height: 100%;
+    border-right: 8px solid $color-secondary-text;
+    margin-right: 8px;
+  }
+  .note-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    .note-header {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .two-weights-span {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 70%;
+      .note-text-smaller {
+        font-size: 0.875rem;
+        font-weight: 400;
+        text-align: center;
+        align-self: center;
       }
     }
   }
