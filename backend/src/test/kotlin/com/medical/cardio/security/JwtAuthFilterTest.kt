@@ -57,10 +57,10 @@ class JwtAuthFilterTest {
     }
 
     @Test
-    fun `request without cookie to protected endpoint returns 403`() {
+    fun `request without cookie to protected endpoint returns 401`() {
         mockMvc.get("/api/auth/me")
             .andExpect {
-                status { isForbidden() }
+                status { isUnauthorized() }
             }
     }
 }

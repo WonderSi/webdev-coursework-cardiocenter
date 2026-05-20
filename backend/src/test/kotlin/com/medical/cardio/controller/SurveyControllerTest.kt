@@ -1,6 +1,6 @@
 package com.medical.cardio.controller
 
-import com.medical.cardio.dto.PredictionResult
+import com.medical.cardio.dto.DiseasePrediction
 import com.medical.cardio.service.MlClient
 import com.medical.cardio.support.ControllerTestBase
 import org.junit.jupiter.api.Test
@@ -29,9 +29,9 @@ class SurveyControllerTest : ControllerTestBase() {
     """.trimIndent()
 
     @Test
-    fun `submit valid survey returns 200 with prediction`() {
+    fun `submit valid survey returns 200 with predictions`() {
         whenever(mlClient.predict(any())).thenReturn(
-            Mono.just(PredictionResult(diseaseType = "ИБС", probability = "72%", message = "Высокий риск"))
+            Mono.just(listOf(DiseasePrediction(name = "Общий риск", probability = 72)))
         )
 
         mockMvc.post("/api/survey/submit") {
@@ -39,9 +39,8 @@ class SurveyControllerTest : ControllerTestBase() {
             content = validSurveyJson
         }.andExpect {
             status { isOk() }
-            jsonPath("$.prediction.diseaseType") { value("ИБС") }
-            jsonPath("$.prediction.probability") { value("72%") }
-            jsonPath("$.prediction.message") { value("Высокий риск") }
+            jsonPath("$.predictions[0].name") { value("Общий риск") }
+            jsonPath("$.predictions[0].probability") { value(72) }
         }
     }
 
@@ -76,18 +75,15 @@ class SurveyControllerTest : ControllerTestBase() {
     }
 
     @Test
-    fun `submit when ML service unavailable returns 200 with fallback message`() {
-        val fallback = "Сервис прогнозирования временно недоступен. Попробуйте позже."
-        whenever(mlClient.predict(any())).thenReturn(
-            Mono.just(PredictionResult(diseaseType = null, probability = null, message = fallback))
-        )
+    fun `submit when ML service unavailable returns 200 with empty predictions`() {
+        whenever(mlClient.predict(any())).thenReturn(Mono.just(emptyList()))
 
         mockMvc.post("/api/survey/submit") {
             contentType = MediaType.APPLICATION_JSON
             content = validSurveyJson
         }.andExpect {
             status { isOk() }
-            jsonPath("$.prediction.message") { value(fallback) }
+            jsonPath("$.predictions") { isArray() }
         }
     }
 }
