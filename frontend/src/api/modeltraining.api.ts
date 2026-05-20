@@ -37,8 +37,11 @@
 //   - (fp) Ложная тревога (Модель сказала "Болен", а человек здоров).
 //   - (fn) Пропуск заболевания (Модель сказала "Здоров", а человек болен — самая опасная ошибка в медицине).
 
+// ВРЕМЕННЫЙ ИМПОРТ ДЛЯ МОКОВЫХ ДАННЫХ ПОКА НЕТ ПОДКЛЮЧЕННОГО БЕКЕНДА:
+import { mockFullModelsResponse, retrainResponse } from '@/mocks/modelData'
+
 export interface OneModelStats {
-  modelStem: string
+  modelName: string
   featureCount: number
   trainRows: number
   testRows: number
@@ -71,19 +74,39 @@ export interface FullModelsResponse {
   modelsStats: OneModelStats[]
 }
 
-// Получение текущих метрик
+// Получение текущих метрик (РЕЖИМ МОКОВ)
+// =========================================
 export async function fetchModelsStats(): Promise<FullModelsResponse> {
-  const res = await fetch('/api/admin/model')
-  if (!res.ok) throw new Error(`Model fetch failed: ${res.status}`)
-  return res.json()
+  // Имитируем задержку сети в 800 миллисекунд для проверки лоадеров
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockFullModelsResponse as FullModelsResponse)
+    }, 800)
+  })
+
+// !!!!!!! ВЕРНУТЬ КОГДА БУДЕТ БЕКЕНД
+// export async function fetchModelsStats(): Promise<FullModelsResponse> {
+//   const res = await fetch('/api/admin/model')
+//   if (!res.ok) throw new Error(`Model fetch failed: ${res.status}`)
+//   return res.json()
+// }
 }
 
-// Запуск переобучения модели
+// Запуск переобучения модели (РЕЖИМ МОКОВ)
+// =========================================
+
 export async function retrainModel(): Promise<RetrainStatusResponse> {
-  // POST, так как инициализируем процесс
-  const res = await fetch('/api/admin/model/retrain', {
-    method: 'POST'
+  // Имитируем процесс переобучения (задержка 1.5 секунды)
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ status: retrainResponse }) // вернет { status: "ok" }
+    }, 1500)
   })
-  if (!res.ok) throw new Error(`Model retrain failed: ${res.status}`)
-  return res.json()
+
+  // !!!!!!! ВЕРНУТЬ КОГДА БУДЕТ БЕКЕНД
+  // const res = await fetch('/api/admin/model/retrain', {
+  //   method: 'POST'
+  // })
+  // if (!res.ok) throw new Error(`Model retrain failed: ${res.status}`)
+  // return res.json()
 }

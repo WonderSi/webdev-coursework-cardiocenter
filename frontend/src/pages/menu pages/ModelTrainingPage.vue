@@ -234,21 +234,34 @@
 <script setup lang="ts">
 import Sidebar from '@/components/Sidebar.vue'
 
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { fetchModelsStats, retrainModel, type FullModelsResponse } from '@/api/modeltraining.api'
-import { retrainResponse, generalModelStats, strokeModelStats, heartFailureModelStats, arrhytmiaOrIhdModelStats, anginaModelStats, miocardModelStats, artetialModelStats,  } from '@/mocks/modelData'
-
-const isCollapsed = ref(false);
-const toggleCollapse = () => {
-  isCollapsed.value = !isCollapsed.value;
-};
 
 const modelData = ref<FullModelsResponse | null>(null)
 const isLoading = ref(false)
-const isRetraining = ref(false) // лоадер для кнопки переобучения
+const isRetraining = ref(false)
 const errorMessage = ref('')
 
-// Функция первичной загрузки (и обновления)
+// Состояние раскрытия-cворачивания для каждой карточки модели
+const collapsedStates = ref<Record<string, boolean>>({})
+
+const toggleCollapse = (modelName: string) => {
+  // По умолчанию состояние считается false (не свернуто) // При клике = инверсия
+  collapsedStates.value[modelName] = !collapsedStates.value[modelName];
+};
+
+const modelsList = computed(() => {
+  if (!modelData.value || !modelData.value.modelsStats) return [];
+    return modelData.value.modelsStats;
+})
+
+// Утилита для расчёта процентов
+const calcPercent = (part: number, total: number) => {
+  if (!total) return 0;
+  return Math.round((part / total) * 100);
+}
+
+// Загрузка данных и обновление
 const loadData = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -268,7 +281,7 @@ const handleRetrain = async () => {
   try {
     const response = await retrainModel()
     if (response.status === 'ok') {
-      // Если переобучение прошло успешно, ОБНОВЛЯЕМ метрики
+      // переобучили => обновляем метрики
       await loadData()
     } else {
       errorMessage.value = 'Ошибка переобучения со стороны ML сервера'
@@ -280,7 +293,6 @@ const handleRetrain = async () => {
   }
 }
 
-// При открытии страницы загружаем данные
 onMounted(() => {
   loadData()
 })

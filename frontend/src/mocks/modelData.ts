@@ -131,7 +131,7 @@ export const anginaModelStats = {
 }
 
 export const miocardModelStats = {
-  modelName: "Инфарк миокарда",
+  modelName: "Инфаркт миокарда",
   featureCount: 108,
   trainRows: 8004,
   testRows: 3944,
@@ -180,4 +180,26 @@ export const artetialModelStats = {
   fp: 371,
   fn: 658,
   tp: 2089
+}
+
+export const mockFullModelsResponse = {
+  modelVersion: "1.0.0",
+  savedModels: [
+    "general_model.cbm",
+    "stroke_model.cbm",
+    "heart_failure_model.cbm",
+    "arrhythmia_or_ihd_model.cbm",
+    "angina_model.cbm",
+    "mi_model.cbm",
+    "arterial_model.cbm"
+  ],
+  modelsStats: [
+    generalModelStats,
+    strokeModelStats,
+    heartFailureModelStats,
+    arrhytmiaOrIhdModelStats,
+    anginaModelStats,
+    miocardModelStats,
+    artetialModelStats
+  ]
 }
