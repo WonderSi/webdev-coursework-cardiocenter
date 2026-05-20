@@ -27,20 +27,34 @@
               </div>
               <div class="stat-number">98</div>
             </div>
-            <div class="one-stat">
-              <div class="icon-and-name">
-                <div class="circle-icon"></div>
-                <span class="one-stat-name">размер тестовой выборки:</span>
+
+            <div class="one-stat-ratio">
+              <div class="one-stat">
+                <div class="icon-and-name">
+                  <div class="circle-icon"></div>
+                  <span class="one-stat-name">размер тестовой выборки:</span>
+                </div>
+                <div class="stat-number">3944</div>
               </div>
-              <div class="stat-number">3944</div>
             </div>
-            <div class="one-stat">
-              <div class="icon-and-name">
-                <div class="circle-icon"></div>
-                <span class="one-stat-name">размер обучающей выборки:</span>
+
+            <div class="one-stat-ratio">
+              <div class="one-stat">
+                <div class="icon-and-name">
+                  <div class="circle-icon"></div>
+                  <span class="one-stat-name">размер обучающей выборки:</span>
+                </div>
+                <div class="stat-number">8004</div>
               </div>
-              <div class="stat-number">8004</div>
+              <div class="diseased-healthy">
+                <div class="span-container">
+                  <span class="diseased">больные:</span><span class="diseased">1000 | 90%</span>
+                  <span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span>
+                </div>
+              </div>
+              <div class="ratio-rectangle"></div>
             </div>
+
           </div>
           <div class="weights-note">
             <div class="note-line"></div>
@@ -101,6 +115,7 @@
               <div class="stat-number">0.83</div>
             </div>
           </div>
+
         </div>
 
         <div class="div-line"></div>
@@ -297,46 +312,16 @@ onMounted(() => {
         color: $color-secondary;
         letter-spacing: 0.05em;
       }
+
+      &.smaller {
+        font-size: 1;
+      }
     }
 
     .stats-list {
       display: flex;
       flex-direction: column;
       gap: 16px;
-    }
-
-    .one-stat {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-
-      .icon-and-name {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .circle-icon {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background-color: $color-blue-dark;
-        }
-
-        .one-stat-name {
-          font-weight: 600;
-          font-size: 1rem;
-          color: $color-blue-dark;
-        }
-      }
-
-      .stat-number {
-        font-weight: 600;
-        font-size: 1rem;
-        color: $color-blue-dark;
-        text-align: right;
-      }
     }
 
     // --- Матрица (Grid)
@@ -418,7 +403,7 @@ onMounted(() => {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
-      align-items: center;
+      align-self: center;
       width: 70%;
       .note-text-smaller {
         font-size: 0.875rem;
@@ -429,4 +414,77 @@ onMounted(() => {
     }
   }
 }
+
+// для "размер выборки"
+.one-stat-ratio {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .diseased-healthy {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%; // почему-то не расталкивает элементы в два края
+
+    .span-container {
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+    }
+    .diseased {
+      color: $color-red;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    .healthy {
+      color: $color-green;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+  }
+
+  .ratio-rectangle {
+    color: $color-red;
+    width: 100%;
+    border-bottom: 10px solid $color-red; // нужно научиться его кусочек зелёным (% здоровых)
+    border-radius: 1000px;
+  }
+}
+
+.one-stat {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .icon-and-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .circle-icon {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: $color-blue-dark;
+    }
+
+    .one-stat-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: $color-blue-dark;
+    }
+  }
+
+  .stat-number {
+    font-weight: 600;
+    font-size: 1rem;
+    color: $color-blue-dark;
+    text-align: right;
+  }
+}
+
 </style>
