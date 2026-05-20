@@ -1,8 +1,10 @@
 package com.medical.cardio.service
 
+import com.medical.cardio.dto.PatientManualCreateRequest
 import com.medical.cardio.dto.RowError
 import com.medical.cardio.dto.UploadReport
 import com.medical.cardio.entity.DiagnosisEntity
+import com.medical.cardio.entity.PatientEntity
 import com.medical.cardio.repository.AdminUserRepository
 import com.medical.cardio.repository.DiagnosisRepository
 import com.medical.cardio.repository.GlossaryRepository
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayOutputStream
+import java.time.LocalDate
 
 @Service
 class UploadService(
@@ -76,6 +79,55 @@ class UploadService(
             skippedRows  = errors.size,
             errors       = errors,
         )
+    }
+
+    @Transactional
+    fun savePatient(request: PatientManualCreateRequest, creatorEmail: String) {
+        val creator = adminUserRepository.findByEmail(creatorEmail)
+            ?: error("Пользователь не найден: $creatorEmail")
+        val resolver = GlossaryResolver(glossaryRepository.findAllWithValues())
+
+        val gender = resolver.resolve("gender", request.gender)
+            ?: throw IllegalArgumentException("Неверный код пола: ${request.gender}")
+
+        val patient = PatientEntity(
+            createDate        = LocalDate.now(),
+            creator           = creator,
+            gender            = gender,
+            age               = request.age,
+            height            = request.height,
+            weight            = request.weight,
+            hipMeasurement    = request.hipMeasurement,
+            alcohol           = request.alcohol?.let { resolver.resolve("alcohol", it) },
+            profession        = request.profession?.let { resolver.resolve("profession", it) },
+            region            = request.region?.let { resolver.resolve("region", it) },
+            glucose           = request.glucose,
+            cholesterol       = request.cholesterol,
+            nonHdlCholesterol = request.nonHdlCholesterol,
+            vldlCholesterol   = request.vldlCholesterol,
+            hdlCholesterol    = request.hdlCholesterol,
+            ldlCholesterol    = request.ldlCholesterol,
+            apolipoproteinA   = request.apolipoproteinA,
+            apolipoproteinB   = request.apolipoproteinB,
+            triglycerides     = request.triglycerides,
+        )
+        val savedPatient = patientRepository.save(patient)
+
+        val diagnosisFields = listOf(
+            Triple(request.stroke,               request.strokeYear,               1),
+            Triple(request.heartFailure,          request.heartFailureYear,          2),
+            Triple(request.cad,                   request.cadYear,                   3),
+            Triple(request.angina,                request.anginaYear,                4),
+            Triple(request.myocardialInfarction,  request.myocardialInfarctionYear,  5),
+            Triple(request.arterialHypertension,  request.arterialHypertensionYear,  6),
+        )
+        val diagnoses = diagnosisFields.mapNotNull { (flag, year, code) ->
+            if (flag == 1) {
+                val value = resolver.resolve("diagnosis", code) ?: return@mapNotNull null
+                DiagnosisEntity(patient = savedPatient, diagnosis = value, yearOfDiagnosis = year?.toShort())
+            } else null
+        }
+        if (diagnoses.isNotEmpty()) diagnosisRepository.saveAll(diagnoses)
     }
 
     fun generateTemplate(): ByteArray {

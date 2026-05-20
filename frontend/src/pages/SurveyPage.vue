@@ -294,6 +294,21 @@ onMounted(() => {
   padding: 48px 0;
 }
 
+.error-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: $color-red;
+  color: $color-white;
+  padding: 14px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+}
+
 .fade-enter-active { animation: fadeIn 0.3s ease; }
 .fade-leave-active { animation: fadeIn 0.2s ease reverse; }
 @keyframes fadeIn {
