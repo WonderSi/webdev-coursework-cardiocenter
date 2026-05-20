@@ -7,9 +7,9 @@ services:
     image: postgres:16-alpine
     container_name: cardio_postgres
     environment:
-      POSTGRES_DB: cardio_db
-      POSTGRES_USER: cardio_user
-      POSTGRES_PASSWORD: cardio_pass
+      POSTGRES_DB: ${DB_NAME:-cardio_db}
+      POSTGRES_USER: ${DB_USER:-cardio_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cardio_pass}
     ports:
       - "5432:5432"
     volumes:
@@ -30,7 +30,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: cardio_redis
-    command: redis-server --requirepass redis_pass
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass}
     ports:
       - "6379:6379"
     volumes:
@@ -38,7 +38,7 @@ services:
     networks:
       - internal
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "redis_pass", "ping" ]
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-redis_pass} ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
