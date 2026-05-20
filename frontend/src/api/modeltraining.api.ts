@@ -9,13 +9,15 @@
 //   - имя модели (model_stem маппед к русскому имени)
 //   - количество признаков которые учитывает модель (feature_count)
 //   - размер тестовой выборки (test_rows)
-//     - (train_pos)
-//     - (train_neg)
+//     - те, у которых есть заболевание (train_pos)
+//     - у которых нет заболевания (train_neg)
 //   - размер обучающей выборки (train_rows)
-//     - (test_pos)
-//     - (test_neg)
-//   - вес pos (class_weight_0)
-//   - вес meg (lass_weight_1)
+//     - те, у которых есть заболевание (test_pos)
+//     - у которых нет заболевания (test_neg)
+//   // БЛОК ПРИМЕЧАНИЕ
+//      ВЕС ПРИСУТСТВУЕТ ИЗ-ЗА ДИСБАЛАНСА ПО КЛАССАМ
+//      - вес pos (class_weight_0)
+//      - вес meg (lass_weight_1)
 
 //   // БЛОК МЕТРИКИ КАЧЕСТВА МОДЕЛИ
 //   - общая способность модели отличать пациентов от здоровых (roc_aus) 
@@ -69,8 +71,19 @@ export interface FullModelsResponse {
   modelsStats: OneModelStats[]
 }
 
+// Получение текущих метрик
 export async function fetchModelsStats(): Promise<FullModelsResponse> {
   const res = await fetch('/api/admin/model')
   if (!res.ok) throw new Error(`Model fetch failed: ${res.status}`)
+  return res.json()
+}
+
+// Запуск переобучения модели
+export async function retrainModel(): Promise<RetrainStatusResponse> {
+  // POST, так как инициализируем процесс
+  const res = await fetch('/api/admin/model/retrain', {
+    method: 'POST'
+  })
+  if (!res.ok) throw new Error(`Model retrain failed: ${res.status}`)
   return res.json()
 }
