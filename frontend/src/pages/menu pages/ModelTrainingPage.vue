@@ -263,8 +263,6 @@ onMounted(() => {
 
 </script>
 
-
-
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
 
@@ -277,6 +275,8 @@ onMounted(() => {
   margin-left: 240px;
   padding-inline: 80px;
   box-sizing: border-box;
+  width: calc(100% - 240px);
+  flex-grow: 1;
 
   display: flex;
   flex-direction: column;
@@ -288,12 +288,9 @@ onMounted(() => {
   }
   @media (max-width: 768px) {
     margin-left: 0;
+    width: 100%;
     padding-inline: 16px;
   }
-}
-
-.card-header {
-  align-self: flex-start;
 }
 
 .disease-card {
@@ -305,6 +302,7 @@ onMounted(() => {
   .card-header {
     cursor: pointer;
     transition: background-color 0.2s ease;
+     align-self: flex-start;
 
     display: flex;
     flex-direction: row;
