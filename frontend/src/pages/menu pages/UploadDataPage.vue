@@ -1434,7 +1434,6 @@ input[type="radio"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 16px;
 
   .upload-btn {
     justify-content: center;
