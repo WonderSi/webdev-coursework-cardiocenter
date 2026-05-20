@@ -35,45 +35,41 @@
 //   - (fp) Ложная тревога (Модель сказала "Болен", а человек здоров).
 //   - (fn) Пропуск заболевания (Модель сказала "Здоров", а человек болен — самая опасная ошибка в медицине).
 
-
-export interface GeneralStats {
-  modelVersion: string
-  savedModels: [] // как здесь обозначить что на вход придёт массив с 7 строками?  
-}
-
 export interface OneModelStats {
-    modelStem: string
-    featureCount: number
-    trainRows: number
-    testRows: number
-    trainPos: number
-    trainNeg: number
-    testPos: number
-    testNeg: number
-    classWeight0: number 
-    classWeight1: number
-    rocAuc: number
-    prAuc: number
-    accuracy: number
-    balancedAccuracy: number
-    precision: number
-    recall: number
-    f1: number
-    logloss: number
-    brier: number
-    tn: number
-    fp: number
-    fn: number
-    tp: number
+  modelStem: string
+  featureCount: number
+  trainRows: number
+  testRows: number
+  trainPos: number
+  trainNeg: number
+  testPos: number
+  testNeg: number
+  classWeight0: number 
+  classWeight1: number
+  rocAuc: number
+  prAuc: number
+  accuracy: number
+  balancedAccuracy: number
+  precision: number
+  recall: number
+  f1: number
+  logloss: number
+  brier: number
+  tn: number
+  fp: number
+  fn: number
+  tp: number
 }
 
 export interface RetrainStatusResponse { status: string }
 
 export interface FullModelsResponse {
-  GeneralStats: GeneralStats[]
+  modelVersion: string
+  savedModels: string[]
+  modelsStats: OneModelStats[]
 }
 
-export async function fetchDashboardStats(): Promise<FullModelsResponse> {
+export async function fetchModelsStats(): Promise<FullModelsResponse> {
   const res = await fetch('/api/admin/model')
   if (!res.ok) throw new Error(`Model fetch failed: ${res.status}`)
   return res.json()
