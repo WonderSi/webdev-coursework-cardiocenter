@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/cardio_db
-    username: cardio_user
-    password: cardio_pass
+    username: ${DB_USER:cardio_user}
+    password: ${DB_PASSWORD:cardio_pass}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
@@ -13,7 +13,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: redis_pass
+      password: ${REDIS_PASSWORD:redis_pass}
       timeout: 2000ms
 
   jpa:
