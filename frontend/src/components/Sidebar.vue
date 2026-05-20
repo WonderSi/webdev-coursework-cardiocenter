@@ -90,7 +90,7 @@ const userStore = useUserStore()
 
 // когда отображаем блок переобучения
 const showRetrainBlock = computed(() => {
-  return route.path === '/dashboards' || route.path === '/model-training'
+  return route.path === '/upload-data' || route.path === '/model-training'
 })
 
 const isRetraining = ref(false)
