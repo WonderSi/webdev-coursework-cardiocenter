@@ -37,10 +37,8 @@
                 <div class="stat-number">3944</div>
               </div>
               <div class="diseased-healthy">
-                <div class="span-container">
-                  <span class="diseased">больные:</span><span class="diseased">1000 | 90%</span>
-                  <span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span>
-                </div>
+                <div class="span-container"><span class="diseased">больные:</span><span class="diseased">1000 | 90%</span></div>
+                <div class="span-container"><span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span></div>
               </div>
               <div class="ratio-rectangle" style="--ratio: 72%;"></div>
             </div>
@@ -54,10 +52,8 @@
                 <div class="stat-number">8004</div>
               </div>
               <div class="diseased-healthy">
-                <div class="span-container">
-                  <span class="diseased">больные:</span><span class="diseased">1000 | 90%</span>
-                  <span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span>
-                </div>
+                <div class="span-container"><span class="diseased">больные:</span><span class="diseased">1000 | 90%</span></div>
+                <div class="span-container"><span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span></div>
               </div>
               <div class="ratio-rectangle" style="--ratio: 72%;"></div>
             </div>
@@ -295,6 +291,7 @@ onMounted(() => {
 }
 
 .disease-card {
+  width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -355,12 +352,12 @@ onMounted(() => {
       min-width: 0;
 
       &.first-col {
-        flex: 1.2;
+        flex: 1;
         .stats-list {
           gap: 36px;
         }
       }
-      &.second-col { flex: 0.9; }
+      &.second-col { flex: 0.925; }
       &.third-col { flex: 1.4; }
     }
 
@@ -381,10 +378,9 @@ onMounted(() => {
       
       span {
         font-size: 1.2rem;
-        font-weight: 700;
+        font-weight: 800;
         text-transform: uppercase;
         color: $color-secondary;
-        letter-spacing: 0.05em;
       }
 
       &.smaller {
@@ -492,7 +488,7 @@ onMounted(() => {
 
 // примечание внизу первого столбца
 .weights-note {
-  margin-top: 60px;
+  margin-top: 30px;
   color: $color-secondary-text;
   font-size: 1rem;
   display: flex;
@@ -549,13 +545,13 @@ onMounted(() => {
     .diseased {
       color: $color-red;
       font-size: 1rem;
-      font-weight: 400;
+      font-weight: 500;
     }
 
     .healthy {
       color: $color-green;
       font-size: 1rem;
-      font-weight: 400;
+      font-weight: 500;
     }
   }
 
