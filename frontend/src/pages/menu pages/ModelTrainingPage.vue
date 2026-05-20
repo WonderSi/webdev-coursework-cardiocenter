@@ -2,8 +2,8 @@
   <sidebar/>
   <div class="model-training-page">
     <div class="disease-card">
-      <div class="card-header">
-        <div class="header-icon">
+      <div class="card-header" @click="toggleCollapse">
+        <div class="header-icon" :class="{ 'collapsed': isCollapsed }">
           <svg width="25" height="29" viewBox="0 0 25 29" fill="none" xmlns="http://www.w3.org/2000/svg"> 
             <path d="M24 12.3953C25.3333 13.1651 25.3333 15.0896 24 15.8594L3 27.9837C1.66666 28.7535 -1.38408e-06 27.7913 -1.31678e-06 26.2517L-2.56832e-07 2.00296C-1.89534e-07 0.46336 1.66667 -0.498889 3 0.270912L24 12.3953Z" fill="#242942"/> 
           </svg>
@@ -11,10 +11,10 @@
         <h1 class="disease-name">{{DISEASELIST[0]}}</h1>
       </div>
 
-      <div class="card-content">
+      <div class="card-content" v-show="!isCollapsed">
         <div class="col first-col">
           <div class="subheader">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 2C0 0.89543 0.895431 0 2 0H19.1716C20.9534 0 21.8457 2.15428 20.5858 3.41421L12 12L3.41422 20.5858C2.15429 21.8457 0 20.9534 0 19.1716V2Z" fill="#8A8FA8"/></svg>
+            <svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 2C0 0.89543 0.895431 0 2 0H19.1716C20.9534 0 21.8457 2.15428 20.5858 3.41421L12 12L3.41422 20.5858C2.15429 21.8457 0 20.9534 0 19.1716V2Z" fill="#8A8FA8"/></svg>
             <span>Настройки модели</span>
           </div>
           
@@ -42,7 +42,7 @@
                   <span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span>
                 </div>
               </div>
-              <div class="ratio-rectangle"></div>
+              <div class="ratio-rectangle" style="--ratio: 72%;"></div>
             </div>
 
             <div class="one-stat-ratio">
@@ -59,7 +59,7 @@
                   <span class="healthy">здоровые:</span><span class="healthy">234 | 10%</span>
                 </div>
               </div>
-              <div class="ratio-rectangle"></div>
+              <div class="ratio-rectangle" style="--ratio: 72%;"></div>
             </div>
 
           </div>
@@ -81,7 +81,7 @@
 
         <div class="col second-col">
           <div class="subheader">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 2C0 0.89543 0.895431 0 2 0H19.1716C20.9534 0 21.8457 2.15428 20.5858 3.41421L12 12L3.41422 20.5858C2.15429 21.8457 0 20.9534 0 19.1716V2Z" fill="#8A8FA8"/></svg>
+            <svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 2C0 0.89543 0.895431 0 2 0H19.1716C20.9534 0 21.8457 2.15428 20.5858 3.41421L12 12L3.41422 20.5858C2.15429 21.8457 0 20.9534 0 19.1716V2Z" fill="#8A8FA8"/></svg>
             <span>Метрики качества модели</span>
           </div>
 
@@ -165,30 +165,36 @@
 
         <div class="col third-col">
           <div class="subheader">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 2C0 0.89543 0.895431 0 2 0H19.1716C20.9534 0 21.8457 2.15428 20.5858 3.41421L12 12L3.41422 20.5858C2.15429 21.8457 0 20.9534 0 19.1716V2Z" fill="#8A8FA8"/></svg>
+            <svg width="16" height="16" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 2C0 0.89543 0.895431 0 2 0H19.1716C20.9534 0 21.8457 2.15428 20.5858 3.41421L12 12L3.41422 20.5858C2.15429 21.8457 0 20.9534 0 19.1716V2Z" fill="#8A8FA8"/></svg>
             <span>Матрица ошибок</span>
           </div>
 
-          <div class="confusion-matrix">
-            <div class="matrix-cell true-positive" style="border-radius: 12px 0 0 0;">
-              <span class="cell-label">True Positive</span>
-              <span class="cell-value">2359</span>
-              <span class="cell-label-explanatory">верное определение больного</span>
-            </div>
-            <div class="matrix-cell neutral-colored" style="border-radius: 0 12px 0 0;">
-              <span class="cell-label">False Negative</span>
-              <span class="cell-value">415</span>
-              <span class="cell-label-explanatory">больной принят за здорового</span>
-            </div>
-            <div class="matrix-cell neutral-colored" style="border-radius: 0 0 0 12px;">
-              <span class="cell-label">False Positive</span>
-              <span class="cell-value">514</span>
-              <span class="cell-label-explanatory">здоровый принят за больного</span>
-            </div>
-            <div class="matrix-cell true-negative" style="border-radius: 0 0 12px 0;">
-              <span class="cell-label">True Negative</span>
-              <span class="cell-value">656</span>
-              <span class="cell-label-explanatory">верное определение здорового</span>
+          <div class="matrix-container">
+            <div class="matrix-label-top">Прогноз</div>
+            <div class="matrix-content">
+              <div class="matrix-label-left">Реальность</div>
+              <div class="confusion-matrix">
+                <div class="matrix-cell true-positive" style="border-radius: 12px 0 0 0;">
+                  <span class="cell-label">True Positive</span>
+                  <span class="cell-value">2359</span>
+                  <span class="cell-label-explanatory">верное определение больного</span>
+                </div>
+                <div class="matrix-cell neutral-colored" style="border-radius: 0 12px 0 0;">
+                  <span class="cell-label">False Negative</span>
+                  <span class="cell-value">415</span>
+                  <span class="cell-label-explanatory">больной принят за здорового</span>
+                </div>
+                <div class="matrix-cell neutral-colored" style="border-radius: 0 0 0 12px;">
+                  <span class="cell-label">False Positive</span>
+                  <span class="cell-value">514</span>
+                  <span class="cell-label-explanatory">здоровый принят за больного</span>
+                </div>
+                <div class="matrix-cell true-negative" style="border-radius: 0 0 12px 0;">
+                  <span class="cell-label">True Negative</span>
+                  <span class="cell-value">656</span>
+                  <span class="cell-label-explanatory">верное определение здорового</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -209,6 +215,11 @@ const DISEASELIST = [ "Общий риск", "Инсульт", "Сердечна
 const STATSMOCK = {
 
 }
+
+const isCollapsed = ref(false);
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value;
+};
 
 const modelData = ref<FullModelsResponse | null>(null)
 const isLoading = ref(false)
@@ -289,6 +300,9 @@ onMounted(() => {
   flex-direction: column;
 
   .card-header {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
     display: flex;
     flex-direction: row;
     gap: 24px;
@@ -305,12 +319,21 @@ onMounted(() => {
     .header-icon {
       display: flex;
       align-items: center;
+
+      transition: transform 0.3s ease;
+      &.collapsed {
+        transform: rotate(-90deg);
+      }
     }
 
     .disease-name {
       font-size: 2rem;
       color: $color-text;
       font-weight: 800;
+    }
+
+    &:hover {
+      background-color: rgba($color-glass-white, 0.95);
     }
   }
 
@@ -327,16 +350,18 @@ onMounted(() => {
     align-items: stretch;
 
     .col {
-      flex: 1;
       display: flex;
       flex-direction: column;
       min-width: 0;
 
       &.first-col {
+        flex: 1.2;
         .stats-list {
-          gap: 40px;
+          gap: 36px;
         }
       }
+      &.second-col { flex: 0.9; }
+      &.third-col { flex: 1.4; }
     }
 
     .div-line {
@@ -363,9 +388,11 @@ onMounted(() => {
       }
 
       &.smaller {
-        margin-top: 24px;
+        margin-top: 32px;
+        margin-bottom: 16px;
         span {
           font-size: 1rem;
+          white-space: nowrap
         }
       }
     }
@@ -378,7 +405,40 @@ onMounted(() => {
 
     // --- Матрица (Grid)
 
+    .matrix-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 100%;
+
+      .matrix-label-top {
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: $color-blue-dark;
+        text-transform: uppercase;
+        margin-left: 24px;
+      }
+
+      .matrix-content {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        flex: 1;
+        .matrix-label-left {
+          writing-mode: vertical-lr;
+          transform: rotate(180deg);
+          text-align: center;
+          font-size: 1.2rem;
+          font-weight: 800;
+          color: $color-blue-dark;
+          text-transform: uppercase;
+        }
+      }
+    }
+
     .confusion-matrix {
+      flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
       height: 100%;
@@ -388,7 +448,7 @@ onMounted(() => {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 16px 8px;
+        padding: 16px 16px;
         border-radius: 12px 0px 0px 0px;
         text-align: center;
         gap: 8px;
@@ -432,7 +492,7 @@ onMounted(() => {
 
 // примечание внизу первого столбца
 .weights-note {
-  margin-top: 40px;
+  margin-top: 60px;
   color: $color-secondary-text;
   font-size: 1rem;
   display: flex;
@@ -473,12 +533,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 100%;
 
   .diseased-healthy {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 100%; // почему-то не расталкивает элементы в два края
+    width: 100%;
 
     .span-container {
       display: flex;
@@ -501,8 +562,16 @@ onMounted(() => {
   .ratio-rectangle {
     color: $color-red;
     width: 100%;
-    border-bottom: 10px solid $color-red; // нужно научиться его кусочек зелёным (% здоровых)
+    height: 10px;
     border-radius: 1000px;
+
+    background: linear-gradient(
+      to right,
+      $color-red 0%,
+      $color-red var(--ratio, 50%),
+      $color-green var(--ratio, 50%),
+      $color-green 100%
+    );
   }
 }
 
@@ -540,4 +609,24 @@ onMounted(() => {
   }
 }
 
+// --- АДАПТИВНОСТЬ
+
+@media (max-width: 1024px) {
+  .disease-card .card-content {
+    flex-direction: column;
+    gap: 32px;
+    padding: 24px;
+    
+    .col {
+      width: 100%;
+      flex: none;
+    }
+
+    .div-line {
+      width: 100%;
+      height: 2px;
+      margin-inline: 0;
+    }
+  }
+}
 </style>
