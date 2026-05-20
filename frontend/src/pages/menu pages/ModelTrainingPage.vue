@@ -299,6 +299,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
 
+  align-items: flex-start;
+
   .card-header {
     cursor: pointer;
     transition: background-color 0.2s ease;
