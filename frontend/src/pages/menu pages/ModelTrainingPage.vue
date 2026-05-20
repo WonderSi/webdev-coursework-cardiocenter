@@ -7,13 +7,15 @@
       </div>
     </Transition>
 
-    <div v-if="isLoading" class="loading-state">
-      <div class="loading-text-container">
-        <span class="loading-text">Загрузка метрик...</span>
+    <Transition name="fade">
+      <div v-if="isLoading" class="loading-state">
+        <div class="loading-text-container">
+          <span class="loading-text">Загрузка метрик...</span>
+        </div>
       </div>
-    </div>
+    </Transition>
 
-    <template v-else>
+    <template v-if="!isLoading">
       <div 
         class="disease-card" 
         v-for="model in modelsList" 
@@ -755,6 +757,16 @@ onUnmounted(() => {
 
 .error-banner {
   margin-left: 240px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 </style>
