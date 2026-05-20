@@ -1,6 +1,11 @@
 <template>
   <sidebar/>
   <div class="model-training-page">
+    <!-- <Transition name="fade">
+      <div v-if="showErrors && hasErrors" class="error-banner">
+        <span>{{ currentErrorMessage }}</span>
+      </div>
+    </Transition> -->
 
     <div class="controls-header">
       <button 
@@ -23,7 +28,7 @@
         v-for="model in modelsList" 
         :key="model.modelName"
       >
-        <div class="card-header" @click="toggleCollapse(model.modelName)">
+        <div class="card-header" :class="{ 'header-collapsed': collapsedStates[model.modelName] }" @click="toggleCollapse(model.modelName)">
           <div class="header-icon" :class="{ 'collapsed': collapsedStates[model.modelName] }">
             <svg width="25" height="29" viewBox="0 0 25 29" fill="none" xmlns="http://www.w3.org/2000/svg"> 
               <path d="M24 12.3953C25.3333 13.1651 25.3333 15.0896 24 15.8594L3 27.9837C1.66666 28.7535 -1.38408e-06 27.7913 -1.31678e-06 26.2517L-2.56832e-07 2.00296C-1.89534e-07 0.46336 1.66667 -0.498889 3 0.270912L24 12.3953Z" fill="#242942"/> 
@@ -339,8 +344,12 @@ onMounted(() => {
 
   .card-header {
     cursor: pointer;
-    transition: background-color 0.2s ease;
-     align-self: flex-start;
+    transition: background-color 0.25s ease;
+    align-self: flex-start;
+
+    &.header-collapsed {
+      border-radius: $radius-glass-card;
+    }
 
     display: flex;
     flex-direction: row;
@@ -721,4 +730,13 @@ onMounted(() => {
   padding-bottom: 0;
   border-width: 0;
 }
+
+// .error-banner {
+//   margin-left: 240px;
+// }
+
+// .notification-banner {
+
+// }
+
 </style>
