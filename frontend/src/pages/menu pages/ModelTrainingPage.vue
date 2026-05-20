@@ -8,7 +8,9 @@
     </Transition>
 
     <div v-if="isLoading" class="loading-state">
-      Загрузка данных метрик...
+      <div class="loading-text-container">
+        <span class="loading-text">Загрузка метрик...</span>
+      </div>
     </div>
 
     <template v-else>
@@ -259,9 +261,16 @@ const loadData = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
+    // // ТЕСТ ОШИБКИ
+    // throw new Error('Сервер недоступен')
+
     modelData.value = await fetchModelsStats()
   } catch (e: any) {
     errorMessage.value = 'Ошибка загрузки метрик: ' + e.message
+    setTimeout(() => {
+      errorMessage.value = ''
+    }, 5000)
+
   } finally {
     isLoading.value = false
   }
@@ -711,12 +720,41 @@ onUnmounted(() => {
   border-width: 0;
 }
 
-// .error-banner {
-//   margin-left: 240px;
-// }
+.loading-state {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  
+  background: rgba($color-glass-white, 0.5); 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
 
-// .notification-banner {
+  .loading-text-container {
+    background: rgba($color-glass-white, 0.5); 
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 16px 50px;
+    border-radius: 10px;
 
-// }
+    box-shadow: 0 0px 5px rgba($color-blue-dark, 0.25);
+    .loading-text {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $color-accent;
+    }
+  }
+}
+
+.error-banner {
+  margin-left: 240px;
+}
 
 </style>
