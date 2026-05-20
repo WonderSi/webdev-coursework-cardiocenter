@@ -1,22 +1,11 @@
 <template>
   <sidebar/>
   <div class="model-training-page">
-    <!-- <Transition name="fade">
-      <div v-if="showErrors && hasErrors" class="error-banner">
-        <span>{{ currentErrorMessage }}</span>
+    <Transition name="fade">
+      <div v-if="errorMessage" class="error-banner">
+        <span>{{ errorMessage }}</span>
       </div>
-    </Transition> -->
-
-    <div class="controls-header">
-      <button 
-        class="retrain-btn" 
-        @click="handleRetrain" 
-        :disabled="isLoading || isRetraining"
-      >
-        {{ isRetraining ? 'Переобучение...' : 'Переобучить' }}
-      </button>
-      <span v-if="errorMessage" class="error-msg">{{ errorMessage }}</span>
-    </div>
+    </Transition>
 
     <div v-if="isLoading" class="loading-state">
       Загрузка данных метрик...
@@ -239,12 +228,11 @@
 <script setup lang="ts">
 import Sidebar from '@/components/Sidebar.vue'
 
-import { ref, computed, onMounted } from 'vue';
-import { fetchModelsStats, retrainModel, type FullModelsResponse } from '@/api/modeltraining.api'
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { fetchModelsStats, type FullModelsResponse } from '@/api/modeltraining.api'
 
 const modelData = ref<FullModelsResponse | null>(null)
 const isLoading = ref(false)
-const isRetraining = ref(false)
 const errorMessage = ref('')
 
 // Состояние раскрытия-cворачивания для каждой карточки модели
@@ -279,27 +267,19 @@ const loadData = async () => {
   }
 }
 
-// Обработчик нажатия на кнопку "Переобучить"
-const handleRetrain = async () => {
-  isRetraining.value = true
-  errorMessage.value = ''
-  try {
-    const response = await retrainModel()
-    if (response.status === 'ok') {
-      // переобучили => обновляем метрики
-      await loadData()
-    } else {
-      errorMessage.value = 'Ошибка переобучения со стороны ML сервера'
-    }
-  } catch (e: any) {
-    errorMessage.value = 'Ошибка запроса на переобучение: ' + e.message
-  } finally {
-    isRetraining.value = false
-  }
+const handleModelRetrained = () => {
+  loadData();
 }
 
 onMounted(() => {
   loadData()
+  // событие из сайдбара
+  window.addEventListener('model-retrained', handleModelRetrained)
+})
+
+onUnmounted(() => {
+  // отключаем прослушивание события при уходе со страницы
+  window.removeEventListener('model-retrained', handleModelRetrained)
 })
 
 </script>
