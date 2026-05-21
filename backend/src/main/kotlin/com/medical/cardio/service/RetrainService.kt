@@ -3,6 +3,7 @@ package com.medical.cardio.service
 import com.medical.cardio.entity.PatientEntity
 import com.medical.cardio.repository.PatientRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 data class RetrainResult(
     val status: String,
@@ -14,6 +15,7 @@ class RetrainService(
     private val patientRepository: PatientRepository,
     private val mlClient: MlClient,
 ) {
+    @Transactional(readOnly = true)
     fun retrain(): RetrainResult {
         val patients = patientRepository.findAllWithDiagnoses()
         val csvBytes = generateCsv(patients)
@@ -31,6 +33,8 @@ class RetrainService(
         sb.appendLine("инсульт_год,сн_год,нарушение_ритма_год,стенокардия_год,им_год,аг_год")
 
         for (patient in patients) {
+            val regionStr = REGION_MAP[patient.region?.code] ?: continue
+
             val diagCodes = patient.diagnoses.map { it.diagnosis.code }.toSet()
             val yearMap   = patient.diagnoses
                 .filter { it.yearOfDiagnosis != null }
@@ -49,7 +53,7 @@ class RetrainService(
                 GENDER_MAP[patient.gender.code] ?: "",
                 ALCOHOL_MAP[patient.alcohol?.code] ?: "",
                 csvEsc(PROFESSION_MAP[patient.profession?.code] ?: ""),
-                REGION_MAP[patient.region?.code] ?: "",
+                regionStr,
                 patient.age.toString(),
                 patient.height?.toPlainString() ?: "",
                 patient.weight?.toPlainString() ?: "",

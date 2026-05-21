@@ -30,6 +30,16 @@ class MlClient(
         )
         .build()
 
+    private val retrainWebClient = webClientBuilder
+        .baseUrl(mlServiceUrl)
+        .clientConnector(
+            org.springframework.http.client.reactive.ReactorClientHttpConnector(
+                reactor.netty.http.client.HttpClient.create()
+                    .responseTimeout(java.time.Duration.ofMinutes(15))
+            )
+        )
+        .build()
+
     fun predict(request: SurveyRequest): Mono<List<DiseasePrediction>> {
         log.info("ML prediction called — genderId={}, age={}", request.genderId, request.age)
 
@@ -85,13 +95,13 @@ class MlClient(
     fun retrain(csvBytes: ByteArray): Mono<MlRetrainResponse> {
         val headers = HttpHeaders().apply {
             contentType = MediaType.parseMediaType("text/csv; charset=utf-8")
-            setContentDispositionFormData("file", "patients.csv")
+            setContentDispositionFormData("dataset", "patients.csv")
         }
         val multipart = LinkedMultiValueMap<String, Any>().apply {
-            add("file", HttpEntity(csvBytes, headers))
+            add("dataset", HttpEntity(csvBytes, headers))
         }
 
-        return webClient.post()
+        return retrainWebClient.post()
             .uri("/retrain")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(multipart))
