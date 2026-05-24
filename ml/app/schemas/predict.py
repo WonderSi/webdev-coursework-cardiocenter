@@ -66,7 +66,7 @@ class PredictRequest(BaseModel):
     gender: Gender = Field(..., description="Пол")
     age: int = Field(..., ge=0, le=120, description="Возраст")
     height: float = Field(..., gt=0, le=250, description="Рост")
-    weight: float = Field(..., gt=0, le=200, description="Вес")
+    weight: float = Field(..., gt=0, le=300, description="Вес")
     hip_measurement: float = Field(..., description="Объем бедер")
     alcohol: Alcohol = Field(
         ...,
