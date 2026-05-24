@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
+import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
@@ -19,6 +20,15 @@ class JwtAuthFilter(
 ) : OncePerRequestFilter() {
 
     private val log = LoggerFactory.getLogger(javaClass)
+    private val pathMatcher = AntPathMatcher()
+    private val publicPaths = listOf(
+        "/api/auth/**", "/api/survey/**",
+        "/swagger-ui", "/swagger-ui/**", "/swagger-ui.html",
+        "/v3/api-docs", "/v3/api-docs/**", "/actuator/**"
+    )
+
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
+        publicPaths.any { pathMatcher.match(it, request.requestURI) }
 
     override fun doFilterInternal(
         request: HttpServletRequest,
