@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from loguru import logger
 
 from app.logging import setup_logging
+from app.routers.metrics import router as metrics_router
 from app.routers.predictions import router as predictions_router
 from app.routers.retrain import router as retrain_router
 from app.services.predictions import load_all_models, load_region_data
@@ -27,6 +28,7 @@ app = FastAPI(title="ML Service", lifespan=lifespan)
 
 app.include_router(predictions_router)
 app.include_router(retrain_router)
+app.include_router(metrics_router)
 
 
 @app.get("/health")

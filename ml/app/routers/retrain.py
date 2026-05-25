@@ -5,7 +5,7 @@ from fastapi import APIRouter, File, UploadFile
 from loguru import logger
 
 from app.config import settings
-from app.schemas.retrain import RetrainMetric, RetrainResponse
+from app.schemas.retrain import RetrainResponse
 from app.services.retrain import retrain_from_dataset_csv
 
 
@@ -33,5 +33,4 @@ async def retrain_model(
         status="ok",
         saved_models=list(result["saved_models"]),
         model_version=settings.MODEL_VERSION,
-        metrics=[RetrainMetric(**metric) for metric in result["metrics"]],
     )

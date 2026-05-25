@@ -90,3 +90,30 @@
 **Метод:** `POST`
 **URL:** `http://localhost:8000/retrain`
 
+### Ответ
+
+```json
+{
+  "status": "ok",
+  "saved_models": [
+    "ah_model.cbm",
+    "angina_model.cbm",
+    "arrhythmia_or_ihd_model.cbm",
+    "general_model.cbm",
+    "heart_failure_model.cbm",
+    "mi_model.cbm",
+    "stroke_model.cbm"
+  ],
+  "model_version": "1.0.0"
+}
+```
+
+---
+
+## 3. `/metrics` — метрики моделей
+
+Возвращает текущее содержимое `metrics.json`.
+
+**Метод:** `GET`
+**URL:** `http://localhost:8000/metrics`
+

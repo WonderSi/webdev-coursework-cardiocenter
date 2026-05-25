@@ -1,4 +1,3 @@
-import json
 import shutil
 import threading
 import time
@@ -19,9 +18,6 @@ _LOCK = threading.Lock()
 
 class RetrainResult(TypedDict):
     saved_models: list[str]
-    metrics_json: str
-    metrics_csv: str
-    metrics: list[dict]
 
 
 def retrain_from_dataset_csv(
@@ -125,19 +121,6 @@ def retrain_from_dataset_csv(
         logger.info("Hot-reloaded models after retrain")
 
     saved = sorted(p.name for p in models_dir.glob("*.cbm"))
-    metrics_path = models_dir / "metrics.json"
-    metrics = (
-        json.loads(metrics_path.read_text(encoding="utf-8"))
-        if metrics_path.exists()
-        else []
-    )
     return {
         "saved_models": saved,
-        "metrics_json": str(models_dir / "metrics.json")
-        if (models_dir / "metrics.json").exists()
-        else "",
-        "metrics_csv": str(models_dir / "metrics.csv")
-        if (models_dir / "metrics.csv").exists()
-        else "",
-        "metrics": metrics,
     }
