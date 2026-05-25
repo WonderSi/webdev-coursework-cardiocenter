@@ -87,7 +87,8 @@ class SecurityConfig(
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/v3/api-docs",
-                "/v3/api-docs/**"
+                "/v3/api-docs/**",
+                "/error"
             ).permitAll()
             auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             auth.requestMatchers("/api/admin/extended/**").hasRole("DOCTOR_EXTENDED")
