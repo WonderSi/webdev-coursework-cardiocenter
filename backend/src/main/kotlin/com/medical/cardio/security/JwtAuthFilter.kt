@@ -22,7 +22,7 @@ class JwtAuthFilter(
     private val log = LoggerFactory.getLogger(javaClass)
     private val pathMatcher = AntPathMatcher()
     private val publicPaths = listOf(
-        "/api/auth/**", "/api/survey/**",
+        "/api/auth/login", "/api/auth/logout", "/api/survey/**",
         "/swagger-ui", "/swagger-ui/**", "/swagger-ui.html",
         "/v3/api-docs", "/v3/api-docs/**", "/actuator/**"
     )
