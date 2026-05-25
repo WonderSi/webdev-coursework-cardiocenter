@@ -18,8 +18,6 @@ _LOCK = threading.Lock()
 
 class RetrainResult(TypedDict):
     saved_models: list[str]
-    metrics_json: str
-    metrics_csv: str
 
 
 def retrain_from_dataset_csv(
@@ -125,10 +123,4 @@ def retrain_from_dataset_csv(
     saved = sorted(p.name for p in models_dir.glob("*.cbm"))
     return {
         "saved_models": saved,
-        "metrics_json": str(models_dir / "metrics.json")
-        if (models_dir / "metrics.json").exists()
-        else "",
-        "metrics_csv": str(models_dir / "metrics.csv")
-        if (models_dir / "metrics.csv").exists()
-        else "",
     }

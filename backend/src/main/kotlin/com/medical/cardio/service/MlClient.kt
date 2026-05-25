@@ -30,6 +30,16 @@ class MlClient(
         )
         .build()
 
+    private val retrainWebClient = webClientBuilder
+        .baseUrl(mlServiceUrl)
+        .clientConnector(
+            org.springframework.http.client.reactive.ReactorClientHttpConnector(
+                reactor.netty.http.client.HttpClient.create()
+                    .responseTimeout(java.time.Duration.ofMinutes(15))
+            )
+        )
+        .build()
+
     fun predict(request: SurveyRequest): Mono<List<DiseasePrediction>> {
         log.info("ML prediction called — genderId={}, age={}", request.genderId, request.age)
 
@@ -85,13 +95,13 @@ class MlClient(
     fun retrain(csvBytes: ByteArray): Mono<MlRetrainResponse> {
         val headers = HttpHeaders().apply {
             contentType = MediaType.parseMediaType("text/csv; charset=utf-8")
-            setContentDispositionFormData("file", "patients.csv")
+            setContentDispositionFormData("dataset", "patients.csv")
         }
         val multipart = LinkedMultiValueMap<String, Any>().apply {
-            add("file", HttpEntity(csvBytes, headers))
+            add("dataset", HttpEntity(csvBytes, headers))
         }
 
-        return webClient.post()
+        return retrainWebClient.post()
             .uri("/retrain")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(multipart))
@@ -105,6 +115,17 @@ class MlClient(
                 Mono.error(RuntimeException("Ошибка переобучения модели: ${e.message}"))
             }
     }
+
+    fun getMetrics(): Mono<List<MlMetric>> =
+        webClient.get()
+            .uri("/metrics")
+            .retrieve()
+            .bodyToFlux(MlMetric::class.java)
+            .collectList()
+            .onErrorResume { e ->
+                log.error("ML metrics fetch failed: ${e.message}")
+                Mono.error(RuntimeException("Ошибка получения метрик: ${e.message}"))
+            }
 
     private fun parsePredictions(rawList: List<String>): List<DiseasePrediction> {
         val parsed = rawList.mapNotNull { item ->
@@ -180,3 +201,30 @@ data class MlRetrainResponse(
     @JsonProperty("metrics_json") val metricsJson: String? = null,
     @JsonProperty("metrics_csv") val metricsCsv: String? = null,
 )
+
+data class MlMetric(
+    @JsonProperty("model_stem") val modelStem: String,
+    @JsonProperty("feature_count") val featureCount: Int,
+    @JsonProperty("train_rows") val trainRows: Int,
+    @JsonProperty("test_rows") val testRows: Int,
+    @JsonProperty("train_pos") val trainPos: Int,
+    @JsonProperty("train_neg") val trainNeg: Int,
+    @JsonProperty("test_pos") val testPos: Int,
+    @JsonProperty("test_neg") val testNeg: Int,
+    @JsonProperty("class_weight_0") val classWeight0: Double,
+    @JsonProperty("class_weight_1") val classWeight1: Double,
+    @JsonProperty("roc_auc") val rocAuc: Double,
+    @JsonProperty("pr_auc") val prAuc: Double,
+    val accuracy: Double,
+    @JsonProperty("balanced_accuracy") val balancedAccuracy: Double,
+    val precision: Double,
+    val recall: Double,
+    val f1: Double,
+    val logloss: Double,
+    val brier: Double,
+    val tn: Int,
+    val fp: Int,
+    val fn: Int,
+    val tp: Int,
+)
+

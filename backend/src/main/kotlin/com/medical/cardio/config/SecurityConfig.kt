@@ -4,6 +4,7 @@ import com.medical.cardio.security.AdminUserDetailsService
 import com.medical.cardio.security.JwtAuthFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -86,12 +87,18 @@ class SecurityConfig(
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/v3/api-docs",
-                "/v3/api-docs/**"
+                "/v3/api-docs/**",
+                "/error"
             ).permitAll()
             auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             auth.requestMatchers("/api/admin/extended/**").hasRole("DOCTOR_EXTENDED")
             auth.requestMatchers("/api/admin/**").hasAnyRole("DOCTOR", "DOCTOR_EXTENDED")
             auth.anyRequest().authenticated()
+        }
+        .exceptionHandling {
+            it.authenticationEntryPoint { _, response, _ ->
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+            }
         }
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
         .build()

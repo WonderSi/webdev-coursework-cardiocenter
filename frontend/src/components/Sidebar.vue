@@ -20,6 +20,15 @@
         </div>
         <span>Просмотр данных</span>
       </router-link>
+      <!-- ИСКЛЮЧАЕМ. ФУНКЦИЯ НЕ ГОТОВА -->
+      <router-link to="/dashboards" class="menu-item">
+        <div class="icon">
+          <svg width="21" height="24" viewBox="0 0 21 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.26562 21.5555H2.95312C2.69205 21.5555 2.44167 21.4502 2.25707 21.2626C2.07246 21.0751 1.96875 20.8208 1.96875 20.5555V14.5555C1.96875 14.2903 2.07246 14.036 2.25707 13.8484C2.44167 13.6609 2.69205 13.5555 2.95312 13.5555H4.26562C4.5267 13.5555 4.77708 13.6609 4.96168 13.8484C5.14629 14.036 5.25 14.2903 5.25 14.5555V20.5555C5.25 20.8208 5.14629 21.0751 4.96168 21.2626C4.77708 21.4502 4.5267 21.5555 4.26562 21.5555ZM13.4531 21.5555H12.1406C11.8796 21.5555 11.6292 21.4502 11.4446 21.2626C11.26 21.0751 11.1562 20.8208 11.1562 20.5555V10.5555C11.1562 10.2903 11.26 10.036 11.4446 9.84844C11.6292 9.6609 11.8796 9.55554 12.1406 9.55554H13.4531C13.7142 9.55554 13.9646 9.6609 14.1492 9.84844C14.3338 10.036 14.4375 10.2903 14.4375 10.5555V20.5555C14.4375 20.8208 14.3338 21.0751 14.1492 21.2626C13.9646 21.4502 13.7142 21.5555 13.4531 21.5555ZM18.0469 21.5555H16.7344C16.4733 21.5555 16.2229 21.4502 16.0383 21.2626C15.8537 21.0751 15.75 20.8208 15.75 20.5555V5.88888C15.75 5.62366 15.8537 5.36931 16.0383 5.18177C16.2229 4.99423 16.4733 4.88888 16.7344 4.88888H18.0469C18.3079 4.88888 18.5583 4.99423 18.7429 5.18177C18.9275 5.36931 19.0312 5.62366 19.0312 5.88888V20.5555C19.0312 20.8208 18.9275 21.0751 18.7429 21.2626C18.5583 21.4502 18.3079 21.5555 18.0469 21.5555ZM8.85938 21.5555H7.54688C7.2858 21.5555 7.03542 21.4502 6.85082 21.2626C6.66621 21.0751 6.5625 20.8208 6.5625 20.5555V2.55554C6.5625 2.29033 6.66621 2.03597 6.85082 1.84844C7.03542 1.6609 7.2858 1.55554 7.54688 1.55554H8.85938C9.12045 1.55554 9.37083 1.6609 9.55543 1.84844C9.74004 2.03597 9.84375 2.29033 9.84375 2.55554V20.5555C9.84375 20.8208 9.74004 21.0751 9.55543 21.2626C9.37083 21.4502 9.12045 21.5555 8.85938 21.5555Z" fill="currentColor" stroke="currentColor"/>
+          </svg>
+        </div>
+        <span>Аналитика</span>
+      </router-link>
       
       <router-link to="/upload-data" class="menu-item">
         <div class="icon">
@@ -38,15 +47,17 @@
         </div>
         <span>Обучение модели</span>
       </router-link>
-      
-      <router-link to="/dashboards" class="menu-item">
-        <div class="icon">
-          <svg width="21" height="24" viewBox="0 0 21 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4.26562 21.5555H2.95312C2.69205 21.5555 2.44167 21.4502 2.25707 21.2626C2.07246 21.0751 1.96875 20.8208 1.96875 20.5555V14.5555C1.96875 14.2903 2.07246 14.036 2.25707 13.8484C2.44167 13.6609 2.69205 13.5555 2.95312 13.5555H4.26562C4.5267 13.5555 4.77708 13.6609 4.96168 13.8484C5.14629 14.036 5.25 14.2903 5.25 14.5555V20.5555C5.25 20.8208 5.14629 21.0751 4.96168 21.2626C4.77708 21.4502 4.5267 21.5555 4.26562 21.5555ZM13.4531 21.5555H12.1406C11.8796 21.5555 11.6292 21.4502 11.4446 21.2626C11.26 21.0751 11.1562 20.8208 11.1562 20.5555V10.5555C11.1562 10.2903 11.26 10.036 11.4446 9.84844C11.6292 9.6609 11.8796 9.55554 12.1406 9.55554H13.4531C13.7142 9.55554 13.9646 9.6609 14.1492 9.84844C14.3338 10.036 14.4375 10.2903 14.4375 10.5555V20.5555C14.4375 20.8208 14.3338 21.0751 14.1492 21.2626C13.9646 21.4502 13.7142 21.5555 13.4531 21.5555ZM18.0469 21.5555H16.7344C16.4733 21.5555 16.2229 21.4502 16.0383 21.2626C15.8537 21.0751 15.75 20.8208 15.75 20.5555V5.88888C15.75 5.62366 15.8537 5.36931 16.0383 5.18177C16.2229 4.99423 16.4733 4.88888 16.7344 4.88888H18.0469C18.3079 4.88888 18.5583 4.99423 18.7429 5.18177C18.9275 5.36931 19.0312 5.62366 19.0312 5.88888V20.5555C19.0312 20.8208 18.9275 21.0751 18.7429 21.2626C18.5583 21.4502 18.3079 21.5555 18.0469 21.5555ZM8.85938 21.5555H7.54688C7.2858 21.5555 7.03542 21.4502 6.85082 21.2626C6.66621 21.0751 6.5625 20.8208 6.5625 20.5555V2.55554C6.5625 2.29033 6.66621 2.03597 6.85082 1.84844C7.03542 1.6609 7.2858 1.55554 7.54688 1.55554H8.85938C9.12045 1.55554 9.37083 1.6609 9.55543 1.84844C9.74004 2.03597 9.84375 2.29033 9.84375 2.55554V20.5555C9.84375 20.8208 9.74004 21.0751 9.55543 21.2626C9.37083 21.4502 9.12045 21.5555 8.85938 21.5555Z" fill="currentColor" stroke="currentColor"/>
-          </svg>
+
+      <div class="retrain-model" v-if="showRetrainBlock">
+        <p class="retrain-text">Вы можете переобучить модель <b>(рекомендуется после загрузки данных)</b></p>
+        <button class="retrain-btn"
+          @click="handleRetrain"
+          :disabled="isRetraining">{{ isRetraining? 'Переобучение...' : 'Переобучить' }}</button>
+          <span v-if="retrainError" class="error-msg" style="display:block; margin-top: 8px; font-size: 0.85rem; color: #E24C4C;">
+            {{ retrainError }}
+          </span>
         </div>
-        <span>Аналитика</span>
-      </router-link>
+      
     </nav>
 
     <div class="sidebar-footer">
@@ -68,11 +79,39 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
+import { ref, computed } from 'vue'
+import { retrainModel } from '@/api/modeltraining.api'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+
+// когда отображаем блок переобучения
+const showRetrainBlock = computed(() => {
+  return route.path === '/upload-data' || route.path === '/model-training'
+})
+
+const isRetraining = ref(false)
+const retrainError = ref('')
+
+const handleRetrain = async () => {
+  isRetraining.value = true
+  retrainError.value = ''
+  try {
+    const response = await retrainModel()
+    if (response.status === 'ok') {
+      window.dispatchEvent(new CustomEvent('model-retrained'))
+    } else {
+      retrainError.value = 'Ошибка переобучения со стороны ML сервера'
+    }
+  } catch (e: any) {
+    retrainError.value = 'Ошибка запроса на переобучение: ' + e.message
+  } finally {
+    isRetraining.value = false
+  }
+}
 
 async function handleLogout() {
   await userStore.logout()
@@ -219,5 +258,38 @@ async function handleLogout() {
     }
   }
 }
+
+.retrain-model {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 10px;
+  background-color: $color-white;
+  border-radius: 10px;
+
+  .retrain-text {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: $color-blue-dark;
+  }
+  .retrain-btn {
+    background-color: $color-accent;
+    color: $color-white;
+    border: none;
+    align-self: center;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+
+    &:hover {
+      background-color: $color-accent-lighter;
+      cursor: pointer;
+    }
+  }
+}
+
 
 </style>

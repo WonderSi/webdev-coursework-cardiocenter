@@ -66,7 +66,37 @@ interface GenderProjection {
     fun getCount(): Long
 }
 
-interface DiagnosisProjection {
+interface GenderDiagnosisRaw {
+    fun getLabel(): String
+    fun getTotal(): Long
+    fun getDiagnosed(): Long
+}
+
+interface AgeGenderRaw {
+    fun getAgeGroup(): String
+    fun getGender(): String
+    fun getIsDiagnosed(): Boolean
+    fun getCount(): Long
+}
+
+interface CategoryDiagnosisRaw {
+    fun getCategory(): String
+    fun getIsDiagnosed(): Boolean
+    fun getCount(): Long
+}
+
+interface ProfessionRaw {
+    fun getProfName(): String
+    fun getTotal(): Long
+    fun getDiagnosedCount(): Long
+}
+
+interface DiagnosisCountRaw {
     fun getName(): String
     fun getCount(): Long
+}
+
+interface DistrictRaw {
+    fun getName(): String
+    fun getDiagnosedCount(): Long
 }
