@@ -66,7 +66,7 @@ class PredictRequest(BaseModel):
     gender: Gender = Field(..., description="Пол")
     age: int = Field(..., ge=0, le=120, description="Возраст")
     height: float = Field(..., gt=0, le=250, description="Рост")
-    weight: float = Field(..., gt=0, le=200, description="Вес")
+    weight: float = Field(..., gt=0, le=300, description="Вес")
     hip_measurement: float = Field(..., description="Объем бедер")
     alcohol: Alcohol = Field(
         ...,
@@ -113,7 +113,6 @@ class PredictRequest(BaseModel):
     stroke_year: int | None = Field(
         None,
         ge=1950,
-        le=2026,
         description="Год диагностирования инсульта",
     )
     heart_failure: DiseaseStatus | None = Field(
@@ -123,7 +122,6 @@ class PredictRequest(BaseModel):
     heart_failure_year: int | None = Field(
         None,
         ge=1950,
-        le=2026,
         description="Год диагностирования сердечной недостаточности",
     )
     cad_chd_ihd: DiseaseStatus | None = Field(
@@ -133,7 +131,6 @@ class PredictRequest(BaseModel):
     cad_chd_ihd_year: int | None = Field(
         None,
         ge=1950,
-        le=2026,
         description="Год диагностирования нарушения ритма или других ИБС",
     )
     angine: DiseaseStatus | None = Field(
@@ -142,7 +139,6 @@ class PredictRequest(BaseModel):
     angine_year: int | None = Field(
         None,
         ge=1950,
-        le=2026,
         description="Год диагностирования стенокардии",
     )
     myocardial_infarction: DiseaseStatus | None = Field(
@@ -151,7 +147,6 @@ class PredictRequest(BaseModel):
     myocardial_infarction_year: int | None = Field(
         None,
         ge=1950,
-        le=2026,
         description="Год диагностирования инфаркта миокарда",
     )
     arterial_hypertension: DiseaseStatus | None = Field(
@@ -161,15 +156,21 @@ class PredictRequest(BaseModel):
     arterial_hypertension_year: int | None = Field(
         None,
         ge=1950,
-        le=2026,
         description="Год диагностирования артериальной гипертензии",
     )
 
 
-class PredictResponse(BaseModel):
-    predictions: list[str] = Field(
-        description='Список строк формата "модель:вероятность заболевания"'
+class DiseasePrediction(BaseModel):
+    disease: str = Field(
+        description="Код болезни/модели (например: general, ah, stroke)"
     )
+    probability: float = Field(
+        ge=0.0, le=1.0, description="Вероятность наличия заболевания (0..1)"
+    )
+
+
+class PredictResponse(BaseModel):
+    predictions: list[DiseasePrediction] = Field(description="Список предсказаний")
     model_version: str = Field(description="Версия модели")
 
 

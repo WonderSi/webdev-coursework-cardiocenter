@@ -10,11 +10,79 @@ data class RetrainResult(
     val savedModels: List<String>
 )
 
+data class OneModelStats(
+    val modelName: String,
+    val featureCount: Int,
+    val trainRows: Int,
+    val testRows: Int,
+    val trainPos: Int,
+    val trainNeg: Int,
+    val testPos: Int,
+    val testNeg: Int,
+    val classWeight0: Double,
+    val classWeight1: Double,
+    val rocAuc: Double,
+    val prAuc: Double,
+    val accuracy: Double,
+    val balancedAccuracy: Double,
+    val precision: Double,
+    val recall: Double,
+    val f1: Double,
+    val logloss: Double,
+    val brier: Double,
+    val tn: Int,
+    val fp: Int,
+    val fn: Int,
+    val tp: Int,
+)
+
+data class FullModelsResponse(
+    val modelVersion: String,
+    val savedModels: List<String>,
+    val modelsStats: List<OneModelStats>,
+)
+
 @Service
 class RetrainService(
     private val patientRepository: PatientRepository,
     private val mlClient: MlClient,
 ) {
+    fun getModelStats(): FullModelsResponse {
+        val metrics = mlClient.getMetrics().block()
+            ?: throw RuntimeException("Нет ответа от ML-сервиса")
+        return FullModelsResponse(
+            modelVersion = "1.0.0",
+            savedModels = metrics.map { "${it.modelStem}_model.cbm" },
+            modelsStats = metrics.map { m ->
+                OneModelStats(
+                    modelName = MlClient.DISEASE_NAMES[m.modelStem] ?: m.modelStem,
+                    featureCount = m.featureCount,
+                    trainRows = m.trainRows,
+                    testRows = m.testRows,
+                    trainPos = m.trainPos,
+                    trainNeg = m.trainNeg,
+                    testPos = m.testPos,
+                    testNeg = m.testNeg,
+                    classWeight0 = m.classWeight0,
+                    classWeight1 = m.classWeight1,
+                    rocAuc = m.rocAuc,
+                    prAuc = m.prAuc,
+                    accuracy = m.accuracy,
+                    balancedAccuracy = m.balancedAccuracy,
+                    precision = m.precision,
+                    recall = m.recall,
+                    f1 = m.f1,
+                    logloss = m.logloss,
+                    brier = m.brier,
+                    tn = m.tn,
+                    fp = m.fp,
+                    fn = m.fn,
+                    tp = m.tp,
+                )
+            }
+        )
+    }
+
     @Transactional(readOnly = true)
     fun retrain(): RetrainResult {
         val patients = patientRepository.findAllWithDiagnoses()

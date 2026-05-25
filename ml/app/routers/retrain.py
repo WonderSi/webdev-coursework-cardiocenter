@@ -31,8 +31,6 @@ async def retrain_model(
     result = retrain_from_dataset_csv(tmp_path, models_dir=Path(settings.MODELS_DIR))
     return RetrainResponse(
         status="ok",
-        models_dir=str(settings.MODELS_DIR),
         saved_models=list(result["saved_models"]),
-        metrics_json=result["metrics_json"] or None,
-        metrics_csv=result["metrics_csv"] or None,
+        model_version=settings.MODEL_VERSION,
     )
