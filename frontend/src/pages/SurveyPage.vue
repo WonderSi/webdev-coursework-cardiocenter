@@ -45,6 +45,7 @@
           :current-step-index="currentStepIndex"
           :is-last-step="isLastStep"
           :is-next-btn-disabled="isNextDisabled || store.loading"
+          :active-key-btn="activeKeyBtn"
           @next="handleNext"
           @prev="prevStep"
         />
@@ -93,6 +94,15 @@ const stepComponent = computed(() => {
   }
   return map[currentStepIndex.value] ?? Step1
 })
+
+// Имитируем анимацию нажатия при нажатии на клавиатуру (переход Назад / Далее)
+const activeKeyBtn = ref<'next' | 'prev' | null>(null)
+const triggerVisualClick = (btn: 'next' | 'prev') => {
+  activeKeyBtn.value = btn
+  setTimeout(() => {
+    activeKeyBtn.value = null
+  }, 150)
+}
 
 const fieldErrors = computed<Record<string, string>>(() => {
   const errors: Record<string, string> = {}
@@ -205,10 +215,14 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
   if (event.key === 'Enter' || (event.key === 'ArrowRight' && !isInputFocused)) {
     if (!store.loading && !isNextDisabled.value) {
+      triggerVisualClick('next')
       handleNext()
     }
   } else if (event.key === 'ArrowLeft' && !isInputFocused) {
-    prevStep()
+    if (currentStepIndex.value > 0) {
+      triggerVisualClick('prev')
+      prevStep()
+    }
   }
 }
 
