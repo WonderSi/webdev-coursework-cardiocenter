@@ -45,7 +45,7 @@
           :current-step-index="currentStepIndex"
           :is-last-step="isLastStep"
           :is-next-btn-disabled="isNextDisabled || store.loading"
-          :active-key-btn="activeKeyBtn"
+          
           @next="handleNext"
           @prev="prevStep"
         />
@@ -134,7 +134,10 @@ const fieldErrors = computed<Record<string, string>>(() => {
     // Валидация года
     if (field.yearKey && value === 1) {
       const yearValue = store.answers[field.yearKey]
-      if (yearValue !== null && yearValue !== undefined && yearValue !== '') {
+
+      if (yearValue === null || yearValue === undefined || yearValue === '') {
+        errors[field.yearKey] = 'Укажите год'
+      } else {
         const MINYEAR = 1900
         const year = Number(yearValue)
         const currentYear = new Date().getFullYear()

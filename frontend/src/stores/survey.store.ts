@@ -69,28 +69,21 @@ export const useSurveyStore = defineStore('survey', () => {
   const loading = ref(false)
   const predictions = ref<DiseasePrediction[]>([])
 
-  // ЗАГРУЗКА С БЭКЭНДА
-  /*
-  async function loadConfig() {
-    config.value = await apiFetch<SurveyConfig>('/survey/config')
-    const allKeys = config.value.groups.flatMap(g =>
-      g.fields.flatMap(f => f.yearKey ? [f.key, f.yearKey] : [f.key])
-    )
-    for (const key of allKeys) {
-      answers[key] = null
-    }
-  }
-  */
-
   // Загрузка из локального конфига
   function loadConfig() {
     config.value = SURVEY_CONFIG
-    const allKeys = config.value.groups.flatMap(g =>
-      g.fields.flatMap(f => f.yearKey ? [f.key, f.yearKey] : [f.key])
-    )
-    for (const key of allKeys) {
-      answers[key] = null
-    }
+    
+    config.value.groups.forEach(group => {
+      group.fields.forEach(field => {
+        // Если тип yesno - ставим 0 (Нет) по умолчанию, иначе null
+        answers[field.key] = field.type === 'yesno' ? 0 : null
+        
+        // Если у поля есть yearKey, его год инициализируем как null
+        if (field.yearKey) {
+          answers[field.yearKey] = null
+        }
+      })
+    })
   }
 
   async function submit(): Promise<boolean> {
