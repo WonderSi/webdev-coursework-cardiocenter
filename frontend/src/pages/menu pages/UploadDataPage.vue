@@ -107,7 +107,7 @@
     <div class="one-patient-input-card">
       <div class="input-patient-part-one"> 
         <div class="input-patient-one-col1">
-          <div class="section-header">Ввести одного пациента</div>
+          <div class="section-header">Внести одного пациента</div>
 
           <div class="section-info">
             <div class="input-row">
@@ -359,17 +359,17 @@ const singlePatient = reactive({
   apolipoproteinB: null as number | null,
   triglycerides: null as number | null,
 
-  stroke: null as number | null, 
+  stroke: 0 as number | null, 
   strokeYear: null as number | null,
-  heartFailure: null as number | null, 
+  heartFailure: 0 as number | null, 
   heartFailureYear: null as number | null,
-  cad: null as number | null, 
+  cad: 0 as number | null, 
   cadYear: null as number | null,
-  angina: null as number | null, 
+  angina: 0 as number | null, 
   anginaYear: null as number | null,
-  myocardialInfarction: null as number | null, 
+  myocardialInfarction: 0 as number | null, 
   myocardialInfarctionYear: null as number | null,
-  arterialHypertension: null as number | null, 
+  arterialHypertension: 0 as number | null, 
   arterialHypertensionYear: null as number | null,
 })
 
@@ -410,9 +410,13 @@ const patientFieldErrors = computed<Record<string, string>>(() => {
 
   for (const { key, yearKey } of DISEASES) {
     const yearVal = p[yearKey]
-    if (p[key] === 1 && yearVal !== null && (yearVal as any) !== '') {
-      const y = Number(yearVal)
-      if (isNaN(y) || y < 1900 || y > currentYear) errors[yearKey] = `Год: 1900–${currentYear}`
+    if (p[key] === 1) {
+      if (yearVal === null || (yearVal as any) === '') {
+        errors[yearKey] = 'Укажите год'
+      } else {
+        const y = Number(yearVal)
+        if (isNaN(y) || y < 1900 || y > currentYear) errors[yearKey] = `Год: 1900–${currentYear}`
+      }
     }
   }
 
@@ -1399,6 +1403,10 @@ input[type="radio"] {
 
 
 .patient-form-msg {
+  background: $color-lighter-red2;
+  padding: 6px;
+  width: 75%;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
   margin: 0 0 12px;
@@ -1418,12 +1426,14 @@ input[type="radio"] {
 .radio-group-horizontal.group-error {
   box-shadow: 0 0 0 1.5px $color-red;
   border-radius: 8px;
+  padding: 2px 6px;
 }
 
 .radio-group-vertical.group-error-vert,
 .list-wrapper.group-error-vert {
   box-shadow: 0 0 0 1.5px $color-red;
   border-radius: 8px;
+  padding: 2px 6px;
 }
 
 .label-error {
@@ -1439,7 +1449,7 @@ input[type="radio"] {
     justify-content: center;
     display: flex;
     padding: 13px;
-    width: 100%;
+    width: 50%;
     background: $color-accent;
     white-space: nowrap;
     border: none;

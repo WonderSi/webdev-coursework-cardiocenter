@@ -1,8 +1,8 @@
 <template>
   <div class="actions">
     <button 
-      class="prev-btn" 
-      :class="{ hidden: currentStepIndex === 0 }"
+      class="prev-btn"
+      :class="{ hidden: currentStepIndex === 0, 'keyboard-active': activeKeyBtn === 'prev' }"
       @click="$emit('prev')"
     >
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -12,7 +12,7 @@
     <button 
       v-if="!isLastStep"
       class="next-btn" 
-      :class="{ disabled: isNextBtnDisabled, expanded: currentStepIndex === 0 }"
+      :class="{ disabled: isNextBtnDisabled, expanded: currentStepIndex === 0, 'keyboard-active': activeKeyBtn === 'next' }"
       :disabled="isNextBtnDisabled"
       @click="$emit('next')"
     >
@@ -23,7 +23,7 @@
     <button 
       v-else
       class="finish-btn" 
-      :class="{ disabled: isNextBtnDisabled }"
+      :class="{ disabled: isNextBtnDisabled, 'keyboard-active': activeKeyBtn === 'next' }"
       :disabled="isNextBtnDisabled"
       @click="$emit('next')"
     >
@@ -33,10 +33,11 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  currentStepIndex: number;
-  isLastStep: boolean;
-  isNextBtnDisabled: boolean;
+const props = defineProps<{
+  currentStepIndex: number
+  isLastStep: boolean
+  isNextBtnDisabled: boolean
+  activeKeyBtn?: 'next' | 'prev' | null
 }>()
 
 defineEmits<{
@@ -77,8 +78,10 @@ defineEmits<{
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   white-space: nowrap;
+
+  transition: all 0.2s ease;
   
-  &:hover {
+  &:hover, &.keyboard-active {
     background: $color-accent-lighter;
     border: $color-accent-lighter;
     color: $color-white;
@@ -113,7 +116,9 @@ defineEmits<{
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
-  &:hover:not(.disabled) {
+  transition: all 0.2s ease;
+
+  &:hover:not(.disabled), &.keyboard-active:not(.disabled) {
     background: $color-accent-lighter;
   }
 
@@ -144,7 +149,7 @@ defineEmits<{
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
-  &:hover:not(.disabled) {
+  &:hover:not(.disabled), &.keyboard-active:not(.disabled) {
     background: $color-accent-lighter;
   }
 

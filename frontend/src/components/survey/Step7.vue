@@ -7,12 +7,12 @@
 
           <div class="radio-group-horizontal">
             <label class="radio-label">
-              <span>Да</span>
-              <input type="radio" :name="field.key" :value="1" v-model="answers[field.key]" />
-            </label>
-            <label class="radio-label">
               <span>Нет</span>
               <input type="radio" :name="field.key" :value="0" v-model="answers[field.key]" />
+            </label>
+            <label class="radio-label">
+              <span>Да</span>
+              <input type="radio" :name="field.key" :value="1" v-model="answers[field.key]" />
             </label>
           </div>
 
