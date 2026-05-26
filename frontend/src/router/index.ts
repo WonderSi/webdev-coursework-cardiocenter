@@ -28,7 +28,7 @@ router.beforeEach((to) => {
   const { isAuthenticated } = useUserStore()
   if (to.meta.requiresAuth && !isAuthenticated) return { path: '/login' }
   if (to.path === '/login' && isAuthenticated) return { path: '/dashboards' }
-  if (to.path === '/results' && useSurveyStore().predictions.length === 0) return { path: '/' }
+  if (to.path === '/results' && !useSurveyStore().submitted) return { path: '/' }
 })
 
 export default router
