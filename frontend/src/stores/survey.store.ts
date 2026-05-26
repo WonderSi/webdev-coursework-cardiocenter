@@ -68,6 +68,7 @@ export const useSurveyStore = defineStore('survey', () => {
   const answers = reactive<Record<string, any>>({})
   const loading = ref(false)
   const predictions = ref<DiseasePrediction[]>([])
+  const submitted = ref(false)
 
   // ЗАГРУЗКА С БЭКЭНДА
   /*
@@ -102,6 +103,7 @@ export const useSurveyStore = defineStore('survey', () => {
         body: JSON.stringify(data),
       })
       predictions.value = response.predictions ?? []
+      submitted.value = true
       return true
     } catch (e) {
       console.error('Survey submit failed:', e)
@@ -116,6 +118,7 @@ export const useSurveyStore = defineStore('survey', () => {
       answers[key] = null
     }
     predictions.value = []
+    submitted.value = false
   }
 
   function buildPayload() {
@@ -155,5 +158,5 @@ export const useSurveyStore = defineStore('survey', () => {
     }
   }
 
-  return { config, answers, loading, predictions, loadConfig, submit, reset }
+  return { config, answers, loading, predictions, submitted, loadConfig, submit, reset }
 })
