@@ -23,7 +23,7 @@
     <button 
       v-else
       class="finish-btn" 
-      :class="{ disabled: isNextBtnDisabled }"
+      :class="{ disabled: isNextBtnDisabled, 'keyboard-active': activeKeyBtn === 'next' }"
       :disabled="isNextBtnDisabled"
       @click="$emit('next')"
     >
@@ -149,7 +149,7 @@ defineEmits<{
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
-  &:hover:not(.disabled) {
+  &:hover:not(.disabled), &.keyboard-active:not(.disabled) {
     background: $color-accent-lighter;
   }
 

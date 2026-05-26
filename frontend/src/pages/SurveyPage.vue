@@ -45,7 +45,7 @@
           :current-step-index="currentStepIndex"
           :is-last-step="isLastStep"
           :is-next-btn-disabled="isNextDisabled || store.loading"
-          
+          :active-key-btn="activeKeyBtn"
           @next="handleNext"
           @prev="prevStep"
         />
