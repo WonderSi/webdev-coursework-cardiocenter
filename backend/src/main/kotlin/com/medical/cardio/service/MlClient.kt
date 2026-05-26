@@ -127,15 +127,11 @@ class MlClient(
                 Mono.error(RuntimeException("Ошибка получения метрик: ${e.message}"))
             }
 
-    private fun parsePredictions(rawList: List<String>): List<DiseasePrediction> {
-        val parsed = rawList.mapNotNull { item ->
-            val idx = item.indexOf(':')
-            if (idx < 0) return@mapNotNull null
-            val key = item.substring(0, idx).trim()
-            val prob = item.substring(idx + 1).trim().toDoubleOrNull() ?: return@mapNotNull null
+    private fun parsePredictions(rawList: List<MlDiseasePrediction>): List<DiseasePrediction> {
+        val parsed = rawList.map { item ->
             DiseasePrediction(
-                name = DISEASE_NAMES[key] ?: key,
-                probability = (prob * 100).toInt().coerceIn(0, 100)
+                name = DISEASE_NAMES[item.disease] ?: item.disease,
+                probability = (item.probability * 100).toInt().coerceIn(0, 100)
             )
         }
         val general = parsed.filter { it.name == DISEASE_NAMES["general"] }
@@ -189,8 +185,13 @@ data class MlPredictRequest(
     @JsonProperty("arterial_hypertension_year") val arterialHypertensionYear: Int?
 )
 
+data class MlDiseasePrediction(
+    val disease: String,
+    val probability: Double
+)
+
 data class MlPredictResponse(
-    val predictions: List<String>,
+    val predictions: List<MlDiseasePrediction>,
     @JsonProperty("model_version") val modelVersion: String
 )
 
