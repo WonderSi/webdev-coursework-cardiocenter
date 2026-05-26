@@ -3,6 +3,7 @@ package com.medical.cardio.service
 import com.medical.cardio.dto.*
 import com.medical.cardio.repository.DiagnosisRepository
 import com.medical.cardio.repository.PatientRepository
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -12,6 +13,7 @@ class DashboardService(
     private val diagnosisRepository: DiagnosisRepository
 ) {
 
+    @Cacheable("dashboard-stats")
     @Transactional(readOnly = true)
     fun getStats(): DashboardStatsResponse {
         val total = patientRepository.countAll()

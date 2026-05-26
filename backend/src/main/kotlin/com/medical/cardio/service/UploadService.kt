@@ -15,6 +15,7 @@ import com.medical.cardio.service.upload.GlossaryResolver
 import com.medical.cardio.service.upload.PatientMapper
 import com.medical.cardio.service.upload.RowValidator
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -29,6 +30,7 @@ class UploadService(
     private val adminUserRepository: AdminUserRepository,
 ) {
 
+    @CacheEvict(value = ["dashboard-stats"], allEntries = true)
     @Transactional
     fun upload(file: MultipartFile, creatorEmail: String): UploadReport {
         val creator = adminUserRepository.findByEmail(creatorEmail)
@@ -81,6 +83,7 @@ class UploadService(
         )
     }
 
+    @CacheEvict(value = ["dashboard-stats"], allEntries = true)
     @Transactional
     fun savePatient(request: PatientManualCreateRequest, creatorEmail: String) {
         val creator = adminUserRepository.findByEmail(creatorEmail)
