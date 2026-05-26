@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSurveyStore } from '@/stores/survey.store'
 
@@ -199,9 +199,28 @@ const prevStep = () => {
   }
 }
 
+const handleKeyDown = (event: KeyboardEvent) => {
+  const activeElement = document.activeElement
+  const isInputFocused = activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)
+
+  if (event.key === 'Enter' || (event.key === 'ArrowRight' && !isInputFocused)) {
+    if (!store.loading && !isNextDisabled.value) {
+      handleNext()
+    }
+  } else if (event.key === 'ArrowLeft' && !isInputFocused) {
+    prevStep()
+  }
+}
+
 onMounted(() => {
   store.loadConfig()
   loading.value = false
+  
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
 
