@@ -71,14 +71,16 @@ export interface FullModelsResponse {
   modelsStats: OneModelStats[]
 }
 
+import { apiFetch } from './client'
+
 export async function fetchModelsStats(): Promise<FullModelsResponse> {
-  const res = await fetch('/api/admin/model')
+  const res = await apiFetch('/api/admin/model')
   if (!res.ok) throw new Error(`Ошибка загрузки метрик: ${res.status}`)
   return res.json()
 }
 
 export async function retrainModel(): Promise<RetrainStatusResponse> {
-  const res = await fetch('/api/admin/retrain', { method: 'POST' })
+  const res = await apiFetch('/api/admin/retrain', { method: 'POST' })
   if (!res.ok) throw new Error(`Ошибка запуска переобучения: ${res.status}`)
   return res.json()
 }

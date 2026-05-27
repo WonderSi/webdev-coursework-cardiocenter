@@ -59,8 +59,10 @@ export interface DashboardStatsResponse {
   districts: DistrictStat[]
 }
 
+import { apiFetch } from './client'
+
 export async function fetchDashboardStats(): Promise<DashboardStatsResponse> {
-  const res = await fetch('/api/admin/dashboard')
+  const res = await apiFetch('/api/admin/dashboard')
   if (!res.ok) throw new Error(`Dashboard fetch failed: ${res.status}`)
   return res.json()
 }
