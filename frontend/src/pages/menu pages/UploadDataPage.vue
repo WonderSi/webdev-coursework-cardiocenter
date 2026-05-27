@@ -255,6 +255,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
+import { apiFetch } from '@/api/client'
 
 // --- ИНТЕРФЕЙСЫ И КОНСТАНТЫ
 interface RowError {
@@ -445,11 +446,10 @@ async function submitSinglePatient() {
       Object.entries(singlePatient).map(([k, v]) => [k, (v as unknown) === '' ? null : v])
     )
 
-    const res = await fetch('/api/admin/patients', {
+    const res = await apiFetch('/api/admin/patients', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
-      credentials: 'include',
     })
 
     if (!res.ok) {
@@ -607,11 +607,7 @@ async function uploadFiles() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const res = await fetch('/api/admin/upload', { 
-        method: 'POST', 
-        body: formData, 
-        credentials: 'include' 
-      })
+      const res = await apiFetch('/api/admin/upload', { method: 'POST', body: formData })
 
       if (!res.ok) {
         const body = await res.json().catch(() => null)
@@ -648,7 +644,7 @@ async function downloadTemplate() {
   globalError.value = null
   
   try {
-    const res = await fetch('/api/admin/upload/template', { credentials: 'include' })
+    const res = await apiFetch('/api/admin/upload/template')
     if (!res.ok) {
       globalError.value = res.status === 401 || res.status === 403
         ? 'Сессия истекла — войдите заново'
