@@ -25,5 +25,5 @@ app:
   ml-service:
     url: http://localhost:8000
 
-BOOTSTRAP_ADMIN_EMAIL: test-admin@test.com
-BOOTSTRAP_ADMIN_PASSWORD: test-admin-password
+BOOTSTRAP_SUPER_ADMIN_EMAIL: test-admin@test.com
+BOOTSTRAP_SUPER_ADMIN_PASSWORD: test-admin-password

@@ -91,8 +91,8 @@ class SecurityConfig(
                 "/error"
             ).permitAll()
             auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            auth.requestMatchers("/api/admin/extended/**").hasRole("DOCTOR_EXTENDED")
-            auth.requestMatchers("/api/admin/**").hasAnyRole("DOCTOR", "DOCTOR_EXTENDED")
+            auth.requestMatchers("/api/admin/super-admin/**").hasRole("SUPER_ADMIN")
+            auth.requestMatchers("/api/admin/**").hasAnyRole("DOCTOR", "SUPER_ADMIN")
             auth.anyRequest().authenticated()
         }
         .exceptionHandling {
