@@ -7,7 +7,7 @@ export const useUserStore = defineStore('user', () => {
   const role = ref<string | null>(null)
 
   const isAuthenticated = computed(() => email.value !== null)
-  const isExtended = computed(() => role.value === 'ROLE_DOCTOR_EXTENDED')
+  const isExtended = computed(() => role.value === 'ROLE_SUPER_ADMIN')
 
   async function login(emailInput: string, password: string, rememberMe = false): Promise<void> {
     const res = await fetch('/api/auth/login', {

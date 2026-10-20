@@ -36,7 +36,7 @@ class AdminControllerTest : ControllerTestBase() {
             AdminUserEntity(
                 email = "admin-extended@cardio.ru",
                 passwordHash = passwordEncoder.encode("ValidPass@2000"),
-                role = Role.DOCTOR_EXTENDED
+                role = Role.SUPER_ADMIN
             )
         )
     }
@@ -48,9 +48,9 @@ class AdminControllerTest : ControllerTestBase() {
     }
 
     @Test
-    fun `resetPassword with DOCTOR_EXTENDED returns 200`() {
+    fun `resetPassword with SUPER_ADMIN returns 200`() {
         val cookie = authCookie(extendedUser)
-        mockMvc.post("/api/admin/extended/users/${doctorUser.id}/reset-password") {
+        mockMvc.post("/api/admin/super-admin/users/${doctorUser.id}/reset-password") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"newPassword":"NewValidPassword@2000"}"""
             cookie(cookie)
@@ -62,7 +62,7 @@ class AdminControllerTest : ControllerTestBase() {
     @Test
     fun `resetPassword with DOCTOR role returns 403`() {
         val cookie = authCookie(doctorUser)
-        mockMvc.post("/api/admin/extended/users/${extendedUser.id}/reset-password") {
+        mockMvc.post("/api/admin/super-admin/users/${extendedUser.id}/reset-password") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"newPassword":"NewValidPassword@2000"}"""
             cookie(cookie)
@@ -74,7 +74,7 @@ class AdminControllerTest : ControllerTestBase() {
     @Test
     fun `resetPassword with password too short returns 400`() {
         val cookie = authCookie(extendedUser)
-        mockMvc.post("/api/admin/extended/users/${doctorUser.id}/reset-password") {
+        mockMvc.post("/api/admin/super-admin/users/${doctorUser.id}/reset-password") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"newPassword":"short"}"""
             cookie(cookie)
@@ -86,7 +86,7 @@ class AdminControllerTest : ControllerTestBase() {
     @Test
     fun `resetPassword with non-existent user returns 404`() {
         val cookie = authCookie(extendedUser)
-        mockMvc.post("/api/admin/extended/users/${Long.MAX_VALUE}/reset-password") {
+        mockMvc.post("/api/admin/super-admin/users/${Long.MAX_VALUE}/reset-password") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"newPassword":"NewValidPassword@2000"}"""
             cookie(cookie)
@@ -97,7 +97,7 @@ class AdminControllerTest : ControllerTestBase() {
 
     @Test
     fun `resetPassword without token returns 401`() {
-        mockMvc.post("/api/admin/extended/users/${doctorUser.id}/reset-password") {
+        mockMvc.post("/api/admin/super-admin/users/${doctorUser.id}/reset-password") {
             contentType = MediaType.APPLICATION_JSON
             content = """{"newPassword":"NewValidPassword@2000"}"""
         }.andExpect {

@@ -77,12 +77,12 @@ class DashboardControllerTest : ControllerTestBase() {
     }
 
     @Test
-    fun `getStats with DOCTOR_EXTENDED token returns 200`() {
+    fun `getStats with SUPER_ADMIN token returns 200`() {
         val extUser = adminUserRepository.save(
             AdminUserEntity(
                 email = "dashboard-ext-test@cardio.ru",
                 passwordHash = passwordEncoder.encode("ValidPass@2024"),
-                role = Role.DOCTOR_EXTENDED
+                role = Role.SUPER_ADMIN
             )
         )
         try {
