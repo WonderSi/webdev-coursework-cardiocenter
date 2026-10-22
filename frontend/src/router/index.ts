@@ -9,6 +9,18 @@ import DashboardsPage from '@/pages/menu pages/DashboardsPage.vue'
 import ViewDataPage from '@/pages/menu pages/ViewDataPage.vue'
 import UploadDataPage from '@/pages/menu pages/UploadDataPage.vue'
 import ModelTrainingPage from '@/pages/menu pages/ModelTrainingPage.vue'
+import DoctorsPage from '@/pages/menu pages/DoctorsPage.vue'
+
+type AppRole = 'ROLE_DOCTOR' | 'ROLE_SUPER_ADMIN'
+
+const clinicalRoles: AppRole[] = ['ROLE_DOCTOR', 'ROLE_SUPER_ADMIN']
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    roles?: AppRole[]
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,17 +29,23 @@ const router = createRouter({
     { path: '/survey',         component: SurveyPage },
     { path: '/results',        component: ResultsPage },
     { path: '/login',          component: LoginPage },
-    { path: '/dashboards',     component: DashboardsPage,    meta: { requiresAuth: true } },
-    { path: '/view-data',      component: ViewDataPage,      meta: { requiresAuth: true } },
-    { path: '/upload-data',    component: UploadDataPage,    meta: { requiresAuth: true } },
-    { path: '/model-training', component: ModelTrainingPage, meta: { requiresAuth: true } },
+    { path: '/dashboards',     component: DashboardsPage,    meta: { requiresAuth: true, roles: clinicalRoles } },
+    { path: '/view-data',      component: ViewDataPage,      meta: { requiresAuth: true, roles: clinicalRoles } },
+    { path: '/upload-data',    component: UploadDataPage,    meta: { requiresAuth: true, roles: clinicalRoles } },
+    { path: '/model-training', component: ModelTrainingPage, meta: { requiresAuth: true, roles: clinicalRoles } },
+    { path: '/doctors',        component: DoctorsPage,       meta: { requiresAuth: true, roles: ['ROLE_SUPER_ADMIN'] } },
   ]
 })
 
 router.beforeEach((to) => {
-  const { isAuthenticated } = useUserStore()
-  if (to.meta.requiresAuth && !isAuthenticated) return { path: '/login' }
-  if (to.path === '/login' && isAuthenticated) return { path: '/dashboards' }
+  const userStore = useUserStore()
+  const allowedRoles = to.meta.roles
+
+  const needAuth = to.meta.requiresAuth === true || Boolean(allowedRoles?.length)
+
+  if (needAuth && !userStore.isAuthenticated) return { path: '/login' }
+  if (allowedRoles?.length && !allowedRoles.some((role) => role === userStore.role)) return { path: '/' }
+  if (to.path === '/login' && userStore.isAuthenticated) return { path: userStore.canAccessClinicalData ? '/dashboards' : '/' }
   if (to.path === '/results' && !useSurveyStore().submitted) return { path: '/' }
 })
 
