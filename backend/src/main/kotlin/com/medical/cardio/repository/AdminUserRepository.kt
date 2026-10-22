@@ -8,4 +8,5 @@ interface AdminUserRepository : JpaRepository<AdminUserEntity, Long> {
     fun findByEmail(email: String): AdminUserEntity?
     fun existsByEmail(email: String): Boolean
     fun existsByRole(role: Role): Boolean
+    fun findAllByRole(role: Role): List<AdminUserEntity>
 }

@@ -7,7 +7,11 @@ export const useUserStore = defineStore('user', () => {
   const role = ref<string | null>(null)
 
   const isAuthenticated = computed(() => email.value !== null)
-  const isExtended = computed(() => role.value === 'ROLE_SUPER_ADMIN')
+  const isSuperAdmin = computed(() => role.value === 'ROLE_SUPER_ADMIN')
+
+  const canAccessClinicalData = computed(() =>
+    role.value === 'ROLE_DOCTOR' || role.value === 'ROLE_SUPER_ADMIN'
+  )
 
   async function login(emailInput: string, password: string, rememberMe = false): Promise<void> {
     const res = await fetch('/api/auth/login', {
@@ -39,5 +43,5 @@ export const useUserStore = defineStore('user', () => {
     router.push('/login')
   }
 
-  return { email, role, isAuthenticated, isExtended, login, fetchMe, logout }
+  return { email, role, isAuthenticated, isSuperAdmin, canAccessClinicalData, login, fetchMe, logout }
 })

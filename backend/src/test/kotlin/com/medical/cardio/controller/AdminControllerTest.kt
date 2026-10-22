@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.test.json.JsonCompareMode
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.get
 
 class AdminControllerTest : ControllerTestBase() {
 
@@ -104,4 +106,39 @@ class AdminControllerTest : ControllerTestBase() {
             status { isUnauthorized() }
         }
     }
+
+    @Test
+    fun `getDoctors with SUPER_ADMIN returns 200`() {
+        val cookie = authCookie(extendedUser)
+        mockMvc.get("/api/admin/super-admin/doctors") {
+            cookie(cookie)
+        }.andExpect {
+            status { isOk() }
+            content {
+                json(
+                    """[{"id":${doctorUser.id},"email":"${doctorUser.email}"}]""",
+                    JsonCompareMode.STRICT
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `getDoctors with DOCTOR role returns 403`() {
+        val cookie = authCookie(doctorUser)
+        mockMvc.get("/api/admin/super-admin/doctors") {
+            cookie(cookie)
+        }.andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    fun `getDoctors without token returns 401`() {
+        mockMvc.get("/api/admin/super-admin/doctors")
+            .andExpect {
+                status { isUnauthorized() }
+            }
+    }
+
 }
