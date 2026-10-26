@@ -4,7 +4,9 @@ import com.medical.cardio.repository.AdminUserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import com.medical.cardio.dto.DoctorResponse
+import com.medical.cardio.dto.CreateDoctorRequest
 import com.medical.cardio.entity.Role
+import com.medical.cardio.entity.AdminUserEntity
 
 @Service
 class AdminService(
@@ -23,5 +25,20 @@ class AdminService(
     fun getDoctors(): List<DoctorResponse> {
         val doctors = adminUserRepository.findAllByRole(Role.DOCTOR)
         return doctors.map { DoctorResponse(it.id, it.email) }
+    }
+
+    fun createDoctor(request: CreateDoctorRequest): DoctorResponse {
+        if (adminUserRepository.existsByEmail(request.email)) {
+            throw IllegalArgumentException("Пользователь с таким email уже существует")
+        }
+
+        val user = AdminUserEntity(
+            email = request.email,
+            passwordHash = passwordEncoder.encode(request.password),
+            role = Role.DOCTOR
+        )
+
+        val savedUser = adminUserRepository.save(user)
+        return DoctorResponse(savedUser.id, savedUser.email)
     }
 }

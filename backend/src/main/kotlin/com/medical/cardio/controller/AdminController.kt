@@ -2,6 +2,7 @@ package com.medical.cardio.controller
 
 import com.medical.cardio.dto.ResetPasswordRequest
 import com.medical.cardio.dto.DoctorResponse
+import com.medical.cardio.dto.CreateDoctorRequest
 import com.medical.cardio.service.AdminService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -26,6 +27,13 @@ class AdminController(
         adminService.resetPassword(id, request.newPassword)
         return ResponseEntity.ok().build()
     }
+
+    @PostMapping("/doctors")
+    fun createDoctor(
+        @RequestBody @Valid request: CreateDoctorRequest): ResponseEntity<DoctorResponse> {
+            val doctorResponse = adminService.createDoctor(request)
+            return ResponseEntity.status(201).body(doctorResponse)
+        }
 
     @GetMapping("/doctors")
     fun getDoctors(): ResponseEntity<List<DoctorResponse>> {
