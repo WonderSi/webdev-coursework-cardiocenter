@@ -23,7 +23,7 @@ class JwtAuthFilter(
     private val pathMatcher = AntPathMatcher()
     private val publicPaths = listOf(
         "/api/auth/login", "/api/auth/logout", "/api/survey/**",
-        "/swagger-ui", "/swagger-ui/**", "/swagger-ui.html",
+        "/docs", "/swagger-ui", "/swagger-ui/**", "/swagger-ui.html",
         "/v3/api-docs", "/v3/api-docs/**", "/actuator/**"
     )
 

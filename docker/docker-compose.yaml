@@ -83,7 +83,8 @@ services:
     image: cardio-backend
     container_name: cardio_backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_PROFILES_ACTIVE: prod,local
+#     SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME}
@@ -98,7 +99,7 @@ services:
       BOOTSTRAP_SUPER_ADMIN_PASSWORD: ${BOOTSTRAP_SUPER_ADMIN_PASSWORD}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
     ports:
-      - "8080:8080" # Swagger
+      - "127.0.0.1:8080:8080" # Local API and Swagger
     networks:
       - internal
     depends_on:

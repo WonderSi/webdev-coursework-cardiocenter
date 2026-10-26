@@ -83,6 +83,7 @@ class SecurityConfig(
                 "/api/auth/login",
                 "/api/auth/logout",
                 "/api/survey/**",
+                "/docs",
                 "/swagger-ui",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
