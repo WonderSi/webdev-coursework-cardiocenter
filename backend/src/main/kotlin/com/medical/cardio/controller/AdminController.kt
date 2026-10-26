@@ -3,6 +3,7 @@ package com.medical.cardio.controller
 import com.medical.cardio.dto.ResetPasswordRequest
 import com.medical.cardio.dto.DoctorResponse
 import com.medical.cardio.dto.CreateDoctorRequest
+import com.medical.cardio.dto.UpdateDoctorBlockedRequest
 import com.medical.cardio.service.AdminService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PutMapping
 
 @RestController
 @RequestMapping("/api/admin/super-admin")
@@ -39,5 +41,14 @@ class AdminController(
     fun getDoctors(): ResponseEntity<List<DoctorResponse>> {
         val doctors = adminService.getDoctors()
         return ResponseEntity.ok(doctors)
+    }
+
+    @PutMapping("/doctors/{id}/blocked")
+    fun updateDoctorBlocked(
+        @PathVariable id: Long,
+        @RequestBody @Valid request: UpdateDoctorBlockedRequest
+    ): ResponseEntity<Unit> {
+        adminService.updateDoctorBlocked(id, request.isBlocked)
+        return ResponseEntity.noContent().build()
     }
 }

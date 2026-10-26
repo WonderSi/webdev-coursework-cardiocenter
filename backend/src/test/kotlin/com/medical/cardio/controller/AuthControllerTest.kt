@@ -119,4 +119,32 @@ class AuthControllerTest : ControllerTestBase() {
             header { string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=2592000")) }
         }
     }
+
+    @Test
+    fun `login with blocked doctor returns 401`() {
+        testUser.isBlocked = true
+        adminUserRepository.save(testUser)
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2000"}"""
+        }.andExpect {
+            header { doesNotExist("Set-Cookie") }
+            status { isUnauthorized() }
+        }
+    }
+
+    @Test
+    fun `me with token issued before blocking returns 401`() {
+        val cookie = authCookie(testUser)
+
+        testUser.isBlocked = true
+        adminUserRepository.save(testUser)
+
+        mockMvc.get("/api/auth/me") {
+            cookie(cookie)
+        }.andExpect {
+            status { isUnauthorized() }
+        }
+    }
 }

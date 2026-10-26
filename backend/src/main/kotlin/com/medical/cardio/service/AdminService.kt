@@ -24,7 +24,7 @@ class AdminService(
 
     fun getDoctors(): List<DoctorResponse> {
         val doctors = adminUserRepository.findAllByRole(Role.DOCTOR)
-        return doctors.map { DoctorResponse(it.id, it.email) }
+        return doctors.map { DoctorResponse(it.id, it.email, it.isBlocked) }
     }
 
     fun createDoctor(request: CreateDoctorRequest): DoctorResponse {
@@ -39,6 +39,18 @@ class AdminService(
         )
 
         val savedUser = adminUserRepository.save(user)
-        return DoctorResponse(savedUser.id, savedUser.email)
+        return DoctorResponse(savedUser.id, savedUser.email, savedUser.isBlocked)
+    }
+
+    fun updateDoctorBlocked(userId: Long, isBlocked: Boolean) {
+        val user = adminUserRepository.findById(userId)
+            .orElseThrow { NoSuchElementException("User with id $userId not found") }
+
+        if (user.role != Role.DOCTOR) {
+            throw IllegalArgumentException("Изменять блокировку можно только у врача")
+        }
+
+        user.isBlocked = isBlocked
+        adminUserRepository.save(user)
     }
 }

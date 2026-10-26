@@ -11,7 +11,8 @@ data class ResetPasswordRequest(
 
 data class DoctorResponse(
     val id: Long,
-    val email: String
+    val email: String,
+    val isBlocked: Boolean
 )
 
 data class CreateDoctorRequest(
@@ -19,4 +20,8 @@ data class CreateDoctorRequest(
     val email: String,
     @field:NotBlank @field:Size(min = 12, max = 100)
     val password: String
+)
+
+data class UpdateDoctorBlockedRequest(
+    val isBlocked: Boolean
 )
