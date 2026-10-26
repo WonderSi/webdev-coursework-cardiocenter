@@ -16,6 +16,9 @@ class AdminUserEntity(
     @Column(name = "password_hash", nullable = false, length = 255)
     var passwordHash: String,
 
+    @Column(name = "is_blocked", nullable = false)
+    var isBlocked: Boolean = false,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     val role: Role = Role.DOCTOR

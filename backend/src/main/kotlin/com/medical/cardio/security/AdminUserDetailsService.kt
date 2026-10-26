@@ -25,11 +25,11 @@ class AdminUserDetailsService(
         adminUserRepository.findByEmail(email)
             ?.let { entity ->
                 val authority = SimpleGrantedAuthority("ROLE_${entity.role}")
-                User(
-                    entity.email,
-                    entity.passwordHash,
-                    listOf(authority)
-                )
+                User.withUsername(entity.email)
+                    .password(entity.passwordHash)
+                    .authorities(listOf(authority))
+                    .disabled(entity.isBlocked)
+                    .build()
             }
             ?: throw UsernameNotFoundException("Admin user '$email' not found")
 
