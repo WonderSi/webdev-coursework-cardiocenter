@@ -1,0 +1,7 @@
+# For local Docker development: prod supplies container connection settings,
+# and local enables API documentation. Activate in this order: prod,local.
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true

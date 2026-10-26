@@ -46,8 +46,12 @@ app:
     url: ${ML_SERVICE_URL:http://127.0.0.1:8000}
 
 springdoc:
+  default-produces-media-type: application/json
+  packages-to-scan: com.medical.cardio.controller
+  paths-to-match: /api/**
+  override-with-generic-response: false
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /docs
     tags-sorter: alpha
     operations-sorter: alpha
   api-docs:
