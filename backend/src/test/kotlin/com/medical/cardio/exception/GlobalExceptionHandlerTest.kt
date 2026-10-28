@@ -5,6 +5,7 @@ import com.medical.cardio.controller.AuthController
 import com.medical.cardio.security.AdminUserDetailsService
 import com.medical.cardio.security.JwtAuthFilter
 import com.medical.cardio.security.JwtService
+import com.medical.cardio.security.ProblemResponseWriter
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.any
@@ -15,6 +16,8 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.DisabledException
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -23,7 +26,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 
 @WebMvcTest(AuthController::class)
-@Import(SecurityConfig::class, JwtAuthFilter::class)
+@Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
 class GlobalExceptionHandlerTest {
 
     @Autowired
@@ -158,6 +161,64 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.instance") { value("/api/auth/login") }
             jsonPath("$.code") { value("NOT_FOUND") }
             jsonPath("$.errors") { doesNotExist() }
+        }
+    }
+
+    @Test
+    fun `invalid credentials return problem details`() {
+        given(authenticationManager.authenticate(any()))
+            .willThrow(BadCredentialsException("Internal authentication details"))
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"test@test.com","password":"password","rememberMe":false}"""
+        }.andExpect {
+            status { isUnauthorized() }
+            content {
+                string(Matchers.not(Matchers.containsString("Internal authentication details")))
+            }
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+            }
+            jsonPath("$.type") {
+                value("urn:cardiocenter:problem:authentication")
+            }
+            jsonPath("$.title") { value("Ошибка входа") }
+            jsonPath("$.status") { value(401) }
+            jsonPath("$.detail") { value("Не удалось войти. Проверьте email и пароль.") }
+            jsonPath("$.instance") { value("/api/auth/login") }
+            jsonPath("$.code") { value("UNAUTHORIZED") }
+            jsonPath("$.errors") { doesNotExist() }
+            header { doesNotExist("Set-Cookie") }
+        }
+    }
+
+    @Test
+    fun `disabled account returns problem details`() {
+        given(authenticationManager.authenticate(any()))
+            .willThrow(DisabledException("Account is disabled"))
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"test@test.com","password":"password","rememberMe":false}"""
+        }.andExpect {
+            status { isUnauthorized() }
+            content {
+                string(Matchers.not(Matchers.containsString("Account is disabled")))
+            }
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+            }
+            jsonPath("$.type") {
+                value("urn:cardiocenter:problem:authentication")
+            }
+            jsonPath("$.title") { value("Ошибка входа") }
+            jsonPath("$.status") { value(401) }
+            jsonPath("$.detail") { value("Не удалось войти. Проверьте email и пароль.") }
+            jsonPath("$.instance") { value("/api/auth/login") }
+            jsonPath("$.code") { value("UNAUTHORIZED") }
+            jsonPath("$.errors") { doesNotExist() }
+            header { doesNotExist("Set-Cookie") }
         }
     }
 }

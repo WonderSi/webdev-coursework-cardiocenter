@@ -134,6 +134,16 @@ class AdminControllerTest : ControllerTestBase() {
             cookie(cookie)
         }.andExpect {
             status { isForbidden() }
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+            }
+            jsonPath("$.type") { value("urn:cardiocenter:problem:forbidden") }
+            jsonPath("$.title") { value("Доступ запрещён") }
+            jsonPath("$.status") { value(403) }
+            jsonPath("$.detail") { value("Недостаточно прав для выполнения запроса.") }
+            jsonPath("$.instance") { value("/api/admin/super-admin/doctors") }
+            jsonPath("$.code") { value("FORBIDDEN") }
+            jsonPath("$.errors") { doesNotExist() }
         }
     }
 

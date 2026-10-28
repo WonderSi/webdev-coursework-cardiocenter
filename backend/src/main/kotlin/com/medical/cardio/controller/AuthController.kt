@@ -77,31 +77,26 @@ class AuthController(
         ApiResponse(responseCode = "401", description = "Неверные данные или учётная запись заблокирована", content = [Content()])
     ])
     @PostMapping("/login")
-    fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> =
-        try {
-            authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken(request.email, request.password)
-            )
-            val userDetails = adminUserDetailsService.loadUserByUsername(request.email)
-            val token = jwtService.generateToken(userDetails)
-            val cookieValue = buildString {
-                append("access_token=$token; HttpOnly; Path=/; SameSite=Strict")
-                if (request.rememberMe) append("; Max-Age=2592000")
-            }
-
-            ResponseEntity.ok()
-                .header("Set-Cookie", cookieValue)
-                .body(
-                    LoginResponse(
-                        email = userDetails.username,
-                        role = userDetails.authorities.first().authority
-                    )
-                )
-        } catch (_: BadCredentialsException) {
-            ResponseEntity.status(401).build()
-        } catch (_: DisabledException) {
-            ResponseEntity.status(401).build()
+    fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> {
+        authenticationManager.authenticate(
+            UsernamePasswordAuthenticationToken(request.email, request.password)
+        )
+        val userDetails = adminUserDetailsService.loadUserByUsername(request.email)
+        val token = jwtService.generateToken(userDetails)
+        val cookieValue = buildString {
+            append("access_token=$token; HttpOnly; Path=/; SameSite=Strict")
+            if (request.rememberMe) append("; Max-Age=2592000")
         }
+
+        return ResponseEntity.ok()
+            .header("Set-Cookie", cookieValue)
+            .body(
+                LoginResponse(
+                    email = userDetails.username,
+                    role = userDetails.authorities.first().authority
+                )
+            )
+    }
 
     @Operation(summary = "Получить текущего пользователя", description = "Возвращает email и роль пользователя из действующей cookie.")
     @SecurityRequirement(name = "cookieAuth")
