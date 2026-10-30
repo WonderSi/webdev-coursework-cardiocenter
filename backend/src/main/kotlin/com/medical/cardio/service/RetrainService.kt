@@ -1,6 +1,7 @@
 package com.medical.cardio.service
 
 import com.medical.cardio.entity.PatientEntity
+import com.medical.cardio.exception.MlServiceException
 import com.medical.cardio.repository.PatientRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -49,7 +50,7 @@ class RetrainService(
 ) {
     fun getModelStats(): FullModelsResponse {
         val metrics = mlClient.getMetrics().block()
-            ?: throw RuntimeException("Нет ответа от ML-сервиса")
+            ?: throw MlServiceException(IllegalStateException("Нет ответа от ML-сервиса"))
         return FullModelsResponse(
             modelVersion = "1.0.0",
             savedModels = metrics.map { "${it.modelStem}_model.cbm" },
@@ -88,7 +89,7 @@ class RetrainService(
         val patients = patientRepository.findAllWithDiagnoses()
         val csvBytes = generateCsv(patients)
         val response = mlClient.retrain(csvBytes).block()
-            ?: throw RuntimeException("Нет ответа от ML-сервиса")
+            ?: throw MlServiceException(IllegalStateException("Нет ответа от ML-сервиса"))
         return RetrainResult(status = response.status, savedModels = response.savedModels)
     }
 

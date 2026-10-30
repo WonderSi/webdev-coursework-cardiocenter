@@ -2,6 +2,9 @@ package com.medical.cardio.config
 
 import com.medical.cardio.security.AdminUserDetailsService
 import com.medical.cardio.security.JwtAuthFilter
+import com.medical.cardio.security.ProblemResponseWriter
+import com.medical.cardio.exception.ApiProblem
+import org.springframework.http.HttpStatus
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import jakarta.servlet.http.HttpServletResponse
@@ -22,7 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 class SecurityConfig(
     private val adminUserDetailsService: AdminUserDetailsService,
-    private val jwtAuthFilter: JwtAuthFilter
+    private val jwtAuthFilter: JwtAuthFilter,
+    private val problemResponseWriter: ProblemResponseWriter
 ) {
     // Контейнер для шифрования паролей
     @Bean
@@ -97,8 +101,28 @@ class SecurityConfig(
             auth.anyRequest().authenticated()
         }
         .exceptionHandling {
-            it.authenticationEntryPoint { _, response, _ ->
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+            it.authenticationEntryPoint { request, response, _ ->
+                val problem = ApiProblem.create(
+                    status = HttpStatus.UNAUTHORIZED,
+                    type = "urn:cardiocenter:problem:authentication",
+                    title = "Требуется авторизация",
+                    detail = "Войдите в систему для выполнения запроса.",
+                    code = ApiProblem.UNAUTHORIZED
+                )
+
+                problemResponseWriter.write(request, response, problem)
+            }
+
+            it.accessDeniedHandler { request, response, _ ->
+                val problem = ApiProblem.create(
+                    status = HttpStatus.FORBIDDEN,
+                    type = "urn:cardiocenter:problem:forbidden",
+                    title = "Доступ запрещён",
+                    detail = "Недостаточно прав для выполнения запроса.",
+                    code = ApiProblem.FORBIDDEN
+                )
+
+                problemResponseWriter.write(request, response, problem)
             }
         }
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)

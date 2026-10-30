@@ -2,6 +2,7 @@ package com.medical.cardio.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.medical.cardio.config.OpenApiConfig
+import com.medical.cardio.config.ProblemOpenApiConfig
 import com.medical.cardio.repository.GlossaryRepository
 import com.medical.cardio.security.AdminUserDetailsService
 import com.medical.cardio.security.JwtService
@@ -45,7 +46,7 @@ class OpenApiDocumentationTest {
         UserDetailsServiceAutoConfiguration::class
     ])
     @Import(
-        OpenApiConfig::class, AdminController::class, AuthController::class,
+        OpenApiConfig::class, ProblemOpenApiConfig::class, AdminController::class, AuthController::class,
         DashboardController::class, PatientController::class, RetrainController::class,
         SurveyController::class, UploadController::class
     )
@@ -93,9 +94,44 @@ class OpenApiDocumentationTest {
         assertTrue(document.at("/components/schemas/CreateDoctorRequest/properties/password/writeOnly").asBoolean())
         val blocked = paths.path("/api/admin/super-admin/doctors/{id}/blocked").path("put")
         assertFalse(blocked.at("/responses/204").has("content"))
-        assertFalse(paths.path("/api/auth/login").path("post").at("/responses/401").has("content"))
+        assertEquals("#/components/responses/Unauthorized",
+            paths.path("/api/auth/login").path("post").at("/responses/401/\$ref").asText())
         assertFalse(paths.path("/api/auth/me").path("get").has("requestBody"))
         assertEquals("binary", paths.path("/api/admin/upload/template").path("get")
             .at("/responses/200/content/application~1octet-stream/schema/format").asText())
+    }
+
+    @Test
+    fun `all documented errors use the shared problem contract`() {
+        val result = mockMvc.get("/v3/api-docs").andExpect { status { isOk() } }.andReturn()
+        val document = objectMapper.readTree(result.response.contentAsString)
+        val schema = document.at("/components/schemas/ApiProblem")
+        assertTrue(schema.path("required").map { it.asText() }.containsAll(
+            listOf("type", "title", "status", "detail", "instance", "code")))
+        assertFalse(schema.path("required").any { it.asText() == "errors" })
+        document.path("paths").fields().forEachRemaining { (path, methods) ->
+            methods.fields().forEachRemaining { (_, operation) ->
+                assertTrue(operation.path("responses").has("500"), path)
+                operation.path("responses").fields().forEachRemaining { (status, response) ->
+                    if (status.toIntOrNull()?.let { it >= 400 } == true) {
+                        val ref = response.path("\$ref").asText()
+                        assertTrue(ref.startsWith("#/components/responses/"), "$path $status")
+                        val resolved = document.at(ref.removePrefix("#"))
+                        val content = resolved.path("content")
+                        assertEquals(listOf("application/problem+json"), content.fieldNames().asSequence().toList())
+                        assertEquals("#/components/schemas/ApiProblem",
+                            content.path("application/problem+json").at("/schema/\$ref").asText())
+                    }
+                }
+            }
+        }
+        listOf("/api/survey/submit", "/api/admin/retrain", "/api/admin/model").forEach { path ->
+            val operation = document.path("paths").path(path).elements().next()
+            assertEquals("#/components/responses/MlServiceError", operation.at("/responses/502/\$ref").asText())
+        }
+        val validation = document.at("/components/responses/BadRequest/content/application~1problem+json/examples/validation/value")
+        assertEquals("VALIDATION_ERROR", validation.path("code").asText())
+        assertTrue(validation.path("errors").isArray)
+        assertFalse(document.toString().contains("200 с пустым predictions"))
     }
 }

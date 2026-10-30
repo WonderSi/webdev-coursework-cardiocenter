@@ -2,6 +2,7 @@ package com.medical.cardio.security
 
 import com.medical.cardio.exception.InvalidTokenException
 import com.medical.cardio.exception.TokenExpiredException
+import com.medical.cardio.exception.ApiProblem
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -12,11 +13,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
 import org.springframework.web.filter.OncePerRequestFilter
+import org.springframework.http.HttpStatus
+
 
 @Component
 class JwtAuthFilter(
+    private val adminUserDetailsService: AdminUserDetailsService,
     private val jwtService: JwtService,
-    private val adminUserDetailsService: AdminUserDetailsService
+    private val problemResponseWriter: ProblemResponseWriter
 ) : OncePerRequestFilter() {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -57,22 +61,47 @@ class JwtAuthFilter(
                 }
             }
         } catch (e: TokenExpiredException) {
-            log.warn("Expired JWT token: ${e.message}")
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
-            response.contentType = "application/json;charset=UTF-8"
-            response.writer.write("""{"error":"invalid_token"}""")
+            log.warn("Expired JWT token")
+            val problem = ApiProblem.create(
+                status = HttpStatus.UNAUTHORIZED,
+                type = "urn:cardiocenter:problem:token-expired",
+                title = "Сессия истекла",
+                detail = "Войдите в систему снова.",
+                code = ApiProblem.TOKEN_EXPIRED,
+            )
+
+            problemResponseWriter.write(request, response, problem)
+
             return
         } catch (e: InvalidTokenException) {
-            log.warn("Invalid JWT token: ${e.message}")
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
-            response.contentType = "application/json;charset=UTF-8"
-            response.writer.write("""{"error":"invalid_token"}""")
+            log.warn("Invalid JWT token")
+            val problem = ApiProblem.create(
+                status = HttpStatus.UNAUTHORIZED,
+                type = "urn:cardiocenter:problem:invalid-token",
+                title = "Недействительный токен",
+                detail = "Войдите в систему снова.",
+                code = ApiProblem.INVALID_TOKEN,
+            )
+
+            problemResponseWriter.write(request, response, problem)
+
             return
         } catch (e: UsernameNotFoundException) {
-            log.warn("User from token not found: ${e.message}")
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
-            response.contentType = "application/json;charset=UTF-8"
-            response.writer.write("""{"error":"invalid_token"}""")
+            log.warn("User from token not found")
+            val problem = ApiProblem.create(
+                status = HttpStatus.UNAUTHORIZED,
+                type = "urn:cardiocenter:problem:invalid-token",
+                title = "Недействительный токен",
+                detail = "Войдите в систему снова.",
+                code = ApiProblem.INVALID_TOKEN,
+            )
+
+            problemResponseWriter.write(request, response, problem)
+
+            return
+        } catch (e: Exception) {
+            log.error("JWT authentication infrastructure failed", e)
+            problemResponseWriter.write(request, response, ApiProblem.forStatus(HttpStatus.INTERNAL_SERVER_ERROR))
             return
         }
 

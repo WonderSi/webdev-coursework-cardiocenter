@@ -4,7 +4,6 @@ import com.medical.cardio.service.FullModelsResponse
 import com.medical.cardio.service.RetrainResult
 import com.medical.cardio.service.RetrainService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -25,13 +24,9 @@ class RetrainController(
     @Operation(summary = "Получить метрики моделей", description = "Запрашивает у ML-сервиса версию моделей и метрики качества.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Метрики моделей", useReturnTypeSchema = true),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()]),
-        ApiResponse(responseCode = "500", description = "Не удалось получить метрики ML-сервиса", content = [Content()])
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        ApiResponse(responseCode = "502", ref = "#/components/responses/MlServiceError")
     ])
     @GetMapping("/model")
     fun getModelStats(): ResponseEntity<FullModelsResponse> =
@@ -43,13 +38,9 @@ class RetrainController(
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Результат переобучения", useReturnTypeSchema = true),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()]),
-        ApiResponse(responseCode = "500", description = "Ошибка подготовки данных или ML-сервиса", content = [Content()])
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        ApiResponse(responseCode = "502", ref = "#/components/responses/MlServiceError")
     ])
     @PostMapping("/retrain")
     fun retrain(): ResponseEntity<RetrainResult> =

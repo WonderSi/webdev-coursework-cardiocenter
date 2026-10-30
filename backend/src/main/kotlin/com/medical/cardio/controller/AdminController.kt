@@ -8,8 +8,6 @@ import com.medical.cardio.service.AdminService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.ExampleObject
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -38,47 +36,10 @@ class AdminController(
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Пароль изменён, тело ответа отсутствует", content = [Content()]),
-        ApiResponse(
-            responseCode = "400",
-            description = "Некорректный пароль",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            name = "validationError",
-                            value = """{"errors":{"newPassword":"size must be between 12 and 100"}}"""
-                        ),
-                        ExampleObject(
-                            name = "badRequest",
-                            value = """{"error":"Некорректный запрос"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "404",
-            description = "Пользователь не найден",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            value = """{"error":"User with id 999 not found"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()])
+        ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
     ])
     @PostMapping("/users/{id}/reset-password")
     fun resetPassword(
@@ -95,32 +56,9 @@ class AdminController(
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "201", description = "Врач создан", useReturnTypeSchema = true),
-        ApiResponse(
-            responseCode = "400",
-            description = "Нарушены ограничения полей или email уже занят",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            name = "validationError",
-                            value = """{"errors":{"email":"must be a well-formed email address"}}"""
-                        ),
-                        ExampleObject(
-                            name = "badRequest",
-                            value = """{"error":"Некорректный запрос"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()])
+        ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
     ])
     @PostMapping("/doctors")
     fun createDoctor(
@@ -136,12 +74,8 @@ class AdminController(
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Список врачей", useReturnTypeSchema = true),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()])
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
     ])
     @GetMapping("/doctors")
     fun getDoctors(): ResponseEntity<List<DoctorResponse>> {
@@ -155,43 +89,10 @@ class AdminController(
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "204", description = "Состояние обновлено, тело ответа отсутствует", content = [Content()]),
-        ApiResponse(
-            responseCode = "400",
-            description = "Целевой пользователь не является DOCTOR или запрос некорректен",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            name = "badRequest",
-                            value = """{"error":"Некорректный запрос"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "404",
-            description = "Пользователь не найден",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            value = """{"error":"User with id 999 not found"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()])
+        ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
     ])
     @PutMapping("/doctors/{id}/blocked")
     fun updateDoctorBlocked(
