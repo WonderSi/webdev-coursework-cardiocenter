@@ -1,6 +1,7 @@
 package com.medical.cardio.service
 
 import com.medical.cardio.entity.PatientEntity
+import com.medical.cardio.exception.MlServiceException
 import com.medical.cardio.repository.PatientRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

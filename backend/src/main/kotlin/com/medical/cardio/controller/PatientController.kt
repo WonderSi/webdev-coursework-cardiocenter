@@ -4,8 +4,6 @@ import com.medical.cardio.dto.PatientManualCreateRequest
 import com.medical.cardio.service.UploadService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.ExampleObject
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -30,28 +28,9 @@ class PatientController(
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Пациент сохранён, тело ответа отсутствует", content = [Content()]),
-        ApiResponse(
-            responseCode = "400",
-            description = "Некорректный запрос или код пола",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            name = "badRequest",
-                            value = """{"error":"Некорректный запрос"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()])
+        ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
     ])
     @PostMapping
     fun createPatient(@RequestBody request: PatientManualCreateRequest): ResponseEntity<Void> {

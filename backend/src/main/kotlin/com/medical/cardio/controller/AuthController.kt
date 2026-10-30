@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.Content
-import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
@@ -54,27 +53,8 @@ class AuthController(
                 )
             ]
         ),
-        ApiResponse(
-            responseCode = "400",
-            description = "Некорректные поля запроса",
-            content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(type = "object"),
-                    examples = [
-                        ExampleObject(
-                            name = "validationError",
-                            value = """{"errors":{"email":"must be a well-formed email address"}}"""
-                        ),
-                        ExampleObject(
-                            name = "badRequest",
-                            value = """{"error":"Некорректный запрос"}"""
-                        )
-                    ]
-                )
-            ]
-        ),
-        ApiResponse(responseCode = "401", description = "Неверные данные или учётная запись заблокирована", content = [Content()])
+        ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
     ])
     @PostMapping("/login")
     fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> {
@@ -102,11 +82,7 @@ class AuthController(
     @SecurityRequirement(name = "cookieAuth")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Текущий пользователь", useReturnTypeSchema = true),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        )
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
     ])
     @GetMapping("/me")
     fun me(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): ResponseEntity<LoginResponse> =

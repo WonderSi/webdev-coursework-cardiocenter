@@ -23,6 +23,26 @@ import org.hamcrest.Matchers
 @Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
 class JwtAuthFilterTest {
 
+    @Test
+    fun `authentication infrastructure failure returns safe internal problem`() {
+        given(jwtService.extractUsername("valid.token")).willReturn("doctor@example.com")
+        given(adminUserDetailsService.loadUserByUsername("doctor@example.com"))
+            .willThrow(IllegalStateException("jdbc:postgresql://internal-db/private"))
+
+        mockMvc.get("/api/auth/me") {
+            cookie(Cookie("access_token", "valid.token"))
+        }.andExpect {
+            status { isInternalServerError() }
+            content { contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON) }
+            jsonPath("$.status") { value(500) }
+            jsonPath("$.type") { value("urn:cardiocenter:problem:internal-server-error") }
+            jsonPath("$.code") { value("INTERNAL_SERVER_ERROR") }
+            jsonPath("$.instance") { value("/api/auth/me") }
+            jsonPath("$.errors") { doesNotExist() }
+            content { string(Matchers.not(Matchers.containsString("internal-db"))) }
+        }
+    }
+
     @Autowired
     lateinit var mockMvc: MockMvc
 

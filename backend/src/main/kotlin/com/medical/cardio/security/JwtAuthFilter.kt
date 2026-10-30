@@ -99,6 +99,10 @@ class JwtAuthFilter(
             problemResponseWriter.write(request, response, problem)
 
             return
+        } catch (e: Exception) {
+            log.error("JWT authentication infrastructure failed", e)
+            problemResponseWriter.write(request, response, ApiProblem.forStatus(HttpStatus.INTERNAL_SERVER_ERROR))
+            return
         }
 
         filterChain.doFilter(request, response)

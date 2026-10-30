@@ -3,7 +3,6 @@ package com.medical.cardio.controller
 import com.medical.cardio.dto.DashboardStatsResponse
 import com.medical.cardio.service.DashboardService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -24,12 +23,8 @@ class DashboardController(
     @Operation(summary = "Получить статистику клинических данных", description = "Возвращает агрегированную статистику пациентов для Dashboard.")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Статистика", useReturnTypeSchema = true),
-        ApiResponse(
-            responseCode = "401",
-            description = "Нет действующей авторизации: cookie отсутствует, токен истёк или учётная запись заблокирована",
-            content = [Content()]
-        ),
-        ApiResponse(responseCode = "403", description = "Недостаточно прав для операции", content = [Content()])
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
     ])
     @GetMapping("/dashboard")
     fun getStats(): ResponseEntity<DashboardStatsResponse> =

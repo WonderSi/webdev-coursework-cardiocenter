@@ -8,19 +8,18 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.reactive.function.BodyInserters
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import com.medical.cardio.exception.MlServiceException
 
 @Service
 class MlClient(
     webClientBuilder: WebClient.Builder,
     @Value("\${app.ml-service.url}") private val mlServiceUrl: String
 ) {
-    private val log = LoggerFactory.getLogger(javaClass)
-    private val webClient = webClientBuilder
+    private val webClient = webClientBuilder.clone()
         .baseUrl(mlServiceUrl)
         .clientConnector(
             org.springframework.http.client.reactive.ReactorClientHttpConnector(
@@ -30,7 +29,7 @@ class MlClient(
         )
         .build()
 
-    private val retrainWebClient = webClientBuilder
+    private val retrainWebClient = webClientBuilder.clone()
         .baseUrl(mlServiceUrl)
         .clientConnector(
             org.springframework.http.client.reactive.ReactorClientHttpConnector(
@@ -41,8 +40,6 @@ class MlClient(
         .build()
 
     fun predict(request: SurveyRequest): Mono<List<DiseasePrediction>> {
-        log.info("ML prediction called — genderId={}, age={}", request.genderId, request.age)
-
         val mlRequest = MlPredictRequest(
             gender = request.genderId?.toInt(),
             age = request.age,
@@ -75,21 +72,17 @@ class MlClient(
             arterialHypertensionYear = request.arterialHypertensionYear ?: 1950,
         )
 
-        log.info("Sending ML request: {}", mlRequest)
-
         return webClient.post()
             .uri("/predictions/predict")
             .bodyValue(mlRequest)
             .retrieve()
             .bodyToMono(MlPredictResponse::class.java)
-            .map { parsePredictions(it.predictions) }
-            .onErrorResume { e ->
-                log.error("ML service call failed: ${e.message}")
-                if (e is org.springframework.web.reactive.function.client.WebClientResponseException) {
-                    log.error("ML response body: ${e.responseBodyAsString}")
-                }
-                Mono.just(emptyList())
+            .switchIfEmpty(Mono.error(IllegalStateException("Пустой ответ ML-сервиса")))
+            .map {
+                check(it.predictions.isNotEmpty()) { "ML response contains no predictions" }
+                parsePredictions(it.predictions)
             }
+            .onErrorMap { MlServiceException(it) }
     }
 
     fun retrain(csvBytes: ByteArray): Mono<MlRetrainResponse> {
@@ -107,25 +100,18 @@ class MlClient(
             .body(BodyInserters.fromMultipartData(multipart))
             .retrieve()
             .bodyToMono(MlRetrainResponse::class.java)
-            .onErrorResume { e ->
-                log.error("ML retrain failed: ${e.message}")
-                if (e is org.springframework.web.reactive.function.client.WebClientResponseException) {
-                    log.error("ML response body: ${e.responseBodyAsString}")
-                }
-                Mono.error(RuntimeException("Ошибка переобучения модели: ${e.message}"))
-            }
+            .switchIfEmpty(Mono.error(IllegalStateException("Пустой ответ ML-сервиса")))
+            .onErrorMap { MlServiceException(it) }
     }
 
     fun getMetrics(): Mono<List<MlMetric>> =
         webClient.get()
             .uri("/metrics")
             .retrieve()
-            .bodyToFlux(MlMetric::class.java)
-            .collectList()
-            .onErrorResume { e ->
-                log.error("ML metrics fetch failed: ${e.message}")
-                Mono.error(RuntimeException("Ошибка получения метрик: ${e.message}"))
-            }
+            .bodyToMono(Array<MlMetric>::class.java)
+            .switchIfEmpty(Mono.error(IllegalStateException("Пустой ответ ML-сервиса")))
+            .map { it.toList() }
+            .onErrorMap { MlServiceException(it) }
 
     private fun parsePredictions(rawList: List<MlDiseasePrediction>): List<DiseasePrediction> {
         val parsed = rawList.map { item ->
