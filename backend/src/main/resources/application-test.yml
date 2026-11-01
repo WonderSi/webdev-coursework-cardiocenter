@@ -1,7 +1,7 @@
 app:
   jwt:
     secret: c2VjcmV0LWtleS1mb3ItdGVzdGluZy1wdXJwb3Nlcy1vbmx5LW5vdC1mb3ItcHJvZA==
-    expiration-ms: 86400000
+    expiration-ms: 900000
 
 spring:
   autoconfigure:

@@ -30,7 +30,7 @@ class RefreshTokenRepositoryTest : BaseIntegrationTest() {
     private lateinit var entityManager: EntityManager
 
     @Test
-    fun `findByTokenHash returns null for unknown has`() {
+    fun `findByTokenHash returns null for unknown hash`() {
         val result = refreshTokenRepository.findByTokenHash("unknown-token-hash")
         assertNull(result)
     }

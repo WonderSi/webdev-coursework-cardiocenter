@@ -46,11 +46,12 @@ class JwtService {
     }
 
     fun generateToken(extraClaims: Map<String, Any>, userDetails: UserDetails): String {
+        val issuedAt = Date()
         return Jwts.builder()
             .claims(extraClaims)                                         // Роли
             .subject(userDetails.username)                               // Username
-            .issuedAt(Date())                                            // Когда выдан
-            .expiration(Date(System.currentTimeMillis() + expirationMs)) // Когда истечет
+            .issuedAt(issuedAt)                                          // Когда выдан
+            .expiration(Date(issuedAt.time + expirationMs))              // Когда истечет
             .signWith(signingKey)
             .compact()
     }

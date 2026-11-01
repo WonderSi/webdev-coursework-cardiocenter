@@ -138,7 +138,7 @@ backend/
 app:
   jwt:
     secret: <base64-encoded-secret>   # минимум 256 бит / 32 байта
-    expiration-ms: 86400000           # 24 часа
+    expiration-ms: 900000             # 15 минут; JWT_EXPIRATION_MS переопределяет основной конфиг
 ```
 
 **Claims токена:**
@@ -146,6 +146,24 @@ app:
 - `iat` — время выдачи
 - `exp` — время истечения
 - `roles` — список ролей (`List<String>`)
+
+---
+
+## Выдача refresh-сессий — `RefreshTokenService`
+
+`issueToken(user, lifetime)` создаёт случайный refresh token из 32 байт,
+сохраняет его SHA-256-хэш, сотрудника, время создания и истечения в
+`refresh_tokens`. Новый токен не отозван: `revoked_date` равен `NULL`.
+Продолжительность `lifetime` должна быть положительной.
+
+Результат `IssuedRefreshToken` содержит исходный токен и момент истечения для
+последующей установки cookie. Вызов выполняется в транзакции. Для поиска сессии
+используется `RefreshTokenRepository.findByTokenHash`.
+
+На этом этапе сервис ещё не подключён к `/api/auth/login`. Endpoint обновления
+доступа и отзыв refresh при выходе будут добавлены отдельно. Срок refresh и
+его зависимость от `rememberMe` пока не заданы: сервис принимает продолжительность
+как параметр.
 
 ---
 

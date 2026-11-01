@@ -47,7 +47,7 @@ management:
 app:
   jwt:
     secret: ${JWT_SECRET}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+    expiration-ms: ${JWT_EXPIRATION_MS:900000}
 
   ml-service:
     url: ${ML_SERVICE_URL:http://127.0.0.1:8000}

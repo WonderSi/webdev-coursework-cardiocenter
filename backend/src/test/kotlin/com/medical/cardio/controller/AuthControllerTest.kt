@@ -7,6 +7,9 @@ import com.medical.cardio.support.ControllerTestBase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -50,6 +53,25 @@ class AuthControllerTest : ControllerTestBase() {
             jsonPath("$.role") { value("ROLE_DOCTOR") }
             header { exists("Set-Cookie") }
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun `login issues fifteen minute access token regardless of rememberMe`(rememberMe: Boolean) {
+        val response = mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2000","rememberMe":$rememberMe}"""
+        }.andExpect {
+            status { isOk() }
+        }.andReturn().response
+
+        val accessCookie = requireNotNull(response.getHeader("Set-Cookie"))
+        val accessToken = accessCookie.substringAfter("access_token=").substringBefore(";")
+        val lifetimeMs = jwtService.extractClaim(accessToken) { claims ->
+            claims.expiration.time - claims.issuedAt.time
+        }
+
+        assertEquals(900_000L, lifetimeMs)
     }
 
     @Test
