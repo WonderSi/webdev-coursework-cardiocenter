@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.medical.cardio.config.OpenApiConfig
 import com.medical.cardio.config.ProblemOpenApiConfig
 import com.medical.cardio.repository.GlossaryRepository
-import com.medical.cardio.security.AdminUserDetailsService
-import com.medical.cardio.security.JwtService
+import com.medical.cardio.security.AuthCookieService
 import com.medical.cardio.service.*
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
@@ -18,7 +17,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.context.annotation.Import
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.junit.jupiter.api.Assertions.*
@@ -58,9 +56,8 @@ class OpenApiDocumentationTest {
     @MockitoBean lateinit var retrainService: RetrainService
     @MockitoBean lateinit var surveyService: SurveyService
     @MockitoBean lateinit var glossaryRepository: GlossaryRepository
-    @MockitoBean lateinit var authenticationManager: AuthenticationManager
-    @MockitoBean lateinit var jwtService: JwtService
-    @MockitoBean lateinit var userDetailsService: AdminUserDetailsService
+    @MockitoBean lateinit var authService: AuthService
+    @MockitoBean lateinit var authCookieService: AuthCookieService
 
     @Autowired lateinit var mockMvc: MockMvc
     @Autowired
@@ -97,6 +94,10 @@ class OpenApiDocumentationTest {
         assertEquals("#/components/responses/Unauthorized",
             paths.path("/api/auth/login").path("post").at("/responses/401/\$ref").asText())
         assertFalse(paths.path("/api/auth/me").path("get").has("requestBody"))
+        val login = paths.path("/api/auth/login").path("post")
+        assertTrue(login.path("description").asText().contains("refresh_token"))
+        val loginResponse = document.at("/components/schemas/LoginResponse/properties")
+        assertEquals(setOf("email", "role"), loginResponse.fieldNames().asSequence().toSet())
         assertEquals("binary", paths.path("/api/admin/upload/template").path("get")
             .at("/responses/200/content/application~1octet-stream/schema/format").asText())
     }

@@ -2,8 +2,8 @@ package com.medical.cardio.controller
 
 import com.medical.cardio.dto.LoginRequest
 import com.medical.cardio.dto.LoginResponse
-import com.medical.cardio.security.AdminUserDetailsService
-import com.medical.cardio.security.JwtService
+import com.medical.cardio.security.AuthCookieService
+import com.medical.cardio.service.AuthService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.headers.Header
@@ -15,10 +15,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.DisabledException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.http.HttpHeaders
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,28 +24,27 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "Авторизация", description = "Вход и выход через HttpOnly cookie access_token. Для Swagger UI сначала выполните login на том же адресе Backend.")
+@Tag(name = "Авторизация", description = "Вход выдаёт HttpOnly cookie access_token и refresh_token. Для Swagger UI сначала выполните login на том же адресе Backend.")
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
-    private val authenticationManager: AuthenticationManager,
-    private val jwtService: JwtService,
-    private val adminUserDetailsService: AdminUserDetailsService
+    private val authService: AuthService,
+    private val authCookieService: AuthCookieService
 ) {
 
     @Operation(
         summary = "Войти в систему",
-        description = "При успехе браузер сохраняет access_token (HttpOnly, SameSite=Strict, Path=/). rememberMe сохраняет cookie на 30 дней, но не продлевает срок самого JWT. Неверные данные и блокировка дают одинаковый 401."
+        description = "Выдаёт access_token (Path=/) и refresh_token (Path=/api/auth): HttpOnly, SameSite=Strict, Secure в production. Без rememberMe cookie сессионные, refresh действует по умолчанию 1 день. С rememberMe cookie постоянные: access по умолчанию 15 минут, refresh 30 дней. Сроки настраиваются. Тело ответа содержит email и роль. Неверные данные и блокировка дают одинаковый 401. Обновление access через refresh будет добавлено отдельным этапом."
     )
     @ApiResponses(value = [
         ApiResponse(
             responseCode = "200",
-            description = "Вход выполнен; cookie передаётся в Set-Cookie",
+            description = "Вход выполнен; две cookie передаются отдельными заголовками Set-Cookie",
             useReturnTypeSchema = true,
             headers = [
                 Header(
                     name = "Set-Cookie",
-                    description = "HttpOnly cookie access_token",
+                    description = "Отдельные Set-Cookie для access_token и refresh_token",
                     schema = Schema(type = "string")
                 )
             ]
@@ -58,24 +54,13 @@ class AuthController(
     ])
     @PostMapping("/login")
     fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> {
-        authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(request.email, request.password)
-        )
-        val userDetails = adminUserDetailsService.loadUserByUsername(request.email)
-        val token = jwtService.generateToken(userDetails)
-        val cookieValue = buildString {
-            append("access_token=$token; HttpOnly; Path=/; SameSite=Strict")
-            if (request.rememberMe) append("; Max-Age=2592000")
-        }
+        val result = authService.login(request)
+        val accessCookie = authCookieService.accessToken(result.accessToken, request.rememberMe)
+        val refreshCookie = authCookieService.refreshToken(result.refreshToken.rawToken, request.rememberMe)
 
         return ResponseEntity.ok()
-            .header("Set-Cookie", cookieValue)
-            .body(
-                LoginResponse(
-                    email = userDetails.username,
-                    role = userDetails.authorities.first().authority
-                )
-            )
+            .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString())
+            .body(result.user)
     }
 
     @Operation(summary = "Получить текущего пользователя", description = "Возвращает email и роль пользователя из действующей cookie.")
@@ -95,7 +80,7 @@ class AuthController(
 
     @Operation(
         summary = "Выйти из системы",
-        description = "Удаляет cookie access_token через Set-Cookie с Max-Age=0. Серверного отзыва уже выданного JWT нет. Запрос доступен без авторизации."
+        description = "Удаляет access_token и refresh_token через отдельные Set-Cookie с Max-Age=0 и исходными Path. Серверный отзыв refresh относится к F-04 и пока не реализован. Запрос доступен без авторизации."
     )
     @ApiResponses(value = [
         ApiResponse(
@@ -105,7 +90,7 @@ class AuthController(
             headers = [
                 Header(
                     name = "Set-Cookie",
-                    description = "access_token с Max-Age=0",
+                    description = "access_token и refresh_token с Max-Age=0",
                     schema = Schema(type = "string")
                 )
             ]
@@ -115,8 +100,9 @@ class AuthController(
     fun logout(): ResponseEntity<Unit> =
         ResponseEntity.ok()
             .header(
-                "Set-Cookie",
-                "access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict"
+                HttpHeaders.SET_COOKIE,
+                authCookieService.clearAccessToken().toString(),
+                authCookieService.clearRefreshToken().toString()
             )
             .build()
 }

@@ -22,6 +22,14 @@ app:
   jwt:
     secret: dGVzdC1zZWNyZXQta2V5LWZvci1jaS10ZXN0cy1vbmx5LTMyLWJ5dGVz
     expiration-ms: 900000
+
+  refresh-token:
+    expiration-ms: 86400000
+    remember-me-expiration-ms: 2592000000
+
+  auth-cookie:
+    secure: false
+
   ml-service:
     url: http://localhost:8000
 
