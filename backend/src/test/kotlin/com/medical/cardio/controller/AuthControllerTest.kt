@@ -181,7 +181,7 @@ class AuthControllerTest : ControllerTestBase() {
         assertEquals(900L, cookies.getValue("access_token").maxAge)
         assertEquals(2_592_000L, cookies.getValue("refresh_token").maxAge)
         assertCookieAttributes(response, cookies)
-        assertRefreshSession(cookies.getValue("refresh_token").value, Duration.ofDays(30))
+        assertRefreshSession(cookies.getValue("refresh_token").value, Duration.ofDays(30), rememberMe = true)
         assertEquals(sessionCount + 1, refreshTokenRepository.count())
     }
 
@@ -231,13 +231,14 @@ class AuthControllerTest : ControllerTestBase() {
         response.getHeaders("Set-Cookie").forEach { assertTrue(it.contains("SameSite=Strict")) }
     }
 
-    private fun assertRefreshSession(rawToken: String, expectedLifetime: Duration) {
+    private fun assertRefreshSession(rawToken: String, expectedLifetime: Duration, rememberMe: Boolean = false) {
         val hashBytes = MessageDigest.getInstance("SHA-256").digest(rawToken.toByteArray(Charsets.UTF_8))
         val tokenHash = HexFormat.of().formatHex(hashBytes)
         val session = requireNotNull(refreshTokenRepository.findByTokenHash(tokenHash))
         assertEquals(testUser.id, session.creator.id)
         assertNotEquals(rawToken, session.tokenHash)
         assertNull(session.revokedDate)
+        assertEquals(rememberMe, session.rememberMe)
         assertEquals(expectedLifetime, Duration.between(session.createdDate, session.expiresDate))
     }
 }

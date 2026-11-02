@@ -82,7 +82,15 @@ class OpenApiDocumentationTest {
                 assertEquals(protected, operation.path("security").any { it.has("cookieAuth") }, path)
             }
         }
-        assertEquals(14, operationCount)
+        assertEquals(16, operationCount)
+        assertEquals("refresh_token", document.at("/components/securitySchemes/refreshCookieAuth/name").asText())
+        val refresh = paths.path("/api/auth/refresh").path("post")
+        assertTrue(refresh.path("security").any { it.has("refreshCookieAuth") })
+        assertFalse(refresh.has("requestBody"))
+        assertTrue(refresh.path("parameters").any { it.path("name").asText() == "X-XSRF-TOKEN" })
+        assertEquals("#/components/responses/InvalidRefresh", refresh.at("/responses/401/\$ref").asText())
+        assertEquals("#/components/responses/CsrfRejected", refresh.at("/responses/403/\$ref").asText())
+        assertTrue(paths.path("/api/auth/csrf").has("get"))
         val doctors = paths.path("/api/admin/super-admin/doctors")
         val created = doctors.path("post").at("/responses/201/content/application~1json/schema")
         assertEquals("#/components/schemas/DoctorResponse", created.path("\$ref").asText())

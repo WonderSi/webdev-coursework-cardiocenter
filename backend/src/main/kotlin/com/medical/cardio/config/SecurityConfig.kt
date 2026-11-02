@@ -7,6 +7,7 @@ import com.medical.cardio.exception.ApiProblem
 import org.springframework.http.HttpStatus
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.beans.factory.annotation.Value
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
@@ -21,12 +22,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.security.web.csrf.CsrfException
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 
 @Configuration
 class SecurityConfig(
     private val adminUserDetailsService: AdminUserDetailsService,
     private val jwtAuthFilter: JwtAuthFilter,
-    private val problemResponseWriter: ProblemResponseWriter
+    private val problemResponseWriter: ProblemResponseWriter,
+    @Value("\${app.auth-cookie.secure:false}") private val secureCookies: Boolean
 ) {
     // Контейнер для шифрования паролей
     @Bean
@@ -72,17 +77,22 @@ class SecurityConfig(
 
     /*
         Применяем CORS конфигурацию
-        Отключаем CSRF (используем JWT)
+        Защищаем refresh от CSRF, сохраняя существующие маршруты без изменения их контракта
         ...
-        Праила доступа к эндпоинтам
-        Проверка токена из Authorization
+        Правила доступа к эндпоинтам
+        Проверка access_token cookie в JwtAuthFilter
      */
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http
         .cors { it.configurationSource(corsConfigurationSource()) }
-        .csrf { it.disable() }
+        .csrf {
+            it.csrfTokenRepository(csrfTokenRepository())
+            it.requireCsrfProtectionMatcher(AntPathRequestMatcher("/api/auth/refresh", "POST"))
+        }
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .authorizeHttpRequests { auth ->
+            auth.requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+            auth.requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
             auth.requestMatchers(
                 "/api/auth/login",
                 "/api/auth/logout",
@@ -113,8 +123,14 @@ class SecurityConfig(
                 problemResponseWriter.write(request, response, problem)
             }
 
-            it.accessDeniedHandler { request, response, _ ->
-                val problem = ApiProblem.create(
+            it.accessDeniedHandler { request, response, exception ->
+                val problem = if (exception is CsrfException) ApiProblem.create(
+                    status = HttpStatus.FORBIDDEN,
+                    type = "urn:cardiocenter:problem:csrf",
+                    title = "Запрос отклонён",
+                    detail = "Получите защитный токен через /api/auth/csrf и повторите запрос.",
+                    code = ApiProblem.CSRF_TOKEN_INVALID
+                ) else ApiProblem.create(
                     status = HttpStatus.FORBIDDEN,
                     type = "urn:cardiocenter:problem:forbidden",
                     title = "Доступ запрещён",
@@ -127,4 +143,12 @@ class SecurityConfig(
         }
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
         .build()
+
+    @Bean
+    fun csrfTokenRepository(): CookieCsrfTokenRepository = CookieCsrfTokenRepository().apply {
+        cookiePath = "/api/auth"
+        setCookieCustomizer { cookie ->
+            cookie.httpOnly(true).secure(secureCookies).sameSite("Strict")
+        }
+    }
 }

@@ -4,6 +4,8 @@ import com.medical.cardio.config.RefreshTokenConfig
 import com.medical.cardio.dto.LoginRequest
 import com.medical.cardio.dto.LoginResponse
 import com.medical.cardio.dto.LoginResult
+import com.medical.cardio.dto.RefreshResult
+import com.medical.cardio.entity.AdminUserEntity
 import com.medical.cardio.repository.AdminUserRepository
 import com.medical.cardio.security.JwtService
 import org.springframework.security.authentication.AuthenticationManager
@@ -11,6 +13,7 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -32,21 +35,36 @@ class AuthService(
             ?: throw BadCredentialsException("Invalid credentials")
         if (user.isBlocked) throw DisabledException("User is disabled")
 
-        val authority = "ROLE_${user.role}"
-        val userDetails = User.withUsername(user.email)
-            .password(user.passwordHash)
-            .authorities(authority)
-            .build()
-        val accessToken = jwtService.generateToken(userDetails)
+        val accessToken = jwtService.generateToken(userDetails(user))
         val refreshToken = refreshTokenService.issueToken(
             user,
-            refreshTokenConfig.lifetimeFor(request.rememberMe)
+            refreshTokenConfig.lifetimeFor(request.rememberMe),
+            rememberMe = request.rememberMe
         )
 
         return LoginResult(
-            user = LoginResponse(email = user.email, role = authority),
+            user = userResponse(user),
             accessToken = accessToken,
             refreshToken = refreshToken
         )
     }
+
+    @Transactional(readOnly = true)
+    fun refresh(rawRefreshToken: String?): RefreshResult {
+        val session = refreshTokenService.validateToken(rawRefreshToken)
+        val user = session.creator
+        return RefreshResult(
+            user = userResponse(user),
+            accessToken = jwtService.generateToken(userDetails(user)),
+            rememberMe = session.rememberMe
+        )
+    }
+
+    private fun userDetails(user: AdminUserEntity): UserDetails = User.withUsername(user.email)
+        .password(user.passwordHash)
+        .authorities("ROLE_${user.role}")
+        .build()
+
+    private fun userResponse(user: AdminUserEntity): LoginResponse =
+        LoginResponse(email = user.email, role = "ROLE_${user.role}")
 }

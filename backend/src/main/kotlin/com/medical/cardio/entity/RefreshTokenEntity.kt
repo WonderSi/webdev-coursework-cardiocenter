@@ -33,5 +33,8 @@ class RefreshTokenEntity(
     var createdDate: Instant,
 
     @Column(name = "revoked_date")
-    var revokedDate: Instant? = null
+    var revokedDate: Instant? = null,
+
+    @Column(name = "remember_me", nullable = false)
+    val rememberMe: Boolean = false
 )

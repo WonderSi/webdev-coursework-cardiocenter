@@ -73,6 +73,15 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         return ApiProblem.forStatus(HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(InvalidRefreshTokenException::class)
+    fun handleInvalidRefresh(): ProblemDetail {
+        log.warn("Refresh session rejected")
+        return ApiProblem.create(
+            HttpStatus.UNAUTHORIZED, "urn:cardiocenter:problem:invalid-refresh-token",
+            "Сессия недействительна", "Войдите в систему снова.", ApiProblem.REFRESH_TOKEN_INVALID
+        )
+    }
+
     @ExceptionHandler(AuthenticationException::class)
     fun handleLoginFailure(): ProblemDetail {
         log.warn("Login failed")

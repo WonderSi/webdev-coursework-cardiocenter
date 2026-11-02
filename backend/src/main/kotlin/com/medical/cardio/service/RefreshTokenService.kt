@@ -3,6 +3,7 @@ package com.medical.cardio.service
 import com.medical.cardio.dto.IssuedRefreshToken
 import com.medical.cardio.entity.AdminUserEntity
 import com.medical.cardio.entity.RefreshTokenEntity
+import com.medical.cardio.exception.InvalidRefreshTokenException
 import com.medical.cardio.repository.RefreshTokenRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,7 +36,7 @@ class RefreshTokenService(
     }
 
     @Transactional
-    fun issueToken(user: AdminUserEntity, lifetime: Duration): IssuedRefreshToken {
+    fun issueToken(user: AdminUserEntity, lifetime: Duration, rememberMe: Boolean = false): IssuedRefreshToken {
         require(!lifetime.isZero && !lifetime.isNegative) {
             "Refresh token lifetime must be positive"
         }
@@ -49,7 +50,8 @@ class RefreshTokenService(
             creator = user,
             tokenHash = tokenHash,
             createdDate = createdDate,
-            expiresDate = expiresDate
+            expiresDate = expiresDate,
+            rememberMe = rememberMe
         )
 
         refreshTokenRepository.save(refreshSession)
@@ -58,5 +60,17 @@ class RefreshTokenService(
             rawToken = rawToken,
             expiresDate = expiresDate
         )
+    }
+
+    @Transactional(readOnly = true)
+    fun validateToken(rawToken: String?): RefreshTokenEntity {
+        if (rawToken.isNullOrBlank()) throw InvalidRefreshTokenException()
+
+        val session = refreshTokenRepository.findByTokenHash(hashToken(rawToken))
+            ?: throw InvalidRefreshTokenException()
+        if (session.revokedDate != null || !session.expiresDate.isAfter(Instant.now()) || session.creator.isBlocked) {
+            throw InvalidRefreshTokenException()
+        }
+        return session
     }
 }
