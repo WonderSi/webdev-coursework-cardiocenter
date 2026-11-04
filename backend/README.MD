@@ -151,8 +151,8 @@ app:
 
 ## Выдача refresh-сессий — `RefreshTokenService`
 
-`issueToken(user, lifetime)` создаёт случайный refresh token из 32 байт,
-сохраняет его SHA-256-хэш, сотрудника, время создания и истечения в
+`issueToken(user, lifetime, rememberMe)` создаёт случайный refresh token из 32 байт,
+сохраняет его SHA-256-хэш, сотрудника, режим rememberMe, время создания и истечения в
 `refresh_tokens`. Новый токен не отозван: `revoked_date` равен `NULL`.
 Продолжительность `lifetime` должна быть положительной.
 
@@ -160,10 +160,71 @@ app:
 последующей установки cookie. Вызов выполняется в транзакции. Для поиска сессии
 используется `RefreshTokenRepository.findByTokenHash`.
 
-На этом этапе сервис ещё не подключён к `/api/auth/login`. Endpoint обновления
-доступа и отзыв refresh при выходе будут добавлены отдельно. Срок refresh и
-его зависимость от `rememberMe` пока не заданы: сервис принимает продолжительность
-как параметр.
+`AuthService.login` проверяет credentials и актуальное состояние сотрудника,
+выдаёт access и вызывает `issueToken` в одной транзакции. Контроллер возвращает
+email и роль в JSON, токены передаются двумя отдельными заголовками `Set-Cookie`.
+
+| Cookie | Path | Без `rememberMe` | С `rememberMe` |
+|---|---|---|---|
+| `access_token` | `/` | Сессионная, JWT действует 15 минут | Постоянная на 15 минут |
+| `refresh_token` | `/api/auth` | Сессионная, запись в БД действует 1 день | Постоянная на 30 дней |
+
+У обеих cookie установлены `HttpOnly` и `SameSite=Strict`. `AuthCookieService`
+использует `app.auth-cookie.secure`: в `prod` это `true`, в `dev` и при
+локальном HTTP-запуске с профилями `prod,local` — `false`.
+
+Сроки refresh задаются настройками `app.refresh-token.expiration-ms` и
+`app.refresh-token.remember-me-expiration-ms`; в основном конфиге их можно
+переопределить через `REFRESH_TOKEN_EXPIRATION_MS` и
+`REFRESH_TOKEN_REMEMBER_ME_EXPIRATION_MS`. Значения должны быть положительными,
+а срок с запоминанием — не короче обычного. `RefreshTokenConfig.lifetimeFor`
+возвращает выбранную продолжительность как `Duration`.
+
+При неверных credentials или блокировке новые refresh-сессии и cookie не выдаются.
+`POST /api/auth/logout` удаляет обе cookie с исходными Path и флагами.
+Серверный отзыв refresh при выходе (F-04) будет добавлен отдельным этапом.
+
+### Обновление access через refresh cookie
+
+1. Выполнить `GET /api/auth/csrf` с передачей cookie. Ответ содержит `headerName`
+   и `token`; браузер сохраняет HttpOnly cookie `XSRF-TOKEN` с Path=/api/auth.
+   Ответ имеет `Cache-Control: no-store`.
+2. Выполнить `POST /api/auth/refresh` с cookie и заголовком, указанным в
+   `headerName`, передав в него значение `token` из JSON. JavaScript не должен
+   читать HttpOnly cookie — нужное значение уже есть в ответе bootstrap-маршрута.
+3. При успехе получить `200`, текущие email и роль в JSON и новую access cookie.
+   Действующий access для этого не требуется: отсутствующий, истёкший или
+   недействительный access не мешает проверке refresh.
+
+```javascript
+const csrfResponse = await fetch('/api/auth/csrf', { credentials: 'include' });
+const csrf = await csrfResponse.json();
+const response = await fetch('/api/auth/refresh', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { [csrf.headerName]: csrf.token },
+});
+// 200: повторить исходный запрос. 401: предложить вход.
+// 403 с CSRF_TOKEN_INVALID: получить новый CSRF-токен и повторить обновление.
+```
+
+`RefreshTokenService.validateToken` проверяет хэш, срок, отсутствие отзыва и
+блокировки сотрудника. Недопустимый refresh даёт `401 application/problem+json`
+с кодом `REFRESH_TOKEN_INVALID`. Отсутствующий или неверный CSRF даёт `403`
+с кодом `CSRF_TOKEN_INVALID`, до проверки refresh. Cookie и роли формируются
+из серверного состояния, токены в JSON не возвращаются.
+
+Refresh token при обновлении не заменяется, новые сессии не создаются, исходный
+срок в БД и refresh cookie не продлеваются. Миграция V7 сохраняет режим
+`remember_me`, чтобы новая access cookie оставалась сессионной либо постоянной
+согласно исходному входу. Для записей, существовавших до V7, флаг по умолчанию
+равен `false`; новый вход сохраняет выбранный режим явно.
+
+Для этого маршрута настроен [CSRF-механизм Spring Security](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html)
+с `CookieCsrfTokenRepository` и стандартной маскировкой токена. HttpSession
+не используется. CSRF-политика остальных изменяющих маршрутов остаётся отдельным
+решением архитектуры перед внешним запуском; их текущий контракт этим этапом
+не меняется.
 
 ---
 
@@ -175,6 +236,11 @@ app:
 |---|---|
 | `V1__init.sql` | Создание таблиц: `glossaries`, `glossary_values`, `admin_users`, `patients`, `diagnoses` |
 | `V2__seed_glossaries.sql` | Заполнение справочников начальными данными |
+| `V3__rename_username_to_email.sql` | Переименование логина в email |
+| `V4__replace_doctor_extended_with_super_admin.sql` | Роль SUPER_ADMIN |
+| `V5__add_admin_user_blocked.sql` | Блокировка сотрудника |
+| `V6__create_refresh_tokens.sql` | Хранение refresh-сессий и хэшей токенов |
+| `V7__add_refresh_token_remember_me.sql` | Сохранение режима rememberMe для обновления access cookie |
 
 ### Данные справочников (V2)
 
