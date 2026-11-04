@@ -2,24 +2,23 @@ package com.medical.cardio.exception
 
 import com.medical.cardio.config.SecurityConfig
 import com.medical.cardio.controller.AuthController
+import com.medical.cardio.dto.LoginRequest
 import com.medical.cardio.security.AdminUserDetailsService
 import com.medical.cardio.security.JwtAuthFilter
 import com.medical.cardio.security.JwtService
 import com.medical.cardio.security.ProblemResponseWriter
+import com.medical.cardio.security.AuthCookieService
+import com.medical.cardio.service.AuthService
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito.any
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.DisabledException
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.User
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
@@ -28,6 +27,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException
 @WebMvcTest(AuthController::class)
 @Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
 class GlobalExceptionHandlerTest {
+
+    private val loginRequest = LoginRequest(email = "test@test.com", password = "password")
 
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -41,15 +42,16 @@ class GlobalExceptionHandlerTest {
     @MockitoBean
     lateinit var authenticationManager: AuthenticationManager
 
+    @MockitoBean
+    lateinit var authService: AuthService
+
+    @MockitoBean
+    lateinit var authCookieService: AuthCookieService
+
     @Test
     fun `IllegalArgumentException returns generic message without internal details`() {
         val internalMessage = "JDBC URL: jdbc:postgresql://internal-host:5432/secret_db"
-        val userDetails = User("test@test.com", "", listOf(SimpleGrantedAuthority("ROLE_DOCTOR")))
-
-        given(authenticationManager.authenticate(any()))
-            .willReturn(UsernamePasswordAuthenticationToken("test@test.com", "password", emptyList()))
-        given(adminUserDetailsService.loadUserByUsername("test@test.com")).willReturn(userDetails)
-        given(jwtService.generateToken(userDetails))
+        given(authService.login(loginRequest))
             .willThrow(IllegalArgumentException(internalMessage))
 
         mockMvc.post("/api/auth/login") {
@@ -103,12 +105,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     fun `file too large returns problem details`() {
-        val userDetails = User("test@test.com", "", listOf(SimpleGrantedAuthority("ROLE_DOCTOR")))
-
-        given(authenticationManager.authenticate(any()))
-            .willReturn(UsernamePasswordAuthenticationToken("test@test.com", "password", emptyList()))
-        given(adminUserDetailsService.loadUserByUsername("test@test.com")).willReturn(userDetails)
-        given(jwtService.generateToken(userDetails))
+        given(authService.login(loginRequest))
             .willThrow(MaxUploadSizeExceededException(10L * 1024 * 1024)) // 10 MB
 
         mockMvc.post("/api/auth/login") {
@@ -133,12 +130,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     fun `not found returns problem details without internal details`() {
-        val userDetails = User("test@test.com", "", listOf(SimpleGrantedAuthority("ROLE_DOCTOR")))
-
-        given(authenticationManager.authenticate(any()))
-            .willReturn(UsernamePasswordAuthenticationToken("test@test.com", "password", emptyList()))
-        given(adminUserDetailsService.loadUserByUsername("test@test.com")).willReturn(userDetails)
-        given(jwtService.generateToken(userDetails))
+        given(authService.login(loginRequest))
             .willThrow(NoSuchElementException("Resource missing on internal-host"))
 
         mockMvc.post("/api/auth/login") {
@@ -166,7 +158,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     fun `invalid credentials return problem details`() {
-        given(authenticationManager.authenticate(any()))
+        given(authService.login(loginRequest))
             .willThrow(BadCredentialsException("Internal authentication details"))
 
         mockMvc.post("/api/auth/login") {
@@ -195,7 +187,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     fun `disabled account returns problem details`() {
-        given(authenticationManager.authenticate(any()))
+        given(authService.login(loginRequest))
             .willThrow(DisabledException("Account is disabled"))
 
         mockMvc.post("/api/auth/login") {
@@ -219,6 +211,22 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.code") { value("UNAUTHORIZED") }
             jsonPath("$.errors") { doesNotExist() }
             header { doesNotExist("Set-Cookie") }
+        }
+    }
+    @Test
+    fun `login failure returns safe problem without authentication cookies`() {
+        given(authService.login(loginRequest))
+            .willThrow(IllegalStateException("Database unavailable at internal-host"))
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"test@test.com","password":"password"}"""
+        }.andExpect {
+            status { isInternalServerError() }
+            content { contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON) }
+            header { doesNotExist("Set-Cookie") }
+            jsonPath("$.status") { value(500) }
+            content { string(Matchers.not(Matchers.containsString("internal-host"))) }
         }
     }
 }

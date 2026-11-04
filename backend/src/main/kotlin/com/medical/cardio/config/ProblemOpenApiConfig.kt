@@ -39,6 +39,8 @@ class ProblemOpenApiConfig {
             Definition(400, "BadRequest", "Некорректный запрос или ошибки валидации", "bad-request", "Некорректный запрос", "Некорректный запрос.", "BAD_REQUEST"),
             Definition(401, "Unauthorized", "Требуется вход: cookie отсутствует, JWT истёк/недействителен либо вход отклонён", "authentication", "Требуется авторизация", "Войдите в систему для выполнения запроса.", "UNAUTHORIZED"),
             Definition(403, "Forbidden", "Недостаточно прав", "forbidden", "Доступ запрещён", "Недостаточно прав для выполнения запроса.", "FORBIDDEN"),
+            Definition(401, "InvalidRefresh", "Refresh-сессия недействительна", "invalid-refresh-token", "Сессия недействительна", "Войдите в систему снова.", "REFRESH_TOKEN_INVALID"),
+            Definition(403, "CsrfRejected", "CSRF-токен отсутствует или недействителен", "csrf", "Запрос отклонён", "Получите защитный токен через /api/auth/csrf и повторите запрос.", "CSRF_TOKEN_INVALID"),
             Definition(404, "NotFound", "Ресурс не найден", "not-found", "Ресурс не найден", "Запрашиваемый ресурс не найден.", "NOT_FOUND"),
             Definition(405, "MethodNotAllowed", "HTTP-метод не поддерживается", "method-not-allowed", "Метод не поддерживается", "HTTP-метод не поддерживается для этого ресурса.", "METHOD_NOT_ALLOWED"),
             Definition(406, "NotAcceptable", "Формат ответа не поддерживается", "not-acceptable", "Формат ответа не поддерживается", "Запрошенный формат ответа не поддерживается.", "NOT_ACCEPTABLE"),
@@ -58,7 +60,7 @@ class ProblemOpenApiConfig {
                     "errors" to listOf(mapOf("field" to "age", "message" to "must be greater than or equal to 18"))
                 )))
             }
-            if (definition.status == 401) {
+            if (definition.name == "Unauthorized") {
                 media.addExamples("loginFailed", Example().value(mapOf(
                     "type" to "urn:cardiocenter:problem:authentication", "title" to "Ошибка входа",
                     "status" to 401, "detail" to "Не удалось войти. Проверьте email и пароль.",
@@ -106,7 +108,9 @@ class ProblemOpenApiConfig {
     ) {
         fun example(): Map<String, Any> = mapOf(
             "type" to "urn:cardiocenter:problem:$type", "title" to title,
-            "status" to status, "detail" to detail, "instance" to "/api/survey/submit", "code" to code
+            "status" to status, "detail" to detail,
+            "instance" to if (name == "InvalidRefresh" || name == "CsrfRejected") "/api/auth/refresh" else "/api/survey/submit",
+            "code" to code
         )
     }
 }

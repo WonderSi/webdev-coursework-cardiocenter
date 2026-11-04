@@ -14,7 +14,7 @@ data class LoginRequest(
     @field:Schema(description = "Пароль сотрудника", example = "ExamplePassword123!", format = "password", accessMode = Schema.AccessMode.WRITE_ONLY)
     val password: String,
 
-    @field:Schema(description = "Сохранить cookie на 30 дней; срок JWT не меняется", example = "false")
+    @field:Schema(description = "Запомнить вход: постоянные cookie, refresh по умолчанию на 30 дней. Без запоминания cookie сессионные, refresh на 1 день. Срок access не зависит от rememberMe.", example = "false")
     val rememberMe: Boolean = false
 )
 

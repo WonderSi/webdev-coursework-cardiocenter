@@ -41,6 +41,14 @@ class OpenApiConfig {
                     **403** — у вашей роли нет доступа к операции.
 
                     Для выхода выполните **POST /api/auth/logout**.
+
+                    **Обновление доступа**
+
+                    Получите **GET /api/auth/csrf**. Браузер сохранит XSRF-TOKEN cookie;
+                    передайте поле token из JSON в заголовке headerName при
+                    **POST /api/auth/refresh**. Refresh cookie передаётся браузером автоматически.
+                    Ответ обновляет access cookie и возвращает текущие email и роль.
+                    Если refresh больше недействителен, войдите снова.
                     """.trimIndent()
                 )
         )
@@ -55,6 +63,13 @@ class OpenApiConfig {
                         "Сначала выполните POST /api/auth/login. Браузер сохранит cookie " +
                             "и будет отправлять её автоматически. Вручную вводить токен не нужно."
                     )
+            ).addSecuritySchemes(
+                "refreshCookieAuth",
+                SecurityScheme()
+                    .type(SecurityScheme.Type.APIKEY)
+                    .`in`(SecurityScheme.In.COOKIE)
+                    .name("refresh_token")
+                    .description("Refresh cookie из login. Для POST /api/auth/refresh также нужен CSRF-токен.")
             )
         )
 }
