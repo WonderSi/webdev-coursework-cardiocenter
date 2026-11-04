@@ -60,6 +60,11 @@ class AuthService(
         )
     }
 
+    @Transactional
+    fun logout(rawRefreshToken: String?) {
+        refreshTokenService.revokeToken(rawRefreshToken)
+    }
+
     private fun userDetails(user: AdminUserEntity): UserDetails = User.withUsername(user.email)
         .password(user.passwordHash)
         .authorities("ROLE_${user.role}")

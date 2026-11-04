@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfException
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
 
 @Configuration
 class SecurityConfig(
@@ -77,7 +78,7 @@ class SecurityConfig(
 
     /*
         Применяем CORS конфигурацию
-        Защищаем refresh от CSRF, сохраняя существующие маршруты без изменения их контракта
+        Защищаем refresh и logout от CSRF
         ...
         Правила доступа к эндпоинтам
         Проверка access_token cookie в JwtAuthFilter
@@ -87,7 +88,10 @@ class SecurityConfig(
         .cors { it.configurationSource(corsConfigurationSource()) }
         .csrf {
             it.csrfTokenRepository(csrfTokenRepository())
-            it.requireCsrfProtectionMatcher(AntPathRequestMatcher("/api/auth/refresh", "POST"))
+            it.requireCsrfProtectionMatcher(OrRequestMatcher(
+                AntPathRequestMatcher("/api/auth/refresh", "POST"),
+                AntPathRequestMatcher("/api/auth/logout", "POST")
+            ))
         }
         .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
         .authorizeHttpRequests { auth ->
