@@ -1,5 +1,6 @@
 package com.medical.cardio.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.medical.cardio.entity.AdminUserEntity
 import com.medical.cardio.entity.Role
 import com.medical.cardio.repository.AdminUserRepository
@@ -18,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.crypto.password.PasswordEncoder
+import jakarta.servlet.http.Cookie
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.mock.web.MockHttpServletResponse
@@ -36,6 +38,9 @@ class AuthControllerTest : ControllerTestBase() {
 
     @Autowired
     private lateinit var refreshTokenRepository: RefreshTokenRepository
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     private lateinit var testUser: AdminUserEntity
 
@@ -142,7 +147,14 @@ class AuthControllerTest : ControllerTestBase() {
 
     @Test
     fun `logout clears both cookies with their original paths`() {
-        val response = mockMvc.post("/api/auth/logout").andExpect {
+        val csrfResponse = mockMvc.get("/api/auth/csrf")
+            .andExpect { status { isOk() } }.andReturn().response
+        val csrfBody = objectMapper.readTree(csrfResponse.contentAsString)
+        val csrfCookie = requireNotNull(csrfResponse.getCookie("XSRF-TOKEN"))
+        val response = mockMvc.post("/api/auth/logout") {
+            cookie(Cookie(csrfCookie.name, csrfCookie.value))
+            header(csrfBody.path("headerName").asText(), csrfBody.path("token").asText())
+        }.andExpect {
             status { isOk() }
         }.andReturn().response
 

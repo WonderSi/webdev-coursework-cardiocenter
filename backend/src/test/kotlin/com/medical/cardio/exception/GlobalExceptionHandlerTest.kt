@@ -1,5 +1,6 @@
 package com.medical.cardio.exception
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.medical.cardio.config.SecurityConfig
 import com.medical.cardio.controller.AuthController
 import com.medical.cardio.dto.LoginRequest
@@ -12,6 +13,7 @@ import com.medical.cardio.service.AuthService
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.willThrow
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
@@ -19,9 +21,11 @@ import org.springframework.http.MediaType
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.DisabledException
+import jakarta.servlet.http.Cookie
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.get
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 
 @WebMvcTest(AuthController::class)
@@ -32,6 +36,9 @@ class GlobalExceptionHandlerTest {
 
     @Autowired
     lateinit var mockMvc: MockMvc
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
     @MockitoBean
     lateinit var jwtService: JwtService
@@ -213,6 +220,28 @@ class GlobalExceptionHandlerTest {
             header { doesNotExist("Set-Cookie") }
         }
     }
+    @Test
+    fun `logout persistence failure returns safe problem without clearing cookies`() {
+        willThrow(IllegalStateException("Database unavailable at internal-host"))
+            .given(authService).logout("refresh-token")
+
+        val csrfResponse = mockMvc.get("/api/auth/csrf")
+            .andExpect { status { isOk() } }.andReturn().response
+        val csrfBody = objectMapper.readTree(csrfResponse.contentAsString)
+        val csrfCookie = requireNotNull(csrfResponse.getCookie("XSRF-TOKEN"))
+
+        mockMvc.post("/api/auth/logout") {
+            cookie(Cookie(csrfCookie.name, csrfCookie.value), Cookie("refresh_token", "refresh-token"))
+            header(csrfBody.path("headerName").asText(), csrfBody.path("token").asText())
+        }.andExpect {
+            status { isInternalServerError() }
+            content { contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON) }
+            header { doesNotExist("Set-Cookie") }
+            jsonPath("$.status") { value(500) }
+            content { string(Matchers.not(Matchers.containsString("internal-host"))) }
+        }
+    }
+
     @Test
     fun `login failure returns safe problem without authentication cookies`() {
         given(authService.login(loginRequest))

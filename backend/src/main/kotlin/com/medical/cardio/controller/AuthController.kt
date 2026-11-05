@@ -70,7 +70,7 @@ class AuthController(
 
     @Operation(
         summary = "Получить CSRF-токен для обновления доступа",
-        description = "Сохраняет HttpOnly cookie XSRF-TOKEN с Path=/api/auth и возвращает token и headerName. Отправляйте token в заголовке headerName вместе с cookie при POST /api/auth/refresh. Не требует действующего access. Ответ запрещено кэшировать."
+        description = "Сохраняет HttpOnly cookie XSRF-TOKEN с Path=/api/auth и возвращает token и headerName. Отправляйте token в заголовке headerName вместе с cookie при POST /api/auth/refresh и POST /api/auth/logout. Не требует действующего access. Ответ запрещено кэшировать."
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "CSRF-токен и имя заголовка", useReturnTypeSchema = true)
@@ -124,7 +124,11 @@ class AuthController(
 
     @Operation(
         summary = "Выйти из системы",
-        description = "Удаляет access_token и refresh_token через отдельные Set-Cookie с Max-Age=0 и исходными Path. Серверный отзыв refresh относится к F-04 и пока не реализован. Запрос доступен без авторизации."
+        description = "Отзывает только refresh из текущей cookie и сохраняет время первого отзыва, затем удаляет access_token и refresh_token с исходными Path и флагами. Повторный выход и отсутствующий, неизвестный или истёкший refresh завершаются успешно. Действующий access не требуется. Нужен CSRF-токен из GET /api/auth/csrf. Другие сессии сотрудника продолжают работать. Копия уже выданного access может действовать до своего истечения.",
+        parameters = [Parameter(
+            name = "X-XSRF-TOKEN", `in` = ParameterIn.HEADER, required = true,
+            description = "Значение token из GET /api/auth/csrf вместе с XSRF-TOKEN cookie"
+        )]
     )
     @ApiResponses(value = [
         ApiResponse(
@@ -138,15 +142,21 @@ class AuthController(
                     schema = Schema(type = "string")
                 )
             ]
-        )
+        ),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/CsrfRejected")
     ])
     @PostMapping("/logout")
-    fun logout(): ResponseEntity<Unit> =
-        ResponseEntity.ok()
+    fun logout(
+        @Parameter(hidden = true) @CookieValue(name = "refresh_token", required = false) rawRefreshToken: String?
+    ): ResponseEntity<Unit> {
+        authService.logout(rawRefreshToken)
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noStore())
             .header(
                 HttpHeaders.SET_COOKIE,
                 authCookieService.clearAccessToken().toString(),
                 authCookieService.clearRefreshToken().toString()
             )
             .build()
+    }
 }

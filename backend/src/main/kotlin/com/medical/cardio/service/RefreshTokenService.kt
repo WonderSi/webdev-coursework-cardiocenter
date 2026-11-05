@@ -73,4 +73,13 @@ class RefreshTokenService(
         }
         return session
     }
+
+    @Transactional
+    fun revokeToken(rawToken: String?) {
+        if (rawToken.isNullOrBlank()) return
+
+        val tokenHash: String = hashToken(rawToken)
+        val revokedDate: Instant = Instant.now()
+        refreshTokenRepository.revokeByTokenHash(tokenHash, revokedDate)
+    }
 }
