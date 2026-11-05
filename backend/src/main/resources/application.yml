@@ -56,6 +56,11 @@ app:
   auth-cookie:
     secure: false
 
+  login-rate-limit:
+    window-ms: ${LOGIN_RATE_LIMIT_WINDOW_MS:60000}
+    max-attempts-per-ip: ${LOGIN_RATE_LIMIT_MAX_ATTEMPTS_PER_IP:20}
+    max-attempts-per-login: ${LOGIN_RATE_LIMIT_MAX_ATTEMPTS_PER_LOGIN:5}
+
   ml-service:
     url: ${ML_SERVICE_URL:http://127.0.0.1:8000}
 
