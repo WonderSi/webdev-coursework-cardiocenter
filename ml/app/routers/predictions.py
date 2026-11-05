@@ -1,27 +1,26 @@
-from fastapi import APIRouter
-from loguru import logger
-
-from app.schemas.predict import DiseasePrediction, PredictResponse, PredictRequest
+from fastapi import APIRouter, HTTPException
 from app.config import settings
-from app.services.predictions import predict_all
+from app.schemas.predict import PredictRequest, PredictResponse
+from app.services.model_registry import ModelsUnavailable
+from app.services.predictions import predict
 
-
-router = APIRouter(prefix="/predictions", tags=["Prediction"])
+router = APIRouter(tags=["Prediction"])
 
 
 @router.post(
     "/predict",
     response_model=PredictResponse,
-    summary="Возвращает вероятности заболеваний",
+    summary="Прогноз выбранной модели city или region",
 )
-async def predict_risk(request: PredictRequest):
-    logger.info("Predict request received")
-    pairs = predict_all(request)
-    predictions = [
-        DiseasePrediction(disease=disease, probability=probability)
-        for disease, probability in pairs
-    ]
-    return PredictResponse(
-        predictions=predictions,
-        model_version=settings.MODEL_VERSION,
-    )
+@router.post(
+    "/predictions/predict",
+    response_model=PredictResponse,
+    summary="Альтернативный путь к /predict",
+)
+def predict_risk(request: PredictRequest):
+    try:
+        return predict(request, settings.MODELS_DIR)
+    except ModelsUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

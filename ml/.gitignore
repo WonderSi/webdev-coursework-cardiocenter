@@ -7,3 +7,16 @@ app/data/*.ipynb
 catboost_info
 *.tmp
 __retrain_tmp_*
+
+# Private patient training data stays local.
+app/data/train_dataset.csv
+
+# Required district ecology references.
+!app/data/ecology/*.csv
+!app/models/versions/*/ecology/*.csv
+app/models/.retrain.lock
+app/models/versions/.training-*/
+app/models/.CURRENT-*
+
+# LibreOffice temporary lock files.
+.~lock.*#

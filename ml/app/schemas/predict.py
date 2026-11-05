@@ -1,6 +1,10 @@
 from enum import IntEnum
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+from app.schemas.profession import Profession
+
+SCHEMA_VERSION = 5
 
 
 class Gender(IntEnum):
@@ -12,40 +16,6 @@ class Alcohol(IntEnum):
     NO = 0
     HAD_CONSUMED_BEFORE = 1
     YES = 2
-
-
-class Profession(IntEnum):
-    """
-    1 = ведение домашнего хозяйства\n
-    2 = вооруженные силы\n
-    3 = лица свободных профессий\n
-    4 = низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд\n
-    5 = операторы и монтажники установок и машинного оборудования\n
-    6 = служащие, сфера обслуживания, работники среднего звена\n
-    7 = никогда не работающие домохозяйки\n
-    8 = дипломированные специалисты, умственный труд\n
-    9 = другое, \n
-    10 = квалифицированные специалисты сельского хозяйства и рыболовного\n
-    11 = пенсионеры\n
-    12 = ремесленники и представители других отраслей промышленности\n
-    13 = техники и младшие специалисты\n
-    14 = представители законодад. органов власти,  высокопосталенные долж. лица, менеджеры и руководители \n
-    """
-
-    HOUSEWIFE_MGMNT = 1
-    ARMED_FORCES = 2
-    FREE_PROFESSIONS = 3
-    UNSKILLED_LABOR = 4
-    OPERATORS_INSTALLERS = 5
-    SERVICE_CLERKS = 6
-    NEVER_WORKED = 7
-    PROFESSIONALS_MENTAL = 8
-    OTHER = 9
-    AGRICULTURE_FISH = 10
-    PENSIONERS = 11
-    CRAFTSMEN_INDUSTRY = 12
-    TECHNICIANS_JUNIOR = 13
-    MANAGERS_OFFICIALS = 14
 
 
 class Region(IntEnum):
@@ -63,131 +33,63 @@ class DiseaseStatus(IntEnum):
 
 
 class PredictRequest(BaseModel):
-    gender: Gender = Field(..., description="Пол")
-    age: int = Field(..., ge=0, le=120, description="Возраст")
-    height: float = Field(..., gt=0, le=250, description="Рост")
-    weight: float = Field(..., gt=0, le=300, description="Вес")
-    hip_measurement: float = Field(..., description="Объем бедер")
+    """One clinical observation; training uploads contain full patient histories."""
+
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    model_kind: Literal["city", "region"]
+    year: Literal[2013, 2017, 2019, 2021] | None = Field(
+        None, description="Период экологии city; для region — null"
+    )
+    gender: Gender
+    age: float = Field(ge=0, le=120)
+    height: float = Field(gt=0, le=250, description="Рост, см")
+    weight: float = Field(gt=0, le=300, description="Вес, кг")
     alcohol: Alcohol = Field(
-        ...,
-        description="Употребление алкоголя: 1 - нет, 2 - употреблял ранее, 3 - да, в настоящее время",
+        description="0 — нет, 1 — употреблял ранее, 2 — употребляет"
     )
     profession: Profession = Field(
-        ...,
-        description=(
-            "Профессия пациента. Основные группы:\n"
-            "1-Домохозяйство; 2-ВС; 3-Свободные проф.; 4-Рабочие;\n"
-            "5-Операторы; 6-Служащие; 7-Домохозяйки (не раб.);\n"
-            "8-Умств. труд; 9-Другое; 10-Сельхоз; 11-Пенсионеры;\n"
-            "12-Ремесленники; 13-Техники; 14-Руководители"
-        ),
+        description="Классификация из 13 категорий; коды и названия: /dataset/schema"
     )
-    region: Region = Field(
-        ...,
-        description=(
-            "Район города или село."
-            "1 - рудничный; 2 - центральный; 3 - заводский;\n"
-            "4 - кировский; 5 - ленинский; 6 - сельская местность"
-        ),
+    region: Region
+    chronic_lung_disease: DiseaseStatus = Field(
+        description="Хронические заболевания легких: 0/1"
     )
-    glucose: float | None = Field(None, description="Уровень глюкозы")
-    cholesterol: float | None = Field(None, description="Уровень холестерина")
-    non_hdl_cholesterol: float | None = Field(
-        None, description="Уровень холестерина не-ЛПВП"
-    )
-    vldl_cholesterol: float | None = Field(
-        None, description="Уровень холестерина ЛПОНП"
-    )
-    hdl_cholesterol: float | None = Field(None, description="Уровень холестерина ЛПВП")
-    ldl_cholesterol: float | None = Field(None, description="Уровень холестерина ЛПНП")
-    apolipoprotein_a: float | None = Field(
-        None, description="Уровень аполипопротеина А"
-    )
-    apolipoprotein_b: float | None = Field(
-        None, description="Уровень аполипопротеина В"
-    )
-    triglycerides: float | None = Field(None, description="Уровень триглицеридов")
-    stroke: DiseaseStatus | None = Field(
-        None, description="Диагностировался ли раньше инсульт: 1 - да, 0 - нет"
-    )
-    stroke_year: int | None = Field(
-        None,
-        ge=1950,
-        description="Год диагностирования инсульта",
-    )
-    heart_failure: DiseaseStatus | None = Field(
-        None,
-        description="Диагностировалась ли сердечная недостаточность: 1 - да, 0 - нет",
-    )
-    heart_failure_year: int | None = Field(
-        None,
-        ge=1950,
-        description="Год диагностирования сердечной недостаточности",
-    )
-    cad_chd_ihd: DiseaseStatus | None = Field(
-        None,
-        description="Диагностировалось ли нарушение ритма или другие ишемические болезни сердца (ИБС): 1 - да, 0 - нет",
-    )
-    cad_chd_ihd_year: int | None = Field(
-        None,
-        ge=1950,
-        description="Год диагностирования нарушения ритма или других ИБС",
-    )
-    angine: DiseaseStatus | None = Field(
-        None, description="Диагностировалось ли стенокардия: 1 - да, 0 - нет"
-    )
-    angine_year: int | None = Field(
-        None,
-        ge=1950,
-        description="Год диагностирования стенокардии",
-    )
-    myocardial_infarction: DiseaseStatus | None = Field(
-        None, description="Диагностировался ли инфаркт миокарда 1 - да, 0 - нет"
-    )
-    myocardial_infarction_year: int | None = Field(
-        None,
-        ge=1950,
-        description="Год диагностирования инфаркта миокарда",
-    )
-    arterial_hypertension: DiseaseStatus | None = Field(
-        None,
-        description="Диагностировалась ли артериальная гипертензия (АГ) 1 - да, 0 - нет",
-    )
-    arterial_hypertension_year: int | None = Field(
-        None,
-        ge=1950,
-        description="Год диагностирования артериальной гипертензии",
-    )
+    glucose: float | None = Field(None, ge=0)
+    cholesterol: float | None = Field(None, ge=0)
+    hdl_cholesterol: float | None = Field(None, ge=0)
+    ldl_cholesterol: float | None = Field(None, ge=0)
+    triglycerides: float | None = Field(None, ge=0)
+    # Retained history fields. These are NOT predictors of the composite label.
+    stroke: DiseaseStatus | None = None
+    stroke_year: int | None = Field(None, ge=1900, le=2100)
+    heart_failure: DiseaseStatus | None = None
+    heart_failure_year: int | None = Field(None, ge=1900, le=2100)
+    cad_chd_ihd: DiseaseStatus | None = None
+    cad_chd_ihd_year: int | None = Field(None, ge=1900, le=2100)
+    angine: DiseaseStatus | None = None
+    angine_year: int | None = Field(None, ge=1900, le=2100)
+    myocardial_infarction: DiseaseStatus | None = None
+    myocardial_infarction_year: int | None = Field(None, ge=1900, le=2100)
+    arterial_hypertension: DiseaseStatus | None = None
+    arterial_hypertension_year: int | None = Field(None, ge=1900, le=2100)
+
+    @model_validator(mode="after")
+    def validate_period(self):
+        if self.model_kind == "city" and self.year is None:
+            raise ValueError("Для city нужен year: 2013, 2017, 2019 или 2021")
+        if self.model_kind == "region" and self.year is not None:
+            raise ValueError(
+                "Для region year должен быть null: экология усреднена за 2009–2020"
+            )
+        return self
 
 
 class DiseasePrediction(BaseModel):
-    disease: str = Field(
-        description="Код болезни/модели (например: general, ah, stroke)"
-    )
-    probability: float = Field(
-        ge=0.0, le=1.0, description="Вероятность наличия заболевания (0..1)"
-    )
+    disease: Literal["city", "region"]
+    probability: float = Field(ge=0, le=1)
+    prediction: int
 
 
 class PredictResponse(BaseModel):
-    predictions: list[DiseasePrediction] = Field(description="Список предсказаний")
-    model_version: str = Field(description="Версия модели")
-
-
-class RegionStats(BaseModel):
-    total_cancer_risk: float
-    iza_concentration_f: float
-    non_cancer_risk_ammonia: float
-    non_cancer_risk_particulate_matter: float
-    avg_annual_conc_am_form: float
-    non_cancer_risk_carbon_monoxide: float
-    non_cancer_risk_sulfur_dioxide: float
-    pdk_excess_nitrogen_oxide_pct: float
-    non_cancer_risk_formaldehyde: float
-    non_cancer_risk_hydrochloride: float
-    non_cancer_risk_aniline: float
-    non_cancer_risk_carbon_soot: float
-    non_cancer_risk_benzopyrene: float
-    cardiac_concentration_f: float
-    non_cancer_risk_phenol: float
-    non_cancer_risk_nitrogen_dioxide: float
+    predictions: list[DiseasePrediction]
+    model_version: str
