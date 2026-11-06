@@ -12,6 +12,8 @@ import com.medical.cardio.security.AuthCookieService
 import com.medical.cardio.service.AuthService
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.willThrow
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.get
 import org.springframework.web.multipart.MaxUploadSizeExceededException
+import org.springframework.http.HttpHeaders
 
 @WebMvcTest(AuthController::class)
 @Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
@@ -54,6 +57,44 @@ class GlobalExceptionHandlerTest {
 
     @MockitoBean
     lateinit var authCookieService: AuthCookieService
+
+    @ParameterizedTest
+    @ValueSource(longs = [1, 30, 120])
+    fun `login rate limit returns problem details with retry delay`(
+        retryAfterSeconds: Long,
+    ) {
+        given(authService.login(loginRequest))
+            .willThrow(LoginRateLimitExceededException(retryAfterSeconds))
+
+        mockMvc.post("/api/auth/login") {
+            header(HttpHeaders.ORIGIN, "http://localhost:5173")
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(loginRequest)
+        }.andExpect {
+            status { isTooManyRequests() }
+
+            header {
+                string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173")
+                string(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+                string(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.RETRY_AFTER)
+                string(HttpHeaders.RETRY_AFTER, retryAfterSeconds.toString())
+                string(HttpHeaders.CACHE_CONTROL, "no-store")
+                doesNotExist(HttpHeaders.SET_COOKIE)
+            }
+
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+            }
+
+            jsonPath("$.type") { value("urn:cardiocenter:problem:login-rate-limit") }
+            jsonPath("$.title") { value("Слишком много попыток входа")}
+            jsonPath("$.status") { value(429) }
+            jsonPath("$.detail") { value("Повторите попытку позже")}
+            jsonPath("$.instance") { value("/api/auth/login") }
+            jsonPath("$.code") { value("LOGIN_RATE_LIMIT_EXCEEDED") }
+            jsonPath("$.errors") { doesNotExist() }
+        }
+    }
 
     @Test
     fun `IllegalArgumentException returns generic message without internal details`() {

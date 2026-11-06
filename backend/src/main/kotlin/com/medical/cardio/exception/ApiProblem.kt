@@ -23,6 +23,7 @@ object ApiProblem {
     const val NOT_ACCEPTABLE = "NOT_ACCEPTABLE"
     const val UNSUPPORTED_MEDIA_TYPE = "UNSUPPORTED_MEDIA_TYPE"
     const val SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE"
+    const val LOGIN_RATE_LIMIT_EXCEEDED = "LOGIN_RATE_LIMIT_EXCEEDED"
 
     fun forStatus(status: HttpStatusCode): ProblemDetail {
         val (type, title, detail, code) = when (status.value()) {
