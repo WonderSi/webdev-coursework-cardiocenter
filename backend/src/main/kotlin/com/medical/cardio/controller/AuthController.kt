@@ -56,7 +56,8 @@ class AuthController(
         ),
         ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
         ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
-        ApiResponse(responseCode = "429", ref = "#/components/responses/LoginRateLimited")
+        ApiResponse(responseCode = "429", ref = "#/components/responses/LoginRateLimited"),
+        ApiResponse(responseCode = "503", ref = "#/components/responses/ServiceUnavailable")
     ])
     @PostMapping("/login")
     fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> {

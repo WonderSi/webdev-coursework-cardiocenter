@@ -103,6 +103,17 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
             .body(problem)
     }
 
+    @ExceptionHandler(LoginRateLimitUnavailableException::class)
+    fun handleLoginRateLimitUnavailable(
+        ex: LoginRateLimitUnavailableException,
+    ): ResponseEntity<ProblemDetail> {
+        log.error("Login rate limit check is unavailable", ex)
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .cacheControl(CacheControl.noStore())
+            .body(ApiProblem.forStatus(HttpStatus.SERVICE_UNAVAILABLE))
+    }
+
     @ExceptionHandler(AuthenticationException::class)
     fun handleLoginFailure(): ProblemDetail {
         log.warn("Login failed")

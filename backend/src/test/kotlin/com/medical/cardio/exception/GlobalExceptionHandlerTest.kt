@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.get
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.http.HttpHeaders
+import org.springframework.data.redis.RedisConnectionFailureException
 
 @WebMvcTest(AuthController::class)
 @Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
@@ -92,6 +93,40 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.detail") { value("Повторите попытку позже")}
             jsonPath("$.instance") { value("/api/auth/login") }
             jsonPath("$.code") { value("LOGIN_RATE_LIMIT_EXCEEDED") }
+            jsonPath("$.errors") { doesNotExist() }
+        }
+    }
+
+    @Test
+    fun `unavailable rate limiter returns safe service unavailable without authentication cookies`() {
+        given(authService.login(loginRequest)).willThrow(
+            LoginRateLimitUnavailableException(
+                RedisConnectionFailureException("Cannot connect to internal-redis:6379")
+            )
+        )
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(loginRequest)
+        }.andExpect {
+            status { isServiceUnavailable() }
+            header {
+                string(HttpHeaders.CACHE_CONTROL, "no-store")
+                doesNotExist(HttpHeaders.SET_COOKIE)
+                doesNotExist(HttpHeaders.RETRY_AFTER)
+            }
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+                string(Matchers.not(Matchers.containsString("internal-redis")))
+                string(Matchers.not(Matchers.containsString("RedisConnectionFailureException")))
+                string(Matchers.not(Matchers.containsString("Login rate limit check is unavailable")))
+            }
+            jsonPath("$.type") { value("urn:cardiocenter:problem:service-unavailable") }
+            jsonPath("$.title") { value("Сервис временно недоступен") }
+            jsonPath("$.status") { value(503) }
+            jsonPath("$.detail") { value("Сервис временно не может выполнить запрос.") }
+            jsonPath("$.instance") { value("/api/auth/login") }
+            jsonPath("$.code") { value("SERVICE_UNAVAILABLE") }
             jsonPath("$.errors") { doesNotExist() }
         }
     }

@@ -152,6 +152,37 @@ class OpenApiDocumentationTest {
     }
 
     @Test
+    fun `login documents unavailable rate limit checks with the shared service unavailable contract`() {
+        val result = mockMvc.get("/v3/api-docs").andExpect { status { isOk() } }.andReturn()
+        val document = objectMapper.readTree(result.response.contentAsString)
+        val responseRef = document.path("paths").path("/api/auth/login").path("post")
+            .at("/responses/503/\$ref").asText()
+        assertEquals("#/components/responses/ServiceUnavailable", responseRef)
+
+        val response = document.at(responseRef.removePrefix("#"))
+        assertEquals("no-store", response.at("/headers/Cache-Control/schema/example").asText())
+        assertFalse(response.path("headers").has("Retry-After"))
+        val media = response.path("content").path("application/problem+json")
+        assertEquals("#/components/schemas/ApiProblem", media.at("/schema/\$ref").asText())
+        val example = media.at("/examples/problem/value")
+        assertEquals(503, example.path("status").asInt())
+        assertEquals("urn:cardiocenter:problem:service-unavailable", example.path("type").asText())
+        assertEquals("Сервис временно недоступен", example.path("title").asText())
+        assertEquals("Сервис временно не может выполнить запрос.", example.path("detail").asText())
+        assertEquals("SERVICE_UNAVAILABLE", example.path("code").asText())
+        assertEquals("/api/auth/login", example.path("instance").asText())
+        assertFalse(example.has("errors"))
+
+        document.path("paths").fields().forEachRemaining { (path, methods) ->
+            methods.fields().forEachRemaining { (method, operation) ->
+                if (path != "/api/auth/login" || method != "post") {
+                    assertFalse(operation.path("responses").has("503"), "$method $path")
+                }
+            }
+        }
+    }
+
+    @Test
     fun `all documented errors use the shared problem contract`() {
         val result = mockMvc.get("/v3/api-docs").andExpect { status { isOk() } }.andReturn()
         val document = objectMapper.readTree(result.response.contentAsString)

@@ -57,7 +57,8 @@ class ProblemOpenApiConfig {
                 code = "LOGIN_RATE_LIMIT_EXCEEDED",
             ),
             Definition(500, "InternalServerError", "Непредвиденная ошибка; технические сведения доступны только в серверных логах", "internal-server-error", "Внутренняя ошибка сервера", "Не удалось выполнить запрос. Попробуйте позже.", "INTERNAL_SERVER_ERROR"),
-            Definition(502, "MlServiceError", "Ошибка ML: сетевой сбой, таймаут, HTTP-ошибка, некорректный или пустой ответ", "ml-service", "Ошибка ML-сервиса", "Не удалось выполнить операцию ML-сервиса.", "ML_SERVICE_ERROR")
+            Definition(502, "MlServiceError", "Ошибка ML: сетевой сбой, таймаут, HTTP-ошибка, некорректный или пустой ответ", "ml-service", "Ошибка ML-сервиса", "Не удалось выполнить операцию ML-сервиса.", "ML_SERVICE_ERROR"),
+            Definition(503, "ServiceUnavailable", "Проверка лимитов временно недоступна; вход отклонён", "service-unavailable", "Сервис временно недоступен", "Сервис временно не может выполнить запрос.", "SERVICE_UNAVAILABLE")
         )
         definitions.forEach { definition ->
             val media = MediaType().schema(Schema<Any>().`$ref`("#/components/schemas/ApiProblem"))
@@ -92,6 +93,8 @@ class ProblemOpenApiConfig {
                     .description("Время ожидания перед повторной попыткой входа, в секундах")
                     .schema(IntegerSchema().format("int64")
                         .minimum(java.math.BigDecimal.ONE).example(30)))
+            }
+            if (definition.name == "LoginRateLimited" || definition.name == "ServiceUnavailable") {
                 response.addHeaderObject("Cache-Control", Header()
                     .description("Запрещает сохранять ответ об ограничении входа в кэше")
                     .schema(StringSchema().example("no-store")))
@@ -131,7 +134,7 @@ class ProblemOpenApiConfig {
             "status" to status, "detail" to detail,
             "instance" to when (name) {
                 "InvalidRefresh", "CsrfRejected" -> "/api/auth/refresh"
-                "LoginRateLimited" -> "/api/auth/login"
+                "LoginRateLimited", "ServiceUnavailable" -> "/api/auth/login"
                 else -> "/api/survey/submit"
             },
             "code" to code
