@@ -290,6 +290,81 @@ refresh не мешает успешной очистке cookie. Истёкша
 - Actuator endpoints: `health`, `metrics`, `info`
 - ML-сервис URL: `${ML_SERVICE_URL:http://localhost:8000}`
 
+### Настройки ограничения входа — F-35
+
+`LoginRateLimitConfig` читает настройки из `app.login-rate-limit`.
+Период и оба лимита должны быть строго положительными; недопустимые значения
+вызывают ошибку при создании конфигурации.
+
+| Переменная окружения | Настройка | По умолчанию |
+|---|---|---|
+| `LOGIN_RATE_LIMIT_WINDOW_MS` | `window-ms` — период подсчёта в миллисекундах | `60000` |
+| `LOGIN_RATE_LIMIT_MAX_ATTEMPTS_PER_IP` | `max-attempts-per-ip` — лимит по IP | `20` |
+| `LOGIN_RATE_LIMIT_MAX_ATTEMPTS_PER_LOGIN` | `max-attempts-per-login` — лимит по введённому логину | `5` |
+
+Переменные описаны в `docker/.env.example` относительно корня репозитория
+и передаются Backend в обоих Docker Compose-файлах. В тестовых конфигурациях
+значения заданы явно. На этом этапе подготовлены настройки, их валидация
+и обработка ошибки превышения лимита. Для счётчика подготовлены Lua-скрипт,
+его конфигурация и `RedisLoginAttemptCounter`: Kotlin-класс вызывает скрипт
+и проверяет полученные количество попыток и остаток времени. Unit-тесты
+проверяют допустимые ответы и отказ при отсутствии результата, неправильном
+размере списка, типах и значениях. Интеграционные тесты проверяют реальные
+вызовы Lua, сохранение срока жизни при повторной попытке, истечение и новый
+отсчёт, независимость ключей и восемь параллельных увеличений без потери попыток.
+Каждый сценарий сам запускает Redis 7 через Docker CLI, использует случайный
+порт на `127.0.0.1` и удаляет контейнер после выполнения. Для запуска нужны
+Docker CLI и работающий Docker.
+
+`LoginRateLimitService.checkLoginAttempt` сначала проверяет счётчик IP,
+затем счётчик email. При превышении лимита IP до счётчика email выполнение
+не доходит. Ключи имеют разные префиксы и SHA-256-представления идентификаторов.
+Для ключа email применяются `trim` и нижний регистр с `Locale.ROOT`;
+исходный email для аутентификации остаётся прежним. Поиска пользователя в БД
+при проверке лимитов нет. Попытка учитывается до сравнения с лимитом;
+точное значение лимита допускается, превышение вызывает отказ.
+Время ожидания округляется вверх до секунд, минимум — одна секунда.
+Счётчик и сервис зарегистрированы в Spring. `AuthController.login` вызывает
+проверку с `httpRequest.remoteAddr` и исходным email до `AuthService.login`:
+при отказе проверка пароля и создание refresh-сессии не выполняются.
+Учитываются все попытки с прошедшим валидацию телом, включая успешный вход;
+успешный вход не сбрасывает счётчики. Некорректное тело возвращает `400`
+до вызова ограничителя. Cookie выдаются только после успешной аутентификации.
+
+Адрес клиента для ограничения нужно получать через `request.remoteAddr`.
+Tomcat работает с `server.forward-headers-strategy: native` и учитывает
+`X-Real-IP` только от прокси, адрес которого соответствует `TRUSTED_PROXY_REGEX`.
+Production nginx перезаписывает этот заголовок значением `$remote_addr`.
+По умолчанию используется `(?!)`: доверенных прокси нет. Пустая переменная
+также не включает доверие всем адресам благодаря группе вокруг значения
+в `internal-proxies`. До явной настройки за nginx будет виден адрес самого nginx.
+Для production нужно определить его фактический адрес со стороны Backend,
+задать точное регулярное выражение и актуализировать его при смене адреса.
+Произвольные `X-Forwarded-For` и `Forwarded` не определяют IP клиента.
+В локальном Compose используется Vite, который сейчас не выставляет
+`X-Real-IP`; включение доверия к нему требует согласованного перезаписывания
+заголовка на стороне Frontend. При прямом обращении к Backend доверие не нужно.
+
+`LoginRateLimitExceededException` обрабатывается как `429 Too Many Requests`
+с телом `application/problem+json`, кодом `LOGIN_RATE_LIMIT_EXCEEDED`,
+типом `urn:cardiocenter:problem:login-rate-limit` и общим сообщением
+«Повторите попытку позже». Заголовок `Retry-After` содержит время ожидания
+в секундах, а `Cache-Control: no-store` запрещает кэшировать отказ.
+Авторизационные cookie при этом не выдаются. В OpenAPI ответ описан компонентом
+`LoginRateLimited` и указан только для `POST /api/auth/login`.
+
+Ошибки соединения с Redis и таймауты проверки преобразуются в
+`LoginRateLimitUnavailableException`: вход временно отклоняется с `503`,
+кодом `SERVICE_UNAVAILABLE` и `Cache-Control: no-store`. Авторизационные
+cookie не выдаются; технические сведения доступны в серверном логе.
+Неожиданные ошибки обработки ответа не маскируются как недоступность Redis.
+В OpenAPI ответ описан компонентом `ServiceUnavailable` у операции login.
+
+Для запросов с разрешённого Frontend CORS открывает JavaScript доступ
+к `Retry-After` через `Access-Control-Expose-Headers`. Разрешённые адреса
+задаются в `ALLOWED_ORIGINS`; по умолчанию используется `http://localhost:5173`.
+Ответ также содержит разрешение на передачу cookie (`Access-Control-Allow-Credentials: true`).
+
 ### `application-dev.yml` (dev-профиль)
 ```
 PostgreSQL:  localhost:5432 / cardio_db / cardio_user / cardio_pass
@@ -314,9 +389,33 @@ docker-compose up -d
 ## Тесты
 
 - Используют Testcontainers для поднятия реальной PostgreSQL-базы
-- Redis отключён в тестовом профиле (`exclude auto-configuration`)
+- Автоконфигурация Redis отключена в тестовом профиле (`exclude auto-configuration`)
+- `RedisLoginAttemptCounterIntegrationTest` создаёт подключение к отдельному
+  Redis-контейнеру через `RedisTestContainer`; нужны Docker CLI и работающий Docker
 - Flyway-миграции применяются автоматически перед тестами
 - Базовый класс интеграционных тестов: `BaseIntegrationTest.kt`
+- В наследниках `BaseIntegrationTest` счётчик попыток заменён через `@MockitoBean`
+  и перед каждым тестом по умолчанию возвращает одну допустимую попытку.
+  Сценарии ограничения в `AuthControllerTest` задают последовательность ответов
+  или отказ счётчика: проверяются `401` → `429` для существующего и неизвестного
+  email, блокировка верных credentials по IP/email и `503` без новой сессии.
+  Реальная политика ограничения и PostgreSQL участвуют в этих тестах;
+  выполнение Lua и истечение ключей отдельно проверяются с настоящим Redis.
+- `UntrustedProxyClientIpHttpTest` и `TrustedProxyClientIpHttpTest` проверяют
+  определение IP через настоящий HTTP-сервер Tomcat без PostgreSQL и Redis.
+  Диагностический контроллер существует только в тестовом профиле.
+
+Запуск тестов счётчика и политики ограничения входа из каталога `backend` в PowerShell (JDK 21):
+
+```powershell
+.\mvnw.cmd "-Dtest=RedisLoginAttemptCounterTest,RedisLoginAttemptCounterIntegrationTest,LoginRateLimitServiceTest" test
+```
+
+Проверка доверия к прокси из каталога `backend` (Docker не требуется):
+
+```powershell
+.\mvnw.cmd "-Dtest=UntrustedProxyClientIpHttpTest,TrustedProxyClientIpHttpTest" test
+```
 
 ---
 
