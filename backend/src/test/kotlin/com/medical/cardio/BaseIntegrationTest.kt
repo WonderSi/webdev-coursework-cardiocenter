@@ -5,12 +5,17 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
+import com.medical.cardio.service.RedisLoginAttemptCounter
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 // Базовый класс для всех интеграционных тестов.
 // Поднимает реальный PostgreSQL перед запуском тестов и передаёт его URL в Spring.
 @SpringBootTest
 @ActiveProfiles("test")
 abstract class BaseIntegrationTest {
+
+    @MockitoBean
+    private lateinit var loginAttemptCounter: RedisLoginAttemptCounter
 
     companion object {
         private const val DB_NAME = "cardio_test"

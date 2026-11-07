@@ -5,10 +5,12 @@ import com.medical.cardio.exception.LoginRateLimitExceededException
 import com.medical.cardio.exception.LoginRateLimitUnavailableException
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.redis.RedisConnectionFailureException
+import org.springframework.stereotype.Service
 import java.security.MessageDigest
 import java.util.HexFormat
 import java.util.Locale
 
+@Service
 class LoginRateLimitService(
     private val counter: RedisLoginAttemptCounter,
     private val config: LoginRateLimitConfig,

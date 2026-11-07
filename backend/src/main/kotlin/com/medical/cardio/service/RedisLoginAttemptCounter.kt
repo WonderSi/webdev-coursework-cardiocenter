@@ -2,7 +2,9 @@ package com.medical.cardio.service
 
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
+import org.springframework.stereotype.Service
 
+@Service
 class RedisLoginAttemptCounter(
     private val redisTemplate: StringRedisTemplate,
     private val incrementLoginAttemptScript: RedisScript<List<*>>,

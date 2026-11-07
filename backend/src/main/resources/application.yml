@@ -29,6 +29,11 @@ spring:
     default-property-inclusion: always
 
 server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Real-IP
+      internal-proxies: '(${TRUSTED_PROXY_REGEX:(?!)})'
   error:
     include-message: never
     include-binding-errors: never
