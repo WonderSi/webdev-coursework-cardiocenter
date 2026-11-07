@@ -7,6 +7,10 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import com.medical.cardio.service.RedisLoginAttemptCounter
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import com.medical.cardio.service.LoginAttemptCounterResult
+import org.junit.jupiter.api.BeforeEach
+import org.mockito.BDDMockito.given
+import org.mockito.kotlin.any
 
 // Базовый класс для всех интеграционных тестов.
 // Поднимает реальный PostgreSQL перед запуском тестов и передаёт его URL в Spring.
@@ -16,6 +20,12 @@ abstract class BaseIntegrationTest {
 
     @MockitoBean
     private lateinit var loginAttemptCounter: RedisLoginAttemptCounter
+
+    @BeforeEach
+    protected fun allowLoginAttempts() {
+        given(loginAttemptCounter.increment(any(), any()))
+            .willReturn(LoginAttemptCounterResult(attempts = 1L, remainingTtlMs = 60000L))
+    }
 
     companion object {
         private const val DB_NAME = "cardio_test"

@@ -6,6 +6,9 @@ import com.medical.cardio.entity.Role
 import com.medical.cardio.repository.AdminUserRepository
 import com.medical.cardio.repository.RefreshTokenRepository
 import com.medical.cardio.support.ControllerTestBase
+import com.medical.cardio.dto.LoginRequest
+import com.medical.cardio.service.LoginAttemptCounterResult
+import com.medical.cardio.service.RedisLoginAttemptCounter
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,8 +19,14 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.junit.jupiter.params.provider.CsvSource
+import org.mockito.BDDMockito.given
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.dao.QueryTimeoutException
+import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.security.crypto.password.PasswordEncoder
 import jakarta.servlet.http.Cookie
 import org.springframework.test.web.servlet.get
@@ -41,6 +50,9 @@ class AuthControllerTest : ControllerTestBase() {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var loginAttemptCounter: RedisLoginAttemptCounter
 
     private lateinit var testUser: AdminUserEntity
 
@@ -124,6 +136,101 @@ class AuthControllerTest : ControllerTestBase() {
         }.andExpect {
             status { isBadRequest() }
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["auth-test@cardio.ru", "nobody@cardio.ru"])
+    fun `repeated invalid credentials reach the same email limit for existing and unknown accounts`(email: String) {
+        given(loginAttemptCounter.increment(argThat { startsWith("auth:login:email:") }, any()))
+            .willReturn(
+                LoginAttemptCounterResult(1L, 60000L),
+                LoginAttemptCounterResult(2L, 60000L),
+                LoginAttemptCounterResult(3L, 60000L),
+                LoginAttemptCounterResult(4L, 60000L),
+                LoginAttemptCounterResult(5L, 60000L),
+                LoginAttemptCounterResult(6L, 60000L),
+            )
+        val sessionCount = refreshTokenRepository.count()
+        val content = objectMapper.writeValueAsString(LoginRequest(email = email, password = "WrongPassword"))
+
+        repeat(5) {
+            mockMvc.post("/api/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                this.content = content
+            }.andExpect {
+                status { isUnauthorized() }
+                header { doesNotExist("Set-Cookie") }
+                jsonPath("$.code") { value("UNAUTHORIZED") }
+            }
+        }
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            this.content = content
+        }.andExpect {
+            status { isTooManyRequests() }
+            header {
+                string("Retry-After", "60")
+                string("Cache-Control", "no-store")
+                doesNotExist("Set-Cookie")
+            }
+            jsonPath("$.code") { value("LOGIN_RATE_LIMIT_EXCEEDED") }
+            jsonPath("$.detail") { value("Повторите попытку позже") }
+        }
+        assertEquals(sessionCount, refreshTokenRepository.count())
+    }
+
+    @ParameterizedTest
+    @CsvSource("ip,21", "email,6")
+    fun `exceeded limits reject valid credentials without creating a session`(counterType: String, attempts: Long) {
+        given(loginAttemptCounter.increment(argThat { startsWith("auth:login:$counterType:") }, any()))
+            .willReturn(LoginAttemptCounterResult(attempts, 1001L))
+        val sessionCount = refreshTokenRepository.count()
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2000"}"""
+        }.andExpect {
+            status { isTooManyRequests() }
+            header {
+                string("Retry-After", "2")
+                string("Cache-Control", "no-store")
+                doesNotExist("Set-Cookie")
+            }
+            jsonPath("$.code") { value("LOGIN_RATE_LIMIT_EXCEEDED") }
+        }
+        assertEquals(sessionCount, refreshTokenRepository.count())
+    }
+
+    @ParameterizedTest
+    @CsvSource("ip,connection", "ip,timeout", "email,connection", "email,timeout")
+    fun `unavailable counters reject valid credentials without creating a session`(
+        counterType: String,
+        failureType: String,
+    ) {
+        val cause = when (failureType) {
+            "connection" -> RedisConnectionFailureException("Cannot connect to internal-redis:6379")
+            "timeout" -> QueryTimeoutException("Redis request timed out")
+            else -> error("Unknown failure type: $failureType")
+        }
+        given(loginAttemptCounter.increment(argThat { startsWith("auth:login:$counterType:") }, any()))
+            .willThrow(cause)
+        val sessionCount = refreshTokenRepository.count()
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"auth-test@cardio.ru","password":"ValidPass@2000"}"""
+        }.andExpect {
+            status { isServiceUnavailable() }
+            header {
+                string("Cache-Control", "no-store")
+                doesNotExist("Retry-After")
+                doesNotExist("Set-Cookie")
+            }
+            jsonPath("$.code") { value("SERVICE_UNAVAILABLE") }
+            jsonPath("$.detail") { value("Сервис временно не может выполнить запрос.") }
+        }
+        assertEquals(sessionCount, refreshTokenRepository.count())
     }
 
     @Test

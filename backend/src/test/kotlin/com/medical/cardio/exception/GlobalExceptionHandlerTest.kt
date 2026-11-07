@@ -10,6 +10,7 @@ import com.medical.cardio.security.JwtService
 import com.medical.cardio.security.ProblemResponseWriter
 import com.medical.cardio.security.AuthCookieService
 import com.medical.cardio.service.AuthService
+import com.medical.cardio.service.LoginRateLimitService
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -31,6 +32,12 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.http.HttpHeaders
 import org.springframework.data.redis.RedisConnectionFailureException
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.mockito.Mockito.inOrder
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verifyNoInteractions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post as postRequest
 
 @WebMvcTest(AuthController::class)
 @Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
@@ -59,13 +66,17 @@ class GlobalExceptionHandlerTest {
     @MockitoBean
     lateinit var authCookieService: AuthCookieService
 
+    @MockitoBean
+    lateinit var loginRateLimitService: LoginRateLimitService
+
     @ParameterizedTest
     @ValueSource(longs = [1, 30, 120])
     fun `login rate limit returns problem details with retry delay`(
         retryAfterSeconds: Long,
     ) {
-        given(authService.login(loginRequest))
-            .willThrow(LoginRateLimitExceededException(retryAfterSeconds))
+        willThrow(LoginRateLimitExceededException(retryAfterSeconds))
+            .given(loginRateLimitService)
+            .checkLoginAttempt(any(), eq(loginRequest.email))
 
         mockMvc.post("/api/auth/login") {
             header(HttpHeaders.ORIGIN, "http://localhost:5173")
@@ -95,15 +106,16 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.code") { value("LOGIN_RATE_LIMIT_EXCEEDED") }
             jsonPath("$.errors") { doesNotExist() }
         }
+        verifyNoInteractions(authService, authCookieService)
     }
 
     @Test
     fun `unavailable rate limiter returns safe service unavailable without authentication cookies`() {
-        given(authService.login(loginRequest)).willThrow(
+        willThrow(
             LoginRateLimitUnavailableException(
                 RedisConnectionFailureException("Cannot connect to internal-redis:6379")
             )
-        )
+        ).given(loginRateLimitService).checkLoginAttempt(any(), eq(loginRequest.email))
 
         mockMvc.post("/api/auth/login") {
             contentType = MediaType.APPLICATION_JSON
@@ -129,6 +141,33 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.code") { value("SERVICE_UNAVAILABLE") }
             jsonPath("$.errors") { doesNotExist() }
         }
+        verifyNoInteractions(authService, authCookieService)
+    }
+
+    @Test
+    fun `login checks the connection address before authenticating the original email`() {
+        val request = LoginRequest(email = "Doctor@Example.COM", password = "password")
+        val connectionAddress = "192.0.2.10"
+        given(authService.login(request)).willThrow(BadCredentialsException("Invalid credentials"))
+
+        val response = mockMvc.perform(postRequest("/api/auth/login")
+            .with { httpRequest ->
+                httpRequest.remoteAddr = connectionAddress
+                httpRequest
+            }
+            .header("X-Real-IP", "198.51.100.20")
+            .header("X-Forwarded-For", "198.51.100.20")
+            .header("Forwarded", "for=198.51.100.20")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andReturn().response
+
+        assertEquals(401, response.status)
+        val invocationOrder = inOrder(loginRateLimitService, authService)
+        invocationOrder.verify(loginRateLimitService).checkLoginAttempt(connectionAddress, request.email)
+        invocationOrder.verify(authService).login(request)
+        invocationOrder.verifyNoMoreInteractions()
+        verifyNoInteractions(authCookieService)
     }
 
     @Test
@@ -184,6 +223,7 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.errors[0].field") { value("email") }
             jsonPath("$.errors[0].message") { isNotEmpty() }
         }
+        verifyNoInteractions(loginRateLimitService, authService, authCookieService)
     }
 
     @Test

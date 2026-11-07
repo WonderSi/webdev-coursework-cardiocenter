@@ -5,6 +5,7 @@ import com.medical.cardio.controller.AuthController
 import com.medical.cardio.exception.InvalidTokenException
 import com.medical.cardio.exception.TokenExpiredException
 import com.medical.cardio.service.AuthService
+import com.medical.cardio.service.LoginRateLimitService
 import jakarta.servlet.http.Cookie
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
@@ -61,6 +62,9 @@ class JwtAuthFilterTest {
 
     @MockitoBean
     lateinit var authCookieService: AuthCookieService
+
+    @MockitoBean
+    lateinit var loginRateLimitService: LoginRateLimitService
 
     @Test
     fun `invalid JWT cookie returns 401 with error body`() {

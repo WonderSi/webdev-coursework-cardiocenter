@@ -58,6 +58,7 @@ class OpenApiDocumentationTest {
     @MockitoBean lateinit var glossaryRepository: GlossaryRepository
     @MockitoBean lateinit var authService: AuthService
     @MockitoBean lateinit var authCookieService: AuthCookieService
+    @MockitoBean lateinit var loginRateLimitService: LoginRateLimitService
 
     @Autowired lateinit var mockMvc: MockMvc
     @Autowired
