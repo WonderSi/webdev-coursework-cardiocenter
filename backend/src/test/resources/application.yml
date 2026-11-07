@@ -13,6 +13,13 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
+server:
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      remote-ip-header: X-Real-IP
+      internal-proxies: '(?!)'
+
 logging:
   level:
     com.medical: DEBUG
@@ -29,6 +36,11 @@ app:
 
   auth-cookie:
     secure: false
+
+  login-rate-limit:
+    window-ms: 60000
+    max-attempts-per-ip: 20
+    max-attempts-per-login: 5
 
   ml-service:
     url: http://localhost:8000

@@ -10,8 +10,11 @@ import com.medical.cardio.security.JwtService
 import com.medical.cardio.security.ProblemResponseWriter
 import com.medical.cardio.security.AuthCookieService
 import com.medical.cardio.service.AuthService
+import com.medical.cardio.service.LoginRateLimitService
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.willThrow
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +30,14 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.get
 import org.springframework.web.multipart.MaxUploadSizeExceededException
+import org.springframework.http.HttpHeaders
+import org.springframework.data.redis.RedisConnectionFailureException
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.mockito.Mockito.inOrder
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verifyNoInteractions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post as postRequest
 
 @WebMvcTest(AuthController::class)
 @Import(SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
@@ -54,6 +65,110 @@ class GlobalExceptionHandlerTest {
 
     @MockitoBean
     lateinit var authCookieService: AuthCookieService
+
+    @MockitoBean
+    lateinit var loginRateLimitService: LoginRateLimitService
+
+    @ParameterizedTest
+    @ValueSource(longs = [1, 30, 120])
+    fun `login rate limit returns problem details with retry delay`(
+        retryAfterSeconds: Long,
+    ) {
+        willThrow(LoginRateLimitExceededException(retryAfterSeconds))
+            .given(loginRateLimitService)
+            .checkLoginAttempt(any(), eq(loginRequest.email))
+
+        mockMvc.post("/api/auth/login") {
+            header(HttpHeaders.ORIGIN, "http://localhost:5173")
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(loginRequest)
+        }.andExpect {
+            status { isTooManyRequests() }
+
+            header {
+                string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173")
+                string(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+                string(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.RETRY_AFTER)
+                string(HttpHeaders.RETRY_AFTER, retryAfterSeconds.toString())
+                string(HttpHeaders.CACHE_CONTROL, "no-store")
+                doesNotExist(HttpHeaders.SET_COOKIE)
+            }
+
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+            }
+
+            jsonPath("$.type") { value("urn:cardiocenter:problem:login-rate-limit") }
+            jsonPath("$.title") { value("Слишком много попыток входа")}
+            jsonPath("$.status") { value(429) }
+            jsonPath("$.detail") { value("Повторите попытку позже")}
+            jsonPath("$.instance") { value("/api/auth/login") }
+            jsonPath("$.code") { value("LOGIN_RATE_LIMIT_EXCEEDED") }
+            jsonPath("$.errors") { doesNotExist() }
+        }
+        verifyNoInteractions(authService, authCookieService)
+    }
+
+    @Test
+    fun `unavailable rate limiter returns safe service unavailable without authentication cookies`() {
+        willThrow(
+            LoginRateLimitUnavailableException(
+                RedisConnectionFailureException("Cannot connect to internal-redis:6379")
+            )
+        ).given(loginRateLimitService).checkLoginAttempt(any(), eq(loginRequest.email))
+
+        mockMvc.post("/api/auth/login") {
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(loginRequest)
+        }.andExpect {
+            status { isServiceUnavailable() }
+            header {
+                string(HttpHeaders.CACHE_CONTROL, "no-store")
+                doesNotExist(HttpHeaders.SET_COOKIE)
+                doesNotExist(HttpHeaders.RETRY_AFTER)
+            }
+            content {
+                contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+                string(Matchers.not(Matchers.containsString("internal-redis")))
+                string(Matchers.not(Matchers.containsString("RedisConnectionFailureException")))
+                string(Matchers.not(Matchers.containsString("Login rate limit check is unavailable")))
+            }
+            jsonPath("$.type") { value("urn:cardiocenter:problem:service-unavailable") }
+            jsonPath("$.title") { value("Сервис временно недоступен") }
+            jsonPath("$.status") { value(503) }
+            jsonPath("$.detail") { value("Сервис временно не может выполнить запрос.") }
+            jsonPath("$.instance") { value("/api/auth/login") }
+            jsonPath("$.code") { value("SERVICE_UNAVAILABLE") }
+            jsonPath("$.errors") { doesNotExist() }
+        }
+        verifyNoInteractions(authService, authCookieService)
+    }
+
+    @Test
+    fun `login checks the connection address before authenticating the original email`() {
+        val request = LoginRequest(email = "Doctor@Example.COM", password = "password")
+        val connectionAddress = "192.0.2.10"
+        given(authService.login(request)).willThrow(BadCredentialsException("Invalid credentials"))
+
+        val response = mockMvc.perform(postRequest("/api/auth/login")
+            .with { httpRequest ->
+                httpRequest.remoteAddr = connectionAddress
+                httpRequest
+            }
+            .header("X-Real-IP", "198.51.100.20")
+            .header("X-Forwarded-For", "198.51.100.20")
+            .header("Forwarded", "for=198.51.100.20")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andReturn().response
+
+        assertEquals(401, response.status)
+        val invocationOrder = inOrder(loginRateLimitService, authService)
+        invocationOrder.verify(loginRateLimitService).checkLoginAttempt(connectionAddress, request.email)
+        invocationOrder.verify(authService).login(request)
+        invocationOrder.verifyNoMoreInteractions()
+        verifyNoInteractions(authCookieService)
+    }
 
     @Test
     fun `IllegalArgumentException returns generic message without internal details`() {
@@ -108,6 +223,7 @@ class GlobalExceptionHandlerTest {
             jsonPath("$.errors[0].field") { value("email") }
             jsonPath("$.errors[0].message") { isNotEmpty() }
         }
+        verifyNoInteractions(loginRateLimitService, authService, authCookieService)
     }
 
     @Test

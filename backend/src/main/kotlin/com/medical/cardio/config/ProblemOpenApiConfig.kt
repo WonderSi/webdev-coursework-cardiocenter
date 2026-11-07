@@ -2,6 +2,7 @@ package com.medical.cardio.config
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.examples.Example
+import io.swagger.v3.oas.models.headers.Header
 import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.IntegerSchema
@@ -46,8 +47,18 @@ class ProblemOpenApiConfig {
             Definition(406, "NotAcceptable", "Формат ответа не поддерживается", "not-acceptable", "Формат ответа не поддерживается", "Запрошенный формат ответа не поддерживается.", "NOT_ACCEPTABLE"),
             Definition(413, "PayloadTooLarge", "Превышен размер файла", "payload-too-large", "Превышен размер файла", "Файл превышает допустимый размер 10 МБ.", "PAYLOAD_TOO_LARGE"),
             Definition(415, "UnsupportedMediaType", "Content-Type не поддерживается", "unsupported-media-type", "Формат запроса не поддерживается", "Проверьте Content-Type запроса.", "UNSUPPORTED_MEDIA_TYPE"),
+            Definition(
+                status = 429,
+                name = "LoginRateLimited",
+                description = "Превышен лимит попыток входа; повторите запрос после указанного времени ожидания",
+                type = "login-rate-limit",
+                title = "Слишком много попыток входа",
+                detail = "Повторите попытку позже",
+                code = "LOGIN_RATE_LIMIT_EXCEEDED",
+            ),
             Definition(500, "InternalServerError", "Непредвиденная ошибка; технические сведения доступны только в серверных логах", "internal-server-error", "Внутренняя ошибка сервера", "Не удалось выполнить запрос. Попробуйте позже.", "INTERNAL_SERVER_ERROR"),
-            Definition(502, "MlServiceError", "Ошибка ML: сетевой сбой, таймаут, HTTP-ошибка, некорректный или пустой ответ", "ml-service", "Ошибка ML-сервиса", "Не удалось выполнить операцию ML-сервиса.", "ML_SERVICE_ERROR")
+            Definition(502, "MlServiceError", "Ошибка ML: сетевой сбой, таймаут, HTTP-ошибка, некорректный или пустой ответ", "ml-service", "Ошибка ML-сервиса", "Не удалось выполнить операцию ML-сервиса.", "ML_SERVICE_ERROR"),
+            Definition(503, "ServiceUnavailable", "Проверка лимитов временно недоступна; вход отклонён", "service-unavailable", "Сервис временно недоступен", "Сервис временно не может выполнить запрос.", "SERVICE_UNAVAILABLE")
         )
         definitions.forEach { definition ->
             val media = MediaType().schema(Schema<Any>().`$ref`("#/components/schemas/ApiProblem"))
@@ -75,8 +86,20 @@ class ProblemOpenApiConfig {
                     )))
                 }
             }
-            components.addResponses(definition.name, ApiResponse().description(definition.description)
-                .content(Content().addMediaType("application/problem+json", media)))
+            val response = ApiResponse().description(definition.description)
+                .content(Content().addMediaType("application/problem+json", media))
+            if (definition.name == "LoginRateLimited") {
+                response.addHeaderObject("Retry-After", Header()
+                    .description("Время ожидания перед повторной попыткой входа, в секундах")
+                    .schema(IntegerSchema().format("int64")
+                        .minimum(java.math.BigDecimal.ONE).example(30)))
+            }
+            if (definition.name == "LoginRateLimited" || definition.name == "ServiceUnavailable") {
+                response.addHeaderObject("Cache-Control", Header()
+                    .description("Запрещает сохранять ответ об ограничении входа в кэше")
+                    .schema(StringSchema().example("no-store")))
+            }
+            components.addResponses(definition.name, response)
         }
 
         document.paths?.values?.forEach { path ->
@@ -109,7 +132,11 @@ class ProblemOpenApiConfig {
         fun example(): Map<String, Any> = mapOf(
             "type" to "urn:cardiocenter:problem:$type", "title" to title,
             "status" to status, "detail" to detail,
-            "instance" to if (name == "InvalidRefresh" || name == "CsrfRejected") "/api/auth/refresh" else "/api/survey/submit",
+            "instance" to when (name) {
+                "InvalidRefresh", "CsrfRejected" -> "/api/auth/refresh"
+                "LoginRateLimited", "ServiceUnavailable" -> "/api/auth/login"
+                else -> "/api/survey/submit"
+            },
             "code" to code
         )
     }

@@ -58,6 +58,7 @@ class OpenApiDocumentationTest {
     @MockitoBean lateinit var glossaryRepository: GlossaryRepository
     @MockitoBean lateinit var authService: AuthService
     @MockitoBean lateinit var authCookieService: AuthCookieService
+    @MockitoBean lateinit var loginRateLimitService: LoginRateLimitService
 
     @Autowired lateinit var mockMvc: MockMvc
     @Autowired
@@ -113,6 +114,73 @@ class OpenApiDocumentationTest {
         assertEquals(setOf("email", "role"), loginResponse.fieldNames().asSequence().toSet())
         assertEquals("binary", paths.path("/api/admin/upload/template").path("get")
             .at("/responses/200/content/application~1octet-stream/schema/format").asText())
+    }
+
+    @Test
+    fun `login rate limit documentation describes retry delay and problem details`() {
+        val result = mockMvc.get("/v3/api-docs").andExpect { status { isOk() } }.andReturn()
+        val document = objectMapper.readTree(result.response.contentAsString)
+        val login = document.path("paths").path("/api/auth/login").path("post")
+        val responseRef = login.at("/responses/429/\$ref").asText()
+        assertEquals("#/components/responses/LoginRateLimited", responseRef)
+
+        val response = document.at(responseRef.removePrefix("#"))
+        val retryAfter = response.at("/headers/Retry-After/schema")
+        assertEquals("integer", retryAfter.path("type").asText())
+        assertEquals("int64", retryAfter.path("format").asText())
+        assertEquals(1L, retryAfter.path("minimum").asLong())
+        assertEquals(30L, retryAfter.path("example").asLong())
+        assertEquals("no-store", response.at("/headers/Cache-Control/schema/example").asText())
+
+        val media = response.path("content").path("application/problem+json")
+        assertEquals("#/components/schemas/ApiProblem", media.at("/schema/\$ref").asText())
+        val example = media.at("/examples/problem/value")
+        assertEquals("urn:cardiocenter:problem:login-rate-limit", example.path("type").asText())
+        assertEquals("Слишком много попыток входа", example.path("title").asText())
+        assertEquals(429, example.path("status").asInt())
+        assertEquals("Повторите попытку позже", example.path("detail").asText())
+        assertEquals("/api/auth/login", example.path("instance").asText())
+        assertEquals("LOGIN_RATE_LIMIT_EXCEEDED", example.path("code").asText())
+        assertFalse(example.has("errors"))
+
+        document.path("paths").fields().forEachRemaining { (path, methods) ->
+            methods.fields().forEachRemaining { (method, operation) ->
+                if (path != "/api/auth/login" || method != "post") {
+                    assertFalse(operation.path("responses").has("429"), "$method $path")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `login documents unavailable rate limit checks with the shared service unavailable contract`() {
+        val result = mockMvc.get("/v3/api-docs").andExpect { status { isOk() } }.andReturn()
+        val document = objectMapper.readTree(result.response.contentAsString)
+        val responseRef = document.path("paths").path("/api/auth/login").path("post")
+            .at("/responses/503/\$ref").asText()
+        assertEquals("#/components/responses/ServiceUnavailable", responseRef)
+
+        val response = document.at(responseRef.removePrefix("#"))
+        assertEquals("no-store", response.at("/headers/Cache-Control/schema/example").asText())
+        assertFalse(response.path("headers").has("Retry-After"))
+        val media = response.path("content").path("application/problem+json")
+        assertEquals("#/components/schemas/ApiProblem", media.at("/schema/\$ref").asText())
+        val example = media.at("/examples/problem/value")
+        assertEquals(503, example.path("status").asInt())
+        assertEquals("urn:cardiocenter:problem:service-unavailable", example.path("type").asText())
+        assertEquals("Сервис временно недоступен", example.path("title").asText())
+        assertEquals("Сервис временно не может выполнить запрос.", example.path("detail").asText())
+        assertEquals("SERVICE_UNAVAILABLE", example.path("code").asText())
+        assertEquals("/api/auth/login", example.path("instance").asText())
+        assertFalse(example.has("errors"))
+
+        document.path("paths").fields().forEachRemaining { (path, methods) ->
+            methods.fields().forEachRemaining { (method, operation) ->
+                if (path != "/api/auth/login" || method != "post") {
+                    assertFalse(operation.path("responses").has("503"), "$method $path")
+                }
+            }
+        }
     }
 
     @Test

@@ -28,18 +28,21 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import com.medical.cardio.service.LoginRateLimitService
+import jakarta.servlet.http.HttpServletRequest
 
 @Tag(name = "Авторизация", description = "Вход выдаёт HttpOnly cookie access_token и refresh_token. Для Swagger UI сначала выполните login на том же адресе Backend.")
 @RestController
 @RequestMapping("/api/auth")
 class AuthController(
     private val authService: AuthService,
-    private val authCookieService: AuthCookieService
+    private val authCookieService: AuthCookieService,
+    private val loginRateLimitService: LoginRateLimitService
 ) {
 
     @Operation(
         summary = "Войти в систему",
-        description = "Выдаёт access_token (Path=/) и refresh_token (Path=/api/auth): HttpOnly, SameSite=Strict, Secure в production. Без rememberMe cookie сессионные, refresh действует по умолчанию 1 день. С rememberMe cookie постоянные: access по умолчанию 15 минут, refresh 30 дней. Сроки настраиваются. Тело ответа содержит email и роль. Неверные данные и блокировка дают одинаковый 401. Для обновления access используйте POST /api/auth/refresh с CSRF-токеном из GET /api/auth/csrf."
+        description = "Выдаёт access_token (Path=/) и refresh_token (Path=/api/auth): HttpOnly, SameSite=Strict, Secure в production. Без rememberMe cookie сессионные, refresh действует по умолчанию 1 день. С rememberMe cookie постоянные: access по умолчанию 15 минут, refresh 30 дней. Сроки настраиваются. Тело ответа содержит email и роль. До проверки пароля учитывает попытку входа по IP и введённому email. Превышение лимита возвращает 429 с Retry-After, недоступность проверки — 503; cookie при отказе не выдаются. Неверные данные и блокировка дают одинаковый 401. Для обновления access используйте POST /api/auth/refresh с CSRF-токеном из GET /api/auth/csrf."
     )
     @ApiResponses(value = [
         ApiResponse(
@@ -55,16 +58,36 @@ class AuthController(
             ]
         ),
         ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
-        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "429", ref = "#/components/responses/LoginRateLimited"),
+        ApiResponse(responseCode = "503", ref = "#/components/responses/ServiceUnavailable")
     ])
     @PostMapping("/login")
-    fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<LoginResponse> {
+    fun login(
+        @RequestBody @Valid request: LoginRequest,
+        @Parameter(hidden = true) httpRequest: HttpServletRequest,
+    ): ResponseEntity<LoginResponse> {
+        loginRateLimitService.checkLoginAttempt(
+            ipAddress = httpRequest.remoteAddr,
+            email = request.email,
+        )
+
         val result = authService.login(request)
-        val accessCookie = authCookieService.accessToken(result.accessToken, request.rememberMe)
-        val refreshCookie = authCookieService.refreshToken(result.refreshToken.rawToken, request.rememberMe)
+        val accessCookie = authCookieService.accessToken(
+            result.accessToken,
+            request.rememberMe,
+        )
+        val refreshCookie = authCookieService.refreshToken(
+            result.refreshToken.rawToken,
+            request.rememberMe,
+        )
 
         return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, accessCookie.toString(), refreshCookie.toString())
+            .header(
+                HttpHeaders.SET_COOKIE,
+                accessCookie.toString(),
+                refreshCookie.toString(),
+            )
             .body(result.user)
     }
 

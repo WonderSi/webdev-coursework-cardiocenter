@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
+import org.springframework.http.CacheControl
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -80,6 +81,37 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
             HttpStatus.UNAUTHORIZED, "urn:cardiocenter:problem:invalid-refresh-token",
             "Сессия недействительна", "Войдите в систему снова.", ApiProblem.REFRESH_TOKEN_INVALID
         )
+    }
+
+    @ExceptionHandler(LoginRateLimitExceededException::class)
+    fun handleLoginRateLimitExceeded(
+        ex: LoginRateLimitExceededException,
+    ): ResponseEntity<ProblemDetail> {
+        log.warn("Login rate limit exceeded")
+
+        val problem = ApiProblem.create(
+            status = HttpStatus.TOO_MANY_REQUESTS,
+            type = "urn:cardiocenter:problem:login-rate-limit",
+            title = "Слишком много попыток входа",
+            detail = "Повторите попытку позже",
+            code = ApiProblem.LOGIN_RATE_LIMIT_EXCEEDED,
+        )
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .header(HttpHeaders.RETRY_AFTER, ex.retryAfterSeconds.toString())
+            .cacheControl(CacheControl.noStore())
+            .body(problem)
+    }
+
+    @ExceptionHandler(LoginRateLimitUnavailableException::class)
+    fun handleLoginRateLimitUnavailable(
+        ex: LoginRateLimitUnavailableException,
+    ): ResponseEntity<ProblemDetail> {
+        log.error("Login rate limit check is unavailable", ex)
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .cacheControl(CacheControl.noStore())
+            .body(ApiProblem.forStatus(HttpStatus.SERVICE_UNAVAILABLE))
     }
 
     @ExceptionHandler(AuthenticationException::class)
