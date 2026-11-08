@@ -290,6 +290,29 @@ refresh не мешает успешной очистке cookie. Истёкша
 - Actuator endpoints: `health`, `metrics`, `info`
 - ML-сервис URL: `${ML_SERVICE_URL:http://localhost:8000}`
 
+### Профиль preview: подготовка healthcheck
+
+Дополнительный `application-preview.yml` предназначен для временных стендов.
+Он оставляет в HTTP exposure только `health` и скрывает детали и компоненты
+ответа. Проверки БД/Redis при этом сохраняются.
+Планируемая комбинация для контейнера — `prod,preview`.
+В preview env-примере `APP_AUTHCOOKIE_SECURE=false` переопределяет
+`app.auth-cookie.secure` для локального HTTP; для HTTPS требуется `true`.
+Оба значения проверены `AuthCookieProfileTest` через переменные окружения.
+Правило анонимного `GET /actuator/health` реализуется отдельной
+`PreviewHealthSecurityConfig` с `@Profile("preview")`.
+Профиль и класс проверены `PreviewHealthSecurityConfigTest`: в preview
+анонимный GET health возвращает только общий статус, неисправность даёт 503;
+остальные проверенные маршруты сохраняют защиту. Без preview health требует
+авторизации. Локальный preview Backend также проверен запуском в Docker:
+миграции1–7, bootstrap, health, вход/refresh/logout и семь прогнозов через ML.
+Frontend подключён, HTTP через nginx проверен. Загрузка страницы и опрос
+в браузере подтверждены пользователем, как и вход с обычным F5.
+Stop/up с сохранением данных проверен. Свежий access сохраняется после
+рестарта Backend. Наблюдавшийся позже browser401 вызван истечением15мин;
+Frontend пока не вызывает refresh автоматически.
+Состояние и код: [план preview](../docs/PREVIEW_ENVIRONMENTS_PLAN.md).
+
 ### Настройки ограничения входа — F-35
 
 `LoginRateLimitConfig` читает настройки из `app.login-rate-limit`.
