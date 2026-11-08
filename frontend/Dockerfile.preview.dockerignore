@@ -1,0 +1,8 @@
+# Applies only to Dockerfile.preview.
+node_modules
+dist
+dist-ssr
+.env
+.env.*
+*.tsbuildinfo
+.vscode
