@@ -1,0 +1,32 @@
+name: Preview images
+
+on:
+  push:
+    branches: [infra/preview-environments]
+
+jobs:
+  ml-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set image reference
+        shell: bash
+        run: echo "IMAGE_REF=ghcr.io/${GITHUB_REPOSITORY,,}-preview-ml:${GITHUB_SHA}" >> "$GITHUB_ENV"
+
+      - name: Log in to GHCR
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+
+      - name: Build ML image
+        run: docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" --tag "$IMAGE_REF" ./ml
+
+      - name: Push ML image
+        run: docker push "$IMAGE_REF"
