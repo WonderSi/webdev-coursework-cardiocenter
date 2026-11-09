@@ -69,8 +69,8 @@ class PreviewHealthSecurityConfigTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["prod", "prod,preview"])
-    fun `health access and details are scoped to preview`(profiles: String) {
+    @ValueSource(strings = ["prod", "prod,preview", "prod,local", "prod,probe"])
+    fun `health probe is public only in explicit container profiles`(profiles: String) {
         WebApplicationContextRunner()
             .withInitializer(ConfigDataApplicationContextInitializer())
             // Read the real main configuration; test/resources/application.yml shadows it otherwise.
@@ -83,7 +83,7 @@ class PreviewHealthSecurityConfigTest {
             .withUserConfiguration(HealthTestConfiguration::class.java)
             .run { context ->
                 context.startupFailure?.let { throw it }
-                val preview = profiles.contains("preview")
+                val preview = profiles.split(",").any { it in setOf("preview", "local", "probe") }
                 assertEquals(preview, context.containsBean("previewHealthSecurityFilterChain"))
                 assertEquals(
                     if (preview) "never" else "always",

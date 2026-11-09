@@ -83,7 +83,10 @@ class OpenApiDocumentationTest {
                 assertEquals(protected, operation.path("security").any { it.has("cookieAuth") }, path)
             }
         }
-        assertEquals(16, operationCount)
+        assertEquals(17, operationCount)
+        assertTrue(paths.path("/api/admin/dataset/schema").has("get"))
+        assertTrue(paths.path("/api/admin/retrain").path("post")
+            .path("requestBody").path("content").has("multipart/form-data"))
         assertEquals("refresh_token", document.at("/components/securitySchemes/refreshCookieAuth/name").asText())
         val refresh = paths.path("/api/auth/refresh").path("post")
         assertTrue(refresh.path("security").any { it.has("refreshCookieAuth") })

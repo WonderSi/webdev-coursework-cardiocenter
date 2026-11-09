@@ -57,8 +57,7 @@ services:
     expose:
       - "8000"
     volumes:
-      - ./models:/app/models
-      - ./data:/app/data
+      - ml_models:/app/app/models
     networks:
       - internal
     restart: unless-stopped
@@ -74,7 +73,7 @@ services:
     image: cardio-backend
     container_name: cardio_backend
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: prod,probe
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${DB_NAME}
@@ -104,7 +103,7 @@ services:
       ml-service:
         condition: service_started
     healthcheck:
-      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/actuator/health" ]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -135,5 +134,6 @@ networks:
     driver: bridge
 
 volumes:
+  ml_models:
   postgres_data:
   redis_data:

@@ -10,11 +10,36 @@ import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
+import jakarta.validation.constraints.AssertTrue
+import jakarta.validation.constraints.Pattern
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.math.BigDecimal
 
 data class SurveyRequest(
     @field:NotNull
-    @field:Positive
+    @field:Pattern(regexp = "city|region")
+    @field:Schema(
+        description = "Модель прогнозирования: city — отдельное обследование, region — сводные данные. Выбирается отдельно от района проживания.",
+        allowableValues = ["city", "region"], example = "city"
+    )
+    val modelKind: String? = null,
+
+    @field:Schema(
+        description = "Период экологических данных: обязателен для city; для region поле отсутствует или равно null.",
+        allowableValues = ["2013", "2017", "2019", "2021"], nullable = true, example = "2021"
+    )
+    val year: Int? = null,
+
+    @field:NotNull
+    @field:Min(0) @field:Max(1)
+    @field:Schema(
+        description = "Хронические заболевания лёгких: 0 — нет, 1 — есть. Требуется явный ответ для обеих моделей.",
+        allowableValues = ["0", "1"], example = "0"
+    )
+    val chronicLungDisease: Int? = null,
+
+    @field:NotNull
+    @field:Min(1) @field:Max(2)
     @field:Schema(description = "Код пола, передаваемый в ML", example = "1")
     val genderId: Long? = null,
 
@@ -38,25 +63,27 @@ data class SurveyRequest(
     val hipMeasurement: BigDecimal? = null,
 
     @field:NotNull
-    @field:Positive
+    @field:Min(1) @field:Max(3)
     @field:Schema(description = "Код употребления алкоголя; перед отправкой ML вычитается 1", example = "3")
     val alcoholId: Long? = null,
 
     @field:NotNull
-    @field:Positive
-    @field:Schema(description = "Код профессии, передаваемый в ML", example = "6")
+    @field:Min(1) @field:Max(13)
+    @field:Schema(description = "Код профессии 1–13 по классификации notebook-13-v1 из ML-контракта. Не ID записи БД и не код старого справочника profession (1–14).", example = "2")
     val professionId: Long? = null,
 
     @field:NotNull
-    @field:Positive
+    @field:Min(1) @field:Max(6)
     @field:Schema(description = "Код района, передаваемый в ML", example = "1")
     val regionId: Long? = null,
 
 //    @field:DecimalMin("0.1") @field:DecimalMax("50.0")
+    @field:DecimalMin("0")
     @field:Schema(description = "Глюкоза, ммоль/л", example = "5.2")
     val glucose: BigDecimal? = null,
 
 //    @field:DecimalMin("0.1") @field:DecimalMax("30.0")
+    @field:DecimalMin("0")
     @field:Schema(description = "Общий холестерин, ммоль/л", example = "4.8")
     val cholesterol: BigDecimal? = null,
 
@@ -69,10 +96,12 @@ data class SurveyRequest(
     val vldlCholesterol: BigDecimal? = null,
 
 //    @field:DecimalMin("0.1") @field:DecimalMax("10.0")
+    @field:DecimalMin("0")
     @field:Schema(description = "Холестерин ЛПВП, ммоль/л", example = "1.3")
     val hdlCholesterol: BigDecimal? = null,
 
 //    @field:DecimalMin("0.1") @field:DecimalMax("20.0")
+    @field:DecimalMin("0")
     @field:Schema(description = "Холестерин ЛПНП, ммоль/л", example = "2.8")
     val ldlCholesterol: BigDecimal? = null,
 
@@ -85,6 +114,7 @@ data class SurveyRequest(
     val apolipoproteinB: BigDecimal? = null,
 
 //    @field:DecimalMin("0.1") @field:DecimalMax("20.0")
+    @field:DecimalMin("0")
     @field:Schema(description = "Триглицериды, ммоль/л", example = "1.5")
     val triglycerides: BigDecimal? = null,
 
@@ -133,7 +163,16 @@ data class SurveyRequest(
     @field:Valid
     @field:Schema(description = "Дополнительные диагнозы; текущий ML-маппер это поле не использует")
     val diagnoses: List<DiagnosisRequest> = emptyList()
-)
+) {
+    @get:JsonIgnore
+    @get:AssertTrue(message = "Для city нужен период 2013, 2017, 2019 или 2021; для region year должен быть null")
+    val isModelPeriodValid: Boolean
+        get() = when (modelKind) {
+            "city" -> year in setOf(2013, 2017, 2019, 2021)
+            "region" -> year == null
+            else -> true
+        }
+}
 
 data class DiagnosisRequest(
     @field:Positive
@@ -147,13 +186,16 @@ data class DiagnosisRequest(
 
 data class SurveyResponse(
     @field:Schema(description = "Прогнозы по заболеваниям")
-    val predictions: List<DiseasePrediction> = emptyList()
+    val predictions: List<DiseasePrediction> = emptyList(),
+    val modelVersion: String? = null
 )
 
 data class DiseasePrediction(
     val name: String,
     @field:Schema(description = "Вероятность в процентах от 0 до 100", example = "25")
-    val probability: Int  // целое число 0–100
+    val probability: Int,  // целое число 0–100
+    val modelKind: String? = null,
+    val prediction: Int? = null
 )
 
 data class GlossaryResponse(

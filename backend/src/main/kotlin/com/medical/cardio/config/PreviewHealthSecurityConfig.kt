@@ -10,7 +10,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 
 @Configuration
-@Profile("preview")
+@Profile("preview", "local", "probe")
 class PreviewHealthSecurityConfig {
 
     @Bean

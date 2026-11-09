@@ -37,6 +37,9 @@ class ProblemOpenApiConfig {
             .required(listOf("type", "title", "status", "detail", "instance", "code")))
 
         val definitions = listOf(
+            Definition(409, "MlRetrainBusy", "Переобучение уже выполняется", "ml-retrain", "Переобучение отклонено", "Переобучение уже выполняется. Дождитесь завершения.", "ML_RETRAIN_BUSY"),
+            Definition(413, "MlDatasetTooLarge", "CSV превышает лимит ML; локальный лимит загрузки также даёт 413", "ml-retrain", "Переобучение отклонено", "CSV превышает допустимый размер ML-сервиса.", "ML_DATASET_TOO_LARGE"),
+            Definition(422, "MlDatasetInvalid", "CSV не соответствует ML-схеме", "ml-retrain", "Переобучение отклонено", "CSV не соответствует схеме ML. Проверьте столбцы и значения.", "ML_DATASET_INVALID"),
             Definition(400, "BadRequest", "Некорректный запрос или ошибки валидации", "bad-request", "Некорректный запрос", "Некорректный запрос.", "BAD_REQUEST"),
             Definition(401, "Unauthorized", "Требуется вход: cookie отсутствует, JWT истёк/недействителен либо вход отклонён", "authentication", "Требуется авторизация", "Войдите в систему для выполнения запроса.", "UNAUTHORIZED"),
             Definition(403, "Forbidden", "Недостаточно прав", "forbidden", "Доступ запрещён", "Недостаточно прав для выполнения запроса.", "FORBIDDEN"),
@@ -135,6 +138,7 @@ class ProblemOpenApiConfig {
             "instance" to when (name) {
                 "InvalidRefresh", "CsrfRejected" -> "/api/auth/refresh"
                 "LoginRateLimited", "ServiceUnavailable" -> "/api/auth/login"
+                "MlRetrainBusy", "MlDatasetTooLarge", "MlDatasetInvalid" -> "/api/admin/retrain"
                 else -> "/api/survey/submit"
             },
             "code" to code

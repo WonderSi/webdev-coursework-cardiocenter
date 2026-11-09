@@ -1,17 +1,29 @@
 package com.medical.cardio.service
 
-import com.medical.cardio.entity.PatientEntity
 import com.medical.cardio.exception.MlServiceException
-import com.medical.cardio.repository.PatientRepository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 data class RetrainResult(
     val status: String,
-    val savedModels: List<String>
+    val savedModels: List<String>,
+    val modelVersion: String,
+    val inputPatients: Int,
+    val preparedRows: Map<String, Int>,
+    val modelsStats: List<OneModelStats>
 )
 
 data class OneModelStats(
+    val modelStem: String,
+    val target: String? = null,
+    val iterations: Int? = null,
+    val threshold: Double? = null,
+    val modelVariant: String? = null,
+    val trainPatients: Int? = null,
+    val validationRows: Int? = null,
+    val validationPatients: Int? = null,
+    val validationPos: Int? = null,
+    val validationNeg: Int? = null,
+    val testPatients: Int? = null,
     val modelName: String,
     val featureCount: Int,
     val trainRows: Int,
@@ -45,152 +57,84 @@ data class FullModelsResponse(
 
 @Service
 class RetrainService(
-    private val patientRepository: PatientRepository,
     private val mlClient: MlClient,
 ) {
     fun getModelStats(): FullModelsResponse {
-        val metrics = mlClient.getMetrics().block()
-            ?: throw MlServiceException(IllegalStateException("Нет ответа от ML-сервиса"))
-        return FullModelsResponse(
-            modelVersion = "1.0.0",
-            savedModels = metrics.map { "${it.modelStem}_model.cbm" },
-            modelsStats = metrics.map { m ->
-                OneModelStats(
-                    modelName = MlClient.DISEASE_NAMES[m.modelStem] ?: m.modelStem,
-                    featureCount = m.featureCount,
-                    trainRows = m.trainRows,
-                    testRows = m.testRows,
-                    trainPos = m.trainPos,
-                    trainNeg = m.trainNeg,
-                    testPos = m.testPos,
-                    testNeg = m.testNeg,
-                    classWeight0 = m.classWeight0,
-                    classWeight1 = m.classWeight1,
-                    rocAuc = m.rocAuc,
-                    prAuc = m.prAuc,
-                    accuracy = m.accuracy,
-                    balancedAccuracy = m.balancedAccuracy,
-                    precision = m.precision,
-                    recall = m.recall,
-                    f1 = m.f1,
-                    logloss = m.logloss,
-                    brier = m.brier,
-                    tn = m.tn,
-                    fp = m.fp,
-                    fn = m.fn,
-                    tp = m.tp,
+        // Read-only retry: a retrain may publish a new pair while metrics are read.
+        repeat(2) {
+            val before = activeVersion()
+            val metrics = mlClient.getMetrics().block()
+                ?: throw MlServiceException(IllegalStateException("Empty ML metrics response"))
+            val after = activeVersion()
+            if (before == after) {
+                if (metrics.size != 2 || metrics.map { it.modelStem }.toSet() != setOf("city", "region")) {
+                    throw MlServiceException(IllegalStateException("Incomplete ML metrics pair"))
+                }
+                return FullModelsResponse(
+                    modelVersion = after,
+                    savedModels = metrics.map { "${it.modelStem}_model.cbm" },
+                    modelsStats = metrics.map { it.toStats() }
                 )
             }
-        )
-    }
-
-    @Transactional(readOnly = true)
-    fun retrain(): RetrainResult {
-        val patients = patientRepository.findAllWithDiagnoses()
-        val csvBytes = generateCsv(patients)
-        val response = mlClient.retrain(csvBytes).block()
-            ?: throw MlServiceException(IllegalStateException("Нет ответа от ML-сервиса"))
-        return RetrainResult(status = response.status, savedModels = response.savedModels)
-    }
-
-    private fun generateCsv(patients: List<PatientEntity>): ByteArray {
-        val sb = StringBuilder()
-        sb.append("id,year,пол,алкоголь,профессия,район,возраст,рост,вес,")
-        sb.append("холестерин,холестерин лпвп,холестерин лпнп,тг,об,глюкоза,")
-        sb.append("не лпвп,лпонп,липиды apoa,липиды apo b,имт,")
-        sb.append("инсульт,сн,нарушение ритма или ибс,стенокардия,им,аг,")
-        sb.appendLine("инсульт_год,сн_год,нарушение_ритма_год,стенокардия_год,им_год,аг_год")
-
-        for (patient in patients) {
-            val regionStr = REGION_MAP[patient.region?.code] ?: continue
-
-            val diagCodes = patient.diagnoses.map { it.diagnosis.code }.toSet()
-            val yearMap   = patient.diagnoses
-                .filter { it.yearOfDiagnosis != null }
-                .associate { it.diagnosis.code to it.yearOfDiagnosis!! }
-
-            val h = patient.height?.toDouble()
-            val w = patient.weight?.toDouble()
-            val bmi = if (h != null && w != null && h > 0) {
-                val hM = h / 100.0
-                (w / (hM * hM)).toString()
-            } else ""
-
-            val row = listOf(
-                patient.id.toString(),
-                patient.createDate.year.toString(),
-                GENDER_MAP[patient.gender.code] ?: "",
-                ALCOHOL_MAP[patient.alcohol?.code] ?: "",
-                csvEsc(PROFESSION_MAP[patient.profession?.code] ?: ""),
-                regionStr,
-                patient.age.toString(),
-                patient.height?.toPlainString() ?: "",
-                patient.weight?.toPlainString() ?: "",
-                patient.cholesterol?.toPlainString() ?: "",
-                patient.hdlCholesterol?.toPlainString() ?: "",
-                patient.ldlCholesterol?.toPlainString() ?: "",
-                patient.triglycerides?.toPlainString() ?: "",
-                patient.hipMeasurement?.toPlainString() ?: "",
-                patient.glucose?.toPlainString() ?: "",
-                patient.nonHdlCholesterol?.toPlainString() ?: "",
-                patient.vldlCholesterol?.toPlainString() ?: "",
-                patient.apolipoproteinA?.toPlainString() ?: "",
-                patient.apolipoproteinB?.toPlainString() ?: "",
-                bmi,
-                if (1 in diagCodes) "1" else "0",
-                if (2 in diagCodes) "1" else "0",
-                if (3 in diagCodes) "1" else "0",
-                if (4 in diagCodes) "1" else "0",
-                if (5 in diagCodes) "1" else "0",
-                if (6 in diagCodes) "1" else "0",
-                yearMap[1]?.toString() ?: "",
-                yearMap[2]?.toString() ?: "",
-                yearMap[3]?.toString() ?: "",
-                yearMap[4]?.toString() ?: "",
-                yearMap[5]?.toString() ?: "",
-                yearMap[6]?.toString() ?: "",
-            )
-            sb.appendLine(row.joinToString(","))
         }
-
-        return sb.toString().toByteArray(Charsets.UTF_8)
+        throw MlServiceException(IllegalStateException("ML version changed during metrics read"))
     }
 
-    private fun csvEsc(value: String): String =
-        if (value.contains(',') || value.contains('"') || value.contains('\n'))
-            "\"${value.replace("\"", "\"\"")}\""
-        else value
+    private fun activeVersion(): String = mlClient.getModelVersion().block()
+        ?: throw MlServiceException(IllegalStateException("Empty ML model version"))
 
-    companion object {
-        private val GENDER_MAP = mapOf(1 to "муж", 2 to "жен")
-        private val ALCOHOL_MAP = mapOf(
-            1 to "нет",
-            2 to "ранее употреблял",
-            3 to "да в настоящее время",
-        )
-        private val PROFESSION_MAP = mapOf(
-            1  to "ведение домашнего хозяйства",
-            2  to "вооруженные силы",
-            3  to "лица свободных профессий",
-            4  to "низкоквалифицированные  и неквалифицированные работники, рабочие, ручной труд",
-            5  to "операторы и монтажники установок и машинного оборудования",
-            6  to "служащие, сфера обслуживания, работники среднего звена",
-            7  to "никогда не работающие домохозяйки",
-            8  to "дипломированные специалисты, умственный труд",
-            9  to "другое",
-            10 to "квалифицированные специалисты сельского хозяйства и рыболовного",
-            11 to "пенсионеры",
-            12 to "ремесленники и представители других отраслей промышленности",
-            13 to "техники и младшие специалисты",
-            14 to "представители законодательных органов власти, высокопоставленные должностные лица, менеджеры и руководители",
-        )
-        private val REGION_MAP = mapOf(
-            1 to "рудничный",
-            2 to "центральный",
-            3 to "заводский",
-            4 to "кировский",
-            5 to "ленинский",
-            6 to "сельская местность",
+    fun getDatasetSchema(): com.fasterxml.jackson.databind.JsonNode =
+        mlClient.getDatasetSchema().block()
+            ?: throw MlServiceException(IllegalStateException("Empty ML dataset schema"))
+
+    fun retrain(csvBytes: ByteArray): RetrainResult {
+        require(csvBytes.isNotEmpty()) { "Dataset is empty" }
+        val response = mlClient.retrain(csvBytes).block()
+            ?: throw MlServiceException(IllegalStateException("Empty ML retrain response"))
+        return RetrainResult(
+            status = response.status,
+            savedModels = response.savedModels,
+            modelVersion = response.modelVersion,
+            inputPatients = response.inputPatients,
+            preparedRows = response.preparedRows,
+            modelsStats = response.metrics.map { it.toStats() }
         )
     }
 }
+
+private fun MlMetric.toStats(): OneModelStats = OneModelStats(
+    modelStem = modelStem,
+    target = target,
+    iterations = iterations,
+    threshold = threshold,
+    modelVariant = modelVariant,
+    trainPatients = trainPatients,
+    validationRows = validationRows,
+    validationPatients = validationPatients,
+    validationPos = validationPos,
+    validationNeg = validationNeg,
+    testPatients = testPatients,
+    modelName = MlClient.DISEASE_NAMES[this.modelStem] ?: this.modelStem,
+    featureCount = this.featureCount,
+    trainRows = this.trainRows,
+    testRows = this.testRows,
+    trainPos = this.trainPos,
+    trainNeg = this.trainNeg,
+    testPos = this.testPos,
+    testNeg = this.testNeg,
+    classWeight0 = this.classWeight0,
+    classWeight1 = this.classWeight1,
+    rocAuc = this.rocAuc,
+    prAuc = this.prAuc,
+    accuracy = this.accuracy,
+    balancedAccuracy = this.balancedAccuracy,
+    precision = this.precision,
+    recall = this.recall,
+    f1 = this.f1,
+    logloss = this.logloss,
+    brier = this.brier,
+    tn = this.tn,
+    fp = this.fp,
+    fn = this.fn,
+    tp = this.tp,
+)

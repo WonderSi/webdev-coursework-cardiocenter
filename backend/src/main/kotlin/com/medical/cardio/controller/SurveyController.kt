@@ -33,7 +33,7 @@ class SurveyController(
 
     @Operation(
         summary = "Получить прогноз по ответам опроса",
-        description = "Валидирует ответы и передаёт их ML-сервису. Поля genderId, alcoholId, professionId и regionId передаются как числовые коды, используемые ML-сервисом. Ошибка или пустой ответ ML даёт 502 в формате Problem Details. Вероятности в ответе выражены целыми процентами от 0 до 100."
+        description = "Прогноз явно выбранной модели: city — отдельное обследование, region — сводные данные. Район проживания не переключает модель. Для city обязателен период экологических данных year: 2013, 2017, 2019 или 2021; для region year должен быть null. chronicLungDisease обязателен (0/1). professionId — новый код notebook-13-v1 из ML-контракта, а не старого справочника profession; alcoholId 1–3 преобразуется в ML-код 0–2. Прочие Id — коды, не ID записей БД. Ответ содержит один составной исход, целый процент, класс prediction и modelVersion. Ошибка ML даёт 502 Problem Details."
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Результат прогнозирования", useReturnTypeSchema = true),

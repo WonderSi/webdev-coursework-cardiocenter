@@ -135,6 +135,19 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         )
     }
 
+    @ExceptionHandler(MlRetrainRejectedException::class)
+    fun handleMlRetrainRejected(ex: MlRetrainRejectedException): ProblemDetail {
+        log.warn("ML retraining rejected with status {}", ex.status.value())
+        val (code, detail) = when (ex.status) {
+            HttpStatus.CONFLICT -> "ML_RETRAIN_BUSY" to "Переобучение уже выполняется. Дождитесь завершения."
+            HttpStatus.PAYLOAD_TOO_LARGE -> "ML_DATASET_TOO_LARGE" to "CSV превышает допустимый размер ML-сервиса."
+            else -> "ML_DATASET_INVALID" to "CSV не соответствует схеме ML. Проверьте столбцы и значения."
+        }
+        return ApiProblem.create(
+            ex.status, "urn:cardiocenter:problem:ml-retrain", "Переобучение отклонено", detail, code
+        )
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleUnexpected(ex: Exception): ProblemDetail {
         log.error("Unexpected request failure", ex)

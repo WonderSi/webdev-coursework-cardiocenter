@@ -45,6 +45,8 @@ services:
 
   ml-service:
     image: ${ML_IMAGE:?Set ML_IMAGE}
+    volumes:
+      - ml_models:/app/app/models
     mem_limit: 512m
     cpus: 0.40
     healthcheck:
@@ -112,5 +114,6 @@ services:
     restart: unless-stopped
 
 volumes:
+  ml_models:
   postgres_data:
   redis_data:

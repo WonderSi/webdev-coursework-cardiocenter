@@ -1,0 +1,10 @@
+# Minimal container probe; activate alongside prod.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
