@@ -1,10 +1,23 @@
 <template>
   <div class="step-container">
     <div class="form-row" v-for="field in group.fields" :key="field.key">
-      <span class="field-label">{{ field.label }}:</span>
+      <span :id="`${field.key}-label`" class="field-label">{{ field.label }}:</span>
+
+      <select
+        v-if="field.type === 'select'"
+        class="select-field"
+        :name="field.key"
+        :aria-labelledby="`${field.key}-label`"
+        v-model="answers[field.key]"
+      >
+        <option :value="null" disabled>Выберите вариант</option>
+        <option v-for="opt in field.options" :key="opt.valueId" :value="opt.valueId">
+          {{ opt.label }}
+        </option>
+      </select>
 
       <!-- Radio -->
-      <div v-if="field.type === 'radio'" class="radio-group-horizontal">
+      <div v-else-if="field.type === 'radio'" class="radio-group-horizontal">
         <label v-for="opt in field.options" :key="opt.valueId" class="radio-label">
           <span>{{ opt.label }}</span>
           <input type="radio" :name="field.key" :value="opt.valueId" v-model="answers[field.key]" />
@@ -15,6 +28,11 @@
       <div v-else-if="field.type === 'number'" class="input-group">
         <input
           type="number"
+          :name="field.key"
+          :aria-labelledby="`${field.key}-label`"
+          :min="field.validation?.min"
+          :max="field.validation?.max"
+          :step="field.validation?.integer ? 1 : 'any'"
           class="input-field"
           :class="{ 'input-error': errors[field.key] }"
           :placeholder="field.placeholder || ''"
@@ -55,11 +73,22 @@ defineProps<{
   flex-wrap: wrap;
 }
 
+.select-field {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1.5px solid $color-accent-lighter2;
+  border-radius: 10px;
+  background: $color-white;
+  color: $color-text;
+  font: inherit;
+}
+
 .field-label {
   font-size: 0.95rem;
   font-weight: 700;
   color: $color-text;
-  white-space: nowrap;
+  white-space: normal;
   min-width: 80px;
 }
 

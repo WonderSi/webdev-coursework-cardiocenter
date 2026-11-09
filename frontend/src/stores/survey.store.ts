@@ -1,22 +1,23 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { SURVEY_CONFIG } from '@/config/survey.config'
 
 export interface GlossaryOption {
-  valueId: number
+  valueId: number | string
   label: string
 }
 
 export interface ValidationRule {
   min?: number
   max?: number
+  integer?: boolean
   required?: boolean
 }
 
 // Описание одного поля анкеты
 export interface SurveyField {
   key: string
-  type: 'radio' | 'number' | 'yesno'
+  type: 'radio' | 'number' | 'yesno' | 'select'
   label: string
   unit?: string
   placeholder?: string
@@ -24,6 +25,7 @@ export interface SurveyField {
   vertical?: boolean
   yearKey?: string
   options?: GlossaryOption[]
+  visibleWhen?: { key: string; value: number | string }
   validation?: ValidationRule
 }
 
@@ -31,6 +33,7 @@ export interface SurveyField {
 export interface SurveyGroup {
   id: number
   title: string
+  description?: string
   requiredFields: string[]
   fields: SurveyField[]
 }
@@ -40,18 +43,21 @@ export interface SurveyConfig {
   groups: SurveyGroup[]
 }
 
-// Одно предсказание ML: русское название болезни и вероятность (целое 0–100)
+// Один составной исход ML и его вероятность (целое 0–100).
 export interface DiseasePrediction {
   name: string
   probability: number
+  modelKind: 'city' | 'region'
+  prediction: 0 | 1
 }
 
 // Ответ от бэкенда при отправке анкеты
 export interface SurveyResponse {
   predictions: DiseasePrediction[]
+  modelVersion: string | null
 }
 
-const API_BASE = (import.meta.env.VITE_API_BASE || 'http://localhost:8080/api').replace(/\/$/, '')
+const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '')
 
 async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {
@@ -69,20 +75,21 @@ export const useSurveyStore = defineStore('survey', () => {
   const loading = ref(false)
   const predictions = ref<DiseasePrediction[]>([])
   const submitted = ref(false)
+  const modelVersion = ref<string | null>(null)
+
+  watch(() => answers.modelKind, (kind) => {
+    if (kind !== 'city') answers.year = null
+  })
 
   // Загрузка из локального конфига
   function loadConfig() {
+    reset()
     config.value = SURVEY_CONFIG
     
     config.value.groups.forEach(group => {
       group.fields.forEach(field => {
-        // Если тип yesno - ставим 0 (Нет) по умолчанию, иначе null
-        answers[field.key] = field.type === 'yesno' ? 0 : null
-        
-        // Если у поля есть yearKey, его год инициализируем как null
-        if (field.yearKey) {
-          answers[field.yearKey] = null
-        }
+        // На каждый вопрос, включая заболевания лёгких, нужен явный ответ.
+        answers[field.key] = null
       })
     })
   }
@@ -96,6 +103,7 @@ export const useSurveyStore = defineStore('survey', () => {
         body: JSON.stringify(data),
       })
       predictions.value = response.predictions ?? []
+      modelVersion.value = response.modelVersion ?? null
       submitted.value = true
       return true
     } catch (e) {
@@ -111,6 +119,7 @@ export const useSurveyStore = defineStore('survey', () => {
       answers[key] = null
     }
     predictions.value = []
+    modelVersion.value = null
     submitted.value = false
   }
 
@@ -118,38 +127,23 @@ export const useSurveyStore = defineStore('survey', () => {
     const parseNum = (v: unknown) => v !== null && v !== undefined && v !== '' ? Number(v) : undefined
 
     return {
+      modelKind: answers.modelKind,
+      year: answers.modelKind === 'city' ? parseNum(answers.year) : null,
+      chronicLungDisease: answers.chronicLungDisease,
       genderId: answers.gender ?? undefined,
       age: parseNum(answers.age) ?? undefined,
       height: parseNum(answers.height),
       weight: parseNum(answers.weight),
-      hipMeasurement: parseNum(answers.hipMeasurement),
       alcoholId: answers.alcohol ?? undefined,
       professionId: answers.profession ?? undefined,
       regionId: answers.region ?? undefined,
       glucose: parseNum(answers.glucose),
       cholesterol: parseNum(answers.cholesterol),
-      nonHdlCholesterol: parseNum(answers.nonHdlCholesterol),
-      vldlCholesterol: parseNum(answers.vldlCholesterol),
       hdlCholesterol: parseNum(answers.hdlCholesterol),
       ldlCholesterol: parseNum(answers.ldlCholesterol),
-      apolipoproteinA: parseNum(answers.apolipoproteinA),
-      apolipoproteinB: parseNum(answers.apolipoproteinB),
       triglycerides: parseNum(answers.triglycerides),
-      stroke: answers.stroke ?? undefined,
-      strokeYear: parseNum(answers.strokeYear),
-      heartFailure: answers.heartFailure ?? undefined,
-      heartFailureYear: parseNum(answers.heartFailureYear),
-      cad: answers.cad ?? undefined,
-      cadYear: parseNum(answers.cadYear),
-      angina: answers.angina ?? undefined,
-      anginaYear: parseNum(answers.anginaYear),
-      myocardialInfarction: answers.myocardialInfarction ?? undefined,
-      myocardialInfarctionYear: parseNum(answers.myocardialInfarctionYear),
-      arterialHypertension: answers.arterialHypertension ?? undefined,
-      arterialHypertensionYear: parseNum(answers.arterialHypertensionYear),
-      diagnoses: []
     }
   }
 
-  return { config, answers, loading, predictions, submitted, loadConfig, submit, reset }
+  return { config, answers, loading, predictions, modelVersion, submitted, loadConfig, submit, reset }
 })

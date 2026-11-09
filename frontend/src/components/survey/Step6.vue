@@ -1,11 +1,15 @@
 <template>
   <div class="step-container">
     <div class="form-row" v-for="field in group.fields" :key="field.key">
-      <span class="field-label">{{ field.label }}:</span>
+      <label :for="field.key" class="field-label">{{ field.label }}:</label>
 
       <div class="input-group">
         <input
           type="number"
+          :id="field.key"
+          :name="field.key"
+          :min="field.validation?.min"
+          step="any"
           class="input-field"
           :class="{ 'input-error': errors[field.key] }"
           :placeholder="field.placeholder || ''"

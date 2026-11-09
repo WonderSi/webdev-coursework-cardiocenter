@@ -31,6 +31,7 @@
 
         <div class="step-content">
           <p class="question-text">{{ currentGroup.title }}</p>
+          <p v-if="currentGroup.description" class="question-description">{{ currentGroup.description }}</p>
           <div class="divider"></div>
 
           <component
@@ -75,9 +76,16 @@ const loading = ref(true)
 const currentStepIndex = ref(0)
 const showErrors = ref(false)
 
-const currentGroup = computed(() =>
-  store.config?.groups?.[currentStepIndex.value] ?? null
-)
+const currentGroup = computed(() => {
+  const group = store.config?.groups?.[currentStepIndex.value]
+  if (!group) return null
+  return {
+    ...group,
+    fields: group.fields.filter(field =>
+      !field.visibleWhen || store.answers[field.visibleWhen.key] === field.visibleWhen.value
+    ),
+  }
+})
 const isLastStep = computed(() =>
   store.config ? currentStepIndex.value === store.config.groups.length - 1 : false
 )
@@ -122,8 +130,10 @@ const fieldErrors = computed<Record<string, string>>(() => {
     // Number
     if (field.type === 'number' && !isEmpty && field.validation) {
       const num = Number(value)
-      if (isNaN(num)) {
+      if (!Number.isFinite(num)) {
         errors[field.key] = 'Введите число'
+      } else if (field.validation.integer && !Number.isInteger(num)) {
+        errors[field.key] = 'Введите корректное значение'
       } else if (field.validation.min !== undefined && num < field.validation.min) {
         errors[field.key] = `Введите корректное значение`
       } else if (field.validation.max !== undefined && num > field.validation.max) {
@@ -214,6 +224,8 @@ const prevStep = () => {
 
 const handleKeyDown = (event: KeyboardEvent) => {
   const activeElement = document.activeElement
+  if (event.defaultPrevented || event.repeat || activeElement?.tagName === 'SELECT') return
+  if (event.key === 'Enter' && activeElement && ['BUTTON', 'A'].includes(activeElement.tagName)) return
   const isInputFocused = activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)
 
   if (event.key === 'Enter' || (event.key === 'ArrowRight' && !isInputFocused)) {
@@ -256,6 +268,7 @@ onUnmounted(() => {
 }
 
 .survey-card {
+  box-sizing: border-box;
   background: $color-white;
   border-radius: 24px;
   padding: 32px 60px;
@@ -267,6 +280,10 @@ onUnmounted(() => {
   align-items: center;
   min-height: 0;
   overflow-y: scroll;
+
+  @media (max-width: 600px) {
+    padding: 24px 20px;
+  }
 
   &::-webkit-scrollbar { width: 6px; color: $color-accent; }
   &::-webkit-scrollbar-track {
@@ -321,6 +338,13 @@ onUnmounted(() => {
 .question-text {
   text-align: center;
   font-size: 1.1rem;
+  color: $color-text;
+}
+
+.question-description {
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.4;
   color: $color-text;
 }
 

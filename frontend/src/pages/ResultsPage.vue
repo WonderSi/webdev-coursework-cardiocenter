@@ -29,29 +29,8 @@
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#EA566F"/> 
             </svg>
           </div>
-          <label class="risk-percent-general-risk">{{ general?.probability }}%</label>
-          <label class="risk-name-general-risk">{{ general?.name }}</label>
-        </div>
-
-        <div 
-          v-for="(item, index) in diseases"
-          :key="index"
-          class="risk-element"
-          :class="getRiskClass(item.probability)"
-        >
-          <div class="risk-icon">
-            <svg 
-              :width="getRiskIconSize(item.probability).width"
-              :height="getRiskIconSize(item.probability).height"
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect width="100%" height="100%" fill="currentColor" />
-            </svg>
-          </div>
-          
-          <label class="risk-percent">{{ item.probability }}%</label>
-          <label class="risk-name">{{ item.name }}</label>
+          <label class="risk-percent-general-risk">{{ prediction?.probability }}%</label>
+          <label class="risk-name-general-risk">Общий риск</label>
         </div>
       </div>
       
@@ -68,27 +47,13 @@ import { useSurveyStore } from '@/stores/survey.store'
 const router = useRouter()
 const store = useSurveyStore()
 
-const general = computed(() => store.predictions[0])
-const diseases = computed(() => store.predictions.slice(1))
+const prediction = computed(() => store.predictions[0])
 
 const goHome = () => {
   store.reset()
   router.push('/')
 }
 
-const getRiskClass = (risk: number) => {
-  if (risk >= 70) return 'risk-severe';
-  if (risk >= 50) return 'risk-high';
-  if (risk >= 30) return 'risk-medium';
-  return 'risk-low';
-}
-
-const getRiskIconSize = (risk: number) => {
-  if (risk >= 70) return { height: 70, width: 66 };
-  if (risk >= 50) return { height: 60, width: 44 };
-  if (risk >= 30) return { height: 48, width: 29 };
-  return { height: 36, width: 19 };
-}
 </script>
 
 <style scoped lang="scss">
@@ -126,6 +91,7 @@ const getRiskIconSize = (risk: number) => {
 }
 
 .results-card {
+  box-sizing: border-box;
   background: $color-white;
   border-radius: 24px;
   padding: 48px 60px;
@@ -295,6 +261,8 @@ const getRiskIconSize = (risk: number) => {
 }
 
 .risk-name-general-risk {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 2rem;
   font-weight: 800; 
   text-align: left;
