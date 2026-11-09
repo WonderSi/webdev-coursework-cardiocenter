@@ -10,7 +10,14 @@
 
 ```bash
 uv sync --frozen --no-dev
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
+uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+В Windows PowerShell, если uv установлен через Python:
+
+```powershell
+py -m uv sync --frozen --no-dev
+py -m uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 Для разработки: `uv run uvicorn app.main:app --reload`. Точка входа — app.main:app, запуск python main.py из ml/app не запускает сервер.

@@ -1,6 +1,7 @@
 import argparse
+from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
+import errno
 import hashlib
 import json
 import os
@@ -23,6 +24,30 @@ class RetrainingBusy(RuntimeError):
     pass
 
 
+@contextmanager
+def _retraining_lock(path: Path):
+    # Each caller opens its own handle, so the OS lock covers threads and processes.
+    # Keep the file in place: deleting it could let callers lock different files.
+    with path.open("a+b") as lock:
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                lock.seek(0)
+                # Windows permits locking a byte beyond EOF, even for an empty file.
+                msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as exc:
+            if exc.errno in (errno.EACCES, errno.EAGAIN, errno.EDEADLK):
+                raise RetrainingBusy("Переобучение уже выполняется") from exc
+            raise
+        # Closing the handle releases the lock, including on training failure.
+        yield
+
+
 def retrain_from_dataset_csv(
     dataset_csv: Path,
     *,
@@ -32,12 +57,7 @@ def retrain_from_dataset_csv(
 ) -> dict:
     reference_dir = reference_dir or settings.ECOLOGY_DIR
     models_dir.mkdir(parents=True, exist_ok=True)
-    # flock works across threads/processes and avoids two writers publishing over each other.
-    with (models_dir / ".retrain.lock").open("a") as lock:
-        try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            raise RetrainingBusy("Переобучение уже выполняется") from exc
+    with _retraining_lock(models_dir / ".retrain.lock"):
         patients = read_dataset(dataset_csv)
         frame = build_patient_dataset(patients)
         version = (

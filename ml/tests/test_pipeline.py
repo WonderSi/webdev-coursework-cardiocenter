@@ -1,5 +1,4 @@
 import asyncio
-import fcntl
 import json
 from pathlib import Path
 import tempfile
@@ -29,7 +28,7 @@ from app.services.preprocess import (
     load_configs,
     request_frame,
 )
-from app.services.retrain import retrain_from_dataset_csv
+from app.services.retrain import _retraining_lock, retrain_from_dataset_csv
 from app.services.training import split_patients
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -504,8 +503,7 @@ class PipelineTests(unittest.TestCase):
                         )
                 self.assertEqual((models / "CURRENT").read_bytes(), current)
                 self.assertFalse(list((models / "versions").glob(".training-*")))
-                with (models / ".retrain.lock").open("a") as lock:
-                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                with _retraining_lock(models / ".retrain.lock"):
                     self.assertEqual(upload(SOURCE.read_bytes())[0], 409)
                 with patch.object(settings, "MAX_UPLOAD_BYTES", 8):
                     self.assertEqual(upload(SOURCE.read_bytes())[0], 413)
