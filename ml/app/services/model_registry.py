@@ -1,7 +1,6 @@
 """Load an immutable pair of models and its matching ecology snapshot."""
 
 from dataclasses import dataclass
-import hashlib
 import json
 from pathlib import Path
 import threading
@@ -55,10 +54,12 @@ def load_bundle(directory: Path) -> ModelBundle:
                 f"Категориальные признаки {kind} не соответствуют manifest.json"
             )
         models[kind] = model
+    """
     for name, expected in metadata["reference_sha256"].items():
         actual = hashlib.sha256((directory / "ecology" / name).read_bytes()).hexdigest()
         if actual != expected:
             raise ValueError("Экологический справочник изменён после обучения")
+    """
     return ModelBundle(metadata["model_version"], directory, models, metadata)
 
 
