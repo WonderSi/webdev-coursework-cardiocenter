@@ -2,3 +2,6 @@
 .idea
 /docker/.env
 /frontend/.env
+AGENTS.md
+skills-lock.json
+.agents
