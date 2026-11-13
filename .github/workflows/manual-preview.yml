@@ -1,0 +1,229 @@
+name: Manual preview
+run-name: Manual preview · ${{ github.ref_name }} · ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: manual-preview-deploy
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    name: Backend and deployment tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Deployment tests
+        run: python3 -m unittest discover -s deploy/preview/tests -p 'test_manual*.py' -v
+      - name: Workflow syntax
+        run: |
+          docker run --rm --network none \
+            --mount "type=bind,source=$GITHUB_WORKSPACE/.github/workflows/manual-preview.yml,target=/manual-preview.yml,readonly" \
+            rhysd/actionlint:1.7.11 /manual-preview.yml
+      - name: Backend tests
+        working-directory: backend
+        env:
+          TESTCONTAINERS_RYUK_DISABLED: 'true'
+        run: bash mvnw --batch-mode test
+
+  images:
+    name: Build ${{ matrix.service }}
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: ml-service
+            suffix: ml
+            context: ml
+            dockerfile: ml/Dockerfile
+          - service: backend
+            suffix: backend
+            context: backend
+            dockerfile: backend/Dockerfile
+          - service: frontend
+            suffix: frontend
+            context: frontend
+            dockerfile: frontend/Dockerfile.preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Authenticate with GHCR
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+      - name: Build, check and publish image
+        env:
+          SERVICE: ${{ matrix.service }}
+          SUFFIX: ${{ matrix.suffix }}
+          BUILD_CONTEXT: ${{ matrix.context }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}-preview-${SUFFIX}:${GITHUB_SHA}-manual-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          docker build --file "$DOCKERFILE" --tag "$image" \
+            --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" "$BUILD_CONTEXT"
+          if [[ "$SERVICE" == ml-service ]]; then
+            # The full pipeline test needs a private patient CSV; it is never copied to CI.
+            docker run --rm --network none --entrypoint python "$image" \
+              -m unittest discover -s tests -p test_retrain_lock.py -v
+          fi
+          docker push "$image"
+          ref="$(docker image inspect --format '{{index .RepoDigests 0}}' "$image")"
+          mkdir -p image-refs
+          printf '{"service":"%s","image":"%s"}\n' "$SERVICE" "$ref" > "image-refs/${SERVICE}.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manual-image-${{ matrix.service }}
+          path: image-refs/*.json
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
+  deploy:
+    name: Update manual preview
+    needs: images
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: manual-preview
+    env:
+      PREVIEW_SSH_HOST: ${{ secrets.PREVIEW_SSH_HOST || vars.PREVIEW_SSH_HOST }}
+      PREVIEW_SSH_USER: ${{ secrets.PREVIEW_SSH_USER || vars.PREVIEW_SSH_USER }}
+      PREVIEW_SSH_PORT: ${{ secrets.PREVIEW_SSH_PORT || vars.PREVIEW_SSH_PORT || '22' }}
+      PREVIEW_URL: ${{ secrets.PREVIEW_URL || vars.PREVIEW_URL }}
+      PREVIEW_BASE_DIR: ${{ secrets.PREVIEW_BASE_DIR || vars.PREVIEW_BASE_DIR }}
+      PREVIEW_COMPOSE_PROJECT: ${{ secrets.PREVIEW_COMPOSE_PROJECT || vars.PREVIEW_COMPOSE_PROJECT }}
+      PREVIEW_FRONTEND_PORT: ${{ secrets.PREVIEW_FRONTEND_PORT || vars.PREVIEW_FRONTEND_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: manual-image-*
+          path: image-refs
+          merge-multiple: true
+      - name: Validate private deployment settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          for value in "$PREVIEW_SSH_HOST" "$PREVIEW_SSH_USER" "$PREVIEW_SSH_PORT" \
+            "$PREVIEW_URL" "$PREVIEW_BASE_DIR" "$PREVIEW_COMPOSE_PROJECT" "$PREVIEW_FRONTEND_PORT"; do
+            # Mask legacy Variables as well as Secrets; escape workflow command characters.
+            value="${value//'%'/'%25'}"
+            value="${value//$'\r'/'%0D'}"
+            value="${value//$'\n'/'%0A'}"
+            printf '::add-mask::%s\n' "$value"
+          done
+          umask 077
+          python3 - <<'PY'
+          import importlib.util, json, os
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('manual_deploy', 'deploy/preview/deploy-manual.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          settings = module.Settings.from_env()
+          (Path(os.environ['RUNNER_TEMP']) / 'preview-deployment-settings.json').write_text(json.dumps(settings.values) + '\n')
+          PY
+      - name: Assemble pinned release
+        shell: bash
+        run: |
+          set -euo pipefail
+          release="actions-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_SHA}"
+          printf 'PREVIEW_RELEASE=%s\n' "$release" >> "$GITHUB_ENV"
+          python3 - <<'PY'
+          import importlib.util, json, os
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('manual_deploy', 'deploy/preview/deploy-manual.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          files = list(Path('image-refs').glob('*.json'))
+          assert len(files) == 3, 'Expected three image artifacts'
+          images = {}
+          for path in files:
+              data = json.loads(path.read_text())
+              assert data['service'] not in images, 'Duplicate image artifact'
+              images[data['service']] = data['image']
+          manifest = {'commit': os.environ['GITHUB_SHA'], 'images': images}
+          release = 'actions-' + os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'] + '-' + os.environ['GITHUB_SHA']
+          module.validate_release(manifest, release, module.Settings.from_env())
+          Path('release.json').write_text(json.dumps(manifest, indent=2) + '\n')
+          PY
+      - name: Configure verified SSH connection
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.PREVIEW_SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PREVIEW_SSH_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$PREVIEW_SSH_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$PREVIEW_SSH_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$PREVIEW_SSH_PORT" =~ ^[0-9]{1,5}$ ]] && (( PREVIEW_SSH_PORT >= 1 && PREVIEW_SSH_PORT <= 65535 ))
+          test -n "$SSH_PRIVATE_KEY" && test -n "$SSH_KNOWN_HOSTS"
+          umask 077
+          mkdir -p "$RUNNER_TEMP/preview-ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$RUNNER_TEMP/preview-ssh/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/preview-ssh/known_hosts"
+          ssh-keygen -y -f "$RUNNER_TEMP/preview-ssh/key" > /dev/null
+      - name: Deliver and deploy only the manual preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          host="${PREVIEW_SSH_USER}@${PREVIEW_SSH_HOST}"
+          options=(-i "$RUNNER_TEMP/preview-ssh/key" -o BatchMode=yes -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/preview-ssh/known_hosts"
+            -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
+          target="${PREVIEW_BASE_DIR}/incoming/${PREVIEW_RELEASE}"
+          ssh "${options[@]}" -p "$PREVIEW_SSH_PORT" "$host" \
+            "test -d '$PREVIEW_BASE_DIR' && umask 077 && mkdir -p '$target'"
+          scp "${options[@]}" -P "$PREVIEW_SSH_PORT" \
+            deploy/preview/deploy-manual.py deploy/preview/validate-config.py \
+            docker/docker-compose.preview.yaml release.json "$host:$target/"
+          scp "${options[@]}" -P "$PREVIEW_SSH_PORT" \
+            "$RUNNER_TEMP/preview-deployment-settings.json" "$host:$target/deployment-settings.json"
+          ssh "${options[@]}" -p "$PREVIEW_SSH_PORT" "$host" \
+            "python3 '$target/deploy-manual.py' '$PREVIEW_RELEASE' --settings '$target/deployment-settings.json'"
+          scp "${options[@]}" -P "$PREVIEW_SSH_PORT" \
+            "$host:$PREVIEW_BASE_DIR/releases/$PREVIEW_RELEASE/report.json" preview-report.json
+      - name: Check preview from GitHub runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 -c 'import json; print(json.load(open("preview-report.json"))["modelVersion"])')"
+          python3 deploy/preview/deploy-manual.py "$PREVIEW_RELEASE" --smoke-only "$version"
+          printf '### Manual preview updated\n\n- Commit: %s\n- Release: %s\n' \
+            "$GITHUB_SHA" "$PREVIEW_RELEASE" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: manual-preview-report
+          path: preview-report.json
+          if-no-files-found: error
+          retention-days: 14
+          overwrite: true
+      - name: Remove runner connection files
+        if: always()
+        shell: bash
+        run: rm -f "$RUNNER_TEMP/preview-ssh/key" "$RUNNER_TEMP/preview-ssh/known_hosts" "$RUNNER_TEMP/preview-deployment-settings.json"
