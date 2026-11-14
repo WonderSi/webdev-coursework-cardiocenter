@@ -69,6 +69,15 @@ class PatientEntity(
 
     val triglycerides: BigDecimal? = null,
 
+    @Column(name = "model_kind", length = 10)
+    val modelKind: String,
+
+    @Column(name = "model_year")
+    val modelYear: Int? = null,
+
+    @Column(name = "chronic_lung_disease")
+    val chronicLungDisease: Int,
+
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     val diagnoses: List<DiagnosisEntity> = emptyList()
 )

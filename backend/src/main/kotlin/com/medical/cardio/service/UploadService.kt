@@ -3,16 +3,14 @@ package com.medical.cardio.service
 import com.medical.cardio.dto.PatientManualCreateRequest
 import com.medical.cardio.dto.RowError
 import com.medical.cardio.dto.UploadReport
-import com.medical.cardio.entity.DiagnosisEntity
-import com.medical.cardio.entity.PatientEntity
 import com.medical.cardio.repository.AdminUserRepository
-import com.medical.cardio.repository.DiagnosisRepository
 import com.medical.cardio.repository.GlossaryRepository
 import com.medical.cardio.repository.PatientRepository
 import com.medical.cardio.service.upload.CsvParser
 import com.medical.cardio.service.upload.ExcelParser
 import com.medical.cardio.service.upload.GlossaryResolver
 import com.medical.cardio.service.upload.PatientMapper
+import com.medical.cardio.service.upload.PatientImportSchema
 import com.medical.cardio.service.upload.RowValidator
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.cache.annotation.CacheEvict
@@ -20,12 +18,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayOutputStream
-import java.time.LocalDate
 
 @Service
 class UploadService(
     private val patientRepository: PatientRepository,
-    private val diagnosisRepository: DiagnosisRepository,
     private val glossaryRepository: GlossaryRepository,
     private val adminUserRepository: AdminUserRepository,
 ) {
@@ -56,19 +52,7 @@ class UploadService(
                     errors.add(RowError(rowNum, validation.reason))
                     return@forEachIndexed
                 }
-                val importData = PatientMapper.map(row, resolver, creator)
-                val savedPatient = patientRepository.save(importData.patient)
-                if (importData.diagnosisEntries.isNotEmpty()) {
-                    diagnosisRepository.saveAll(
-                        importData.diagnosisEntries.map { entry ->
-                            DiagnosisEntity(
-                                patient          = savedPatient,
-                                diagnosis        = entry.diagnosis,
-                                yearOfDiagnosis  = entry.year,
-                            )
-                        }
-                    )
-                }
+                patientRepository.save(PatientMapper.map(row, resolver, creator))
                 savedCount++
             } catch (e: Exception) {
                 errors.add(RowError(rowNum, e.message ?: "Ошибка обработки строки"))
@@ -90,130 +74,62 @@ class UploadService(
             ?: error("Пользователь не найден: $creatorEmail")
         val resolver = GlossaryResolver(glossaryRepository.findAllWithValues())
 
-        val gender = resolver.resolve("gender", request.gender)
-            ?: throw IllegalArgumentException("Неверный код пола: ${request.gender}")
-
-        val patient = PatientEntity(
-            createDate        = LocalDate.now(),
-            creator           = creator,
-            gender            = gender,
-            age               = request.age,
-            height            = request.height,
-            weight            = request.weight,
-            hipMeasurement    = request.hipMeasurement,
-            alcohol           = request.alcohol?.let { resolver.resolve("alcohol", it) },
-            profession        = request.profession?.let { resolver.resolve("profession", it) },
-            region            = request.region?.let { resolver.resolve("region", it) },
-            glucose           = request.glucose,
-            cholesterol       = request.cholesterol,
-            nonHdlCholesterol = request.nonHdlCholesterol,
-            vldlCholesterol   = request.vldlCholesterol,
-            hdlCholesterol    = request.hdlCholesterol,
-            ldlCholesterol    = request.ldlCholesterol,
-            apolipoproteinA   = request.apolipoproteinA,
-            apolipoproteinB   = request.apolipoproteinB,
-            triglycerides     = request.triglycerides,
-        )
-        val savedPatient = patientRepository.save(patient)
-
-        val diagnosisFields = listOf(
-            Triple(request.stroke,               request.strokeYear,               1),
-            Triple(request.heartFailure,          request.heartFailureYear,          2),
-            Triple(request.cad,                   request.cadYear,                   3),
-            Triple(request.angina,                request.anginaYear,                4),
-            Triple(request.myocardialInfarction,  request.myocardialInfarctionYear,  5),
-            Triple(request.arterialHypertension,  request.arterialHypertensionYear,  6),
-        )
-        val diagnoses = diagnosisFields.mapNotNull { (flag, year, code) ->
-            if (flag == 1) {
-                val value = resolver.resolve("diagnosis", code) ?: return@mapNotNull null
-                DiagnosisEntity(patient = savedPatient, diagnosis = value, yearOfDiagnosis = year?.toShort())
-            } else null
-        }
-        if (diagnoses.isNotEmpty()) diagnosisRepository.saveAll(diagnoses)
+        val row = PatientImportSchema.toRow(request)
+        val validation = RowValidator.validate(row, resolver)
+        require(validation.valid) { validation.reason }
+        patientRepository.save(PatientMapper.map(row, resolver, creator))
     }
 
-    fun generateTemplate(): ByteArray {
-        val workbook = XSSFWorkbook()
-
+    fun generateTemplate(): ByteArray = XSSFWorkbook().use { workbook ->
         val dataSheet = workbook.createSheet("Данные")
         val boldStyle = workbook.createCellStyle().apply {
             setFont(workbook.createFont().apply { bold = true })
         }
-        val headers = listOf(
-            "gender", "age", "height", "weight", "hip_measurement",
-            "glucose", "cholesterol", "non_hdl_cholesterol", "vldl_cholesterol",
-            "hdl_cholesterol", "ldl_cholesterol", "apolipoprotein_a", "apolipoprotein_b",
-            "triglycerides", "alcohol", "profession", "region",
-            "stroke", "stroke_year", "heart_failure", "heart_failure_year",
-            "cad", "cad_year", "angina", "angina_year",
-            "myocardial_infarction", "mi_year", "arterial_hypertension", "ah_year",
-        )
         val headerRow = dataSheet.createRow(0)
-        headers.forEachIndexed { i, h ->
-            headerRow.createCell(i).apply {
-                setCellValue(h)
+        PatientImportSchema.headers.forEachIndexed { index, name ->
+            headerRow.createCell(index).apply {
+                setCellValue(name)
                 cellStyle = boldStyle
             }
-            dataSheet.setColumnWidth(i, 5500)
+            dataSheet.setColumnWidth(index, 5500)
         }
+        dataSheet.createFreezePane(0, 1)
 
-        val refSheet = workbook.createSheet("Справочник")
-        val refRows = listOf(
-            "Пол (gender)" to "",
-            "  1" to "Мужской",
-            "  2" to "Женский",
-            "" to "",
-            "Алкоголь (alcohol)" to "",
-            "  1" to "Никогда не употреблял",
-            "  2" to "Употреблял ранее",
-            "  3" to "Употребляю",
-            "" to "",
-            "Профессия (profession)" to "",
-            "  1"  to "Ведение домашнего хозяйства",
-            "  2"  to "Вооруженные силы",
-            "  3"  to "Лица свободных профессий",
-            "  4"  to "Низкоквалифицированные работники, ручной труд",
-            "  5"  to "Операторы и монтажники оборудования",
-            "  6"  to "Служащие, сфера обслуживания",
-            "  7"  to "Никогда не работающие домохозяйки",
-            "  8"  to "Дипломированные специалисты, умственный труд",
-            "  9"  to "Другое",
-            "  10" to "Квалифицированные специалисты сельского хозяйства",
-            "  11" to "Пенсионеры",
-            "  12" to "Ремесленники и представители промышленности",
-            "  13" to "Техники и младшие специалисты",
-            "  14" to "Руководители и законодательные органы",
-            "" to "",
-            "Регион (region)" to "",
-            "  1" to "Рудничный",
-            "  2" to "Центральный",
-            "  3" to "Заводский",
-            "  4" to "Кировский",
-            "  5" to "Ленинский",
-            "  6" to "Сельская местность",
-            "" to "",
-            "Диагнозы (stroke, heart_failure, ...)" to "0 = нет, 1 = есть",
-            "  stroke"                to "Инсульт",
-            "  heart_failure"         to "Сердечная недостаточность",
-            "  cad"                   to "Нарушение ритма / ИБС",
-            "  angina"                to "Стенокардия",
-            "  myocardial_infarction" to "Инфаркт миокарда",
-            "  arterial_hypertension" to "Артериальная гипертензия",
-            "" to "",
-            "Год диагноза (stroke_year, ...)" to "Число 1900–2100, можно оставить пустым",
+        val refRows = mutableListOf(
+            "Назначение" to "Импорт обследований в БД и аналитику. Это не обучающий CSV patients_wide.",
+            "model_kind (обязательно)" to "city — отдельное обследование; region — за период наблюдения",
+            "year" to "Для city: 2013, 2017, 2019 или 2021. Для region: пустая ячейка",
+            "chronic_lung_disease (обязательно)" to "Хронические заболевания лёгких: 0 — нет, 1 — есть; неизвестное не заменять нулём",
+            "Обязательные поля" to "model_kind, chronic_lung_disease, gender, age, height, weight, alcohol, profession, region; year обязателен для city",
+            "Необязательные поля" to "hip_measurement, glucose, cholesterol, hdl_cholesterol, ldl_cholesterol, triglycerides",
+            "Кодировка профессий" to "notebook-13-v1, коды 1–13; старые коды 1–14 не подходят",
+            "Числа" to "Возраст — целое число; десятичный разделитель в CSV — точка; неизвестные анализы оставлять пустыми",
+            "Анализы" to "Неотрицательные значения, не больше 9999.99 (ограничение хранения NUMERIC(6,2))"
         )
-        refRows.forEachIndexed { i, (key, value) ->
-            val row = refSheet.createRow(i)
-            row.createCell(0).setCellValue(key)
-            row.createCell(1).setCellValue(value)
+        val glossaries = glossaryRepository.findAllWithValues().associateBy { it.name }
+        for ((name, column) in listOf(
+            "gender" to "gender", "alcohol" to "alcohol",
+            PatientImportSchema.PROFESSION_GLOSSARY to "profession", "region" to "region"
+        )) {
+            val glossary = requireNotNull(glossaries[name]) { "Справочник импорта не найден: $name" }
+            refRows += "" to ""
+            refRows += column to "Коды, а не ID записей БД"
+            glossary.values.sortedBy { it.code }.forEach { value ->
+                refRows += value.code.toString() to value.value
+            }
         }
-        refSheet.setColumnWidth(0, 9000)
-        refSheet.setColumnWidth(1, 14000)
-
-        val out = ByteArrayOutputStream()
-        workbook.write(out)
-        workbook.close()
-        return out.toByteArray()
+        val refSheet = workbook.createSheet("Справочник")
+        refRows.forEachIndexed { index, (key, value) ->
+            refSheet.createRow(index).apply {
+                createCell(0).setCellValue(key)
+                createCell(1).setCellValue(value)
+            }
+        }
+        refSheet.setColumnWidth(0, 11000)
+        refSheet.setColumnWidth(1, 24000)
+        ByteArrayOutputStream().use { out ->
+            workbook.write(out)
+            out.toByteArray()
+        }
     }
 }

@@ -69,7 +69,9 @@ class DashboardServiceTest : BaseIntegrationTest() {
             PatientEntity(
                 creator = adminUserRepository.getReferenceById(testAdminId),
                 gender = glossaryValueRepository.getReferenceById(genderId),
-                age = age
+                age = age,
+                modelKind = "region",
+                chronicLungDisease = 0
             )
         )
 

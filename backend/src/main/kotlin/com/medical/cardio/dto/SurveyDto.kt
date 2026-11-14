@@ -69,7 +69,7 @@ data class SurveyRequest(
 
     @field:NotNull
     @field:Min(1) @field:Max(13)
-    @field:Schema(description = "Код профессии 1–13 по классификации notebook-13-v1 из ML-контракта. Не ID записи БД и не код старого справочника profession (1–14).", example = "2")
+    @field:Schema(description = "Код профессии 1–13 из справочника profession по классификации notebook-13-v1 из ML-контракта. Не ID записи БД.", example = "2")
     val professionId: Long? = null,
 
     @field:NotNull

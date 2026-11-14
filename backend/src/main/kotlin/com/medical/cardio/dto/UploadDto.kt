@@ -22,62 +22,36 @@ data class RowError(
 )
 
 data class PatientManualCreateRequest(
-    @field:Schema(description = "Код пола в справочнике gender", example = "1")
-    val gender: Int,
-    @field:Schema(description = "Возраст, полных лет", example = "45")
-    val age: Int,
-    @field:Schema(description = "Рост, см", example = "175")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Модель обследования: city или region. Обязательное поле.", allowableValues = ["city", "region"], example = "city")
+    val modelKind: String? = null,
+    @field:Schema(description = "Для city: 2013, 2017, 2019 или 2021; для region: null", example = "2021")
+    val year: Int? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Хронические заболевания лёгких: явный ответ 0 или 1 обязателен", example = "0")
+    val chronicLungDisease: Int? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Код пола 1–2, обязательное поле", example = "1")
+    val gender: Int? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Возраст, полных лет; обязательное поле", example = "45")
+    val age: Int? = null,
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Рост, см; обязательное поле", example = "175")
     val height: BigDecimal? = null,
-    @field:Schema(description = "Вес, кг", example = "80")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Вес, кг; обязательное поле", example = "80")
     val weight: BigDecimal? = null,
-    @field:Schema(description = "Обхват талии/бёдер, см", example = "95")
+    @field:Schema(description = "Обхват талии/бёдер, см; необязательное поле", example = "95")
     val hipMeasurement: BigDecimal? = null,
-    @field:Schema(description = "Код значения справочника alcohol", example = "3")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Код alcohol 1–3; обязательное поле, как в анкете (ML получает код минус 1)", example = "3")
     val alcohol: Int? = null,
-    @field:Schema(description = "Код значения справочника profession", example = "1")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Код справочника profession 1–13 по notebook-13-v1; обязательное поле, не ID БД", example = "2")
     val profession: Int? = null,
-    @field:Schema(description = "Код значения справочника region", example = "1")
+    @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Код района region 1–6; обязательное поле, не определяет модель", example = "1")
     val region: Int? = null,
-    @field:Schema(description = "Глюкоза, ммоль/л", example = "5.2")
+    @field:Schema(description = "Глюкоза, ммоль/л; необязательное неотрицательное значение", example = "5.2")
     val glucose: BigDecimal? = null,
-    @field:Schema(description = "Общий холестерин, ммоль/л", example = "4.8")
+    @field:Schema(description = "Общий холестерин, ммоль/л; необязательное неотрицательное значение", example = "4.8")
     val cholesterol: BigDecimal? = null,
-    @field:Schema(description = "Холестерин не-ЛПВП, ммоль/л", example = "3.5")
-    val nonHdlCholesterol: BigDecimal? = null,
-    @field:Schema(description = "Холестерин ЛПОНП, ммоль/л", example = "0.7")
-    val vldlCholesterol: BigDecimal? = null,
-    @field:Schema(description = "Холестерин ЛПВП, ммоль/л", example = "1.3")
+    @field:Schema(description = "Холестерин ЛПВП, ммоль/л; необязательное неотрицательное значение", example = "1.3")
     val hdlCholesterol: BigDecimal? = null,
-    @field:Schema(description = "Холестерин ЛПНП, ммоль/л", example = "2.8")
+    @field:Schema(description = "Холестерин ЛПНП, ммоль/л; необязательное неотрицательное значение", example = "2.8")
     val ldlCholesterol: BigDecimal? = null,
-    @field:Schema(description = "Аполипопротеин A", example = "1.4")
-    val apolipoproteinA: BigDecimal? = null,
-    @field:Schema(description = "Аполипопротеин B", example = "0.9")
-    val apolipoproteinB: BigDecimal? = null,
-    @field:Schema(description = "Триглицериды, ммоль/л", example = "1.5")
-    val triglycerides: BigDecimal? = null,
-    @field:Schema(description = "Инсульт: 0 — нет, 1 — есть", example = "0")
-    val stroke: Int? = null,
-    @field:Schema(description = "Год постановки диагноза: Инсульт", example = "2020")
-    val strokeYear: Int? = null,
-    @field:Schema(description = "Сердечная недостаточность: 0 — нет, 1 — есть", example = "0")
-    val heartFailure: Int? = null,
-    @field:Schema(description = "Год постановки диагноза: Сердечная недостаточность", example = "2020")
-    val heartFailureYear: Int? = null,
-    @field:Schema(description = "Аритмия / ИБС: 0 — нет, 1 — есть", example = "0")
-    val cad: Int? = null,
-    @field:Schema(description = "Год постановки диагноза: Аритмия / ИБС", example = "2020")
-    val cadYear: Int? = null,
-    @field:Schema(description = "Стенокардия: 0 — нет, 1 — есть", example = "0")
-    val angina: Int? = null,
-    @field:Schema(description = "Год постановки диагноза: Стенокардия", example = "2020")
-    val anginaYear: Int? = null,
-    @field:Schema(description = "Инфаркт миокарда: 0 — нет, 1 — есть", example = "0")
-    val myocardialInfarction: Int? = null,
-    @field:Schema(description = "Год постановки диагноза: Инфаркт миокарда", example = "2020")
-    val myocardialInfarctionYear: Int? = null,
-    @field:Schema(description = "Артериальная гипертензия: 0 — нет, 1 — есть", example = "0")
-    val arterialHypertension: Int? = null,
-    @field:Schema(description = "Год постановки диагноза: Артериальная гипертензия", example = "2020")
-    val arterialHypertensionYear: Int? = null,
+    @field:Schema(description = "Триглицериды, ммоль/л; необязательное неотрицательное значение", example = "1.5")
+    val triglycerides: BigDecimal? = null
 )

@@ -32,7 +32,7 @@ class UploadController(
 
     @Operation(
         summary = "Импортировать пациентов из файла",
-        description = "Принимает multipart/form-data с полем file: CSV, XLS или XLSX, до 10 МБ. Некорректные строки пропускаются и перечисляются в отчёте; успешный HTTP-ответ не означает, что сохранены все строки."
+        description = "Принимает multipart/form-data с полем file: CSV, XLS или XLSX, до 10 МБ. Используйте актуальный шаблон обследований city/region: это не обучающий CSV patients_wide. Некорректные строки пропускаются и перечисляются в отчёте; успешный HTTP-ответ не означает, что сохранены все строки. Прогноз и переобучение автоматически не запускаются."
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "Отчёт импорта", useReturnTypeSchema = true),
@@ -48,7 +48,7 @@ class UploadController(
         return ResponseEntity.ok(uploadService.upload(file, email))
     }
 
-    @Operation(summary = "Скачать шаблон импорта", description = "Возвращает файл patients_template.xlsx с заголовками для загрузки пациентов.")
+    @Operation(summary = "Скачать шаблон импорта", description = "Возвращает patients_template.xlsx для обследований city/region с новым справочником профессий notebook-13-v1. Одна строка — одно обследование. Шаблон не предназначен для переобучения моделей.")
     @ApiResponses(value = [
         ApiResponse(
             responseCode = "200",
