@@ -166,7 +166,7 @@ async function updateBlocked() {
           <span>Справка (как пользоваться страницей)</span>
         </button>
       </header>
-      <!-- Начало макета справки. Тексты и наполнение колонок можно дописать здесь. -->
+      <!--  СПРАВКА: контент -->
       <aside
         v-if="isHelpOpen"
         id="doctors-page-help"
@@ -667,11 +667,11 @@ async function updateBlocked() {
   min-height: calc(100dvh - 56px);
   padding: 24px;
   border: 1px solid rgba($color-white, 0.5);
-  border-radius: 8px;
+  border-radius: $radius-glass-card;
   background: rgba($color-white, 0.68);
 }
 
-// Шапка и кнопка справки.
+// Шапка и кнопка справки
 .card-header {
   display: flex;
   align-items: flex-start;
@@ -698,11 +698,11 @@ async function updateBlocked() {
   max-width: 100%;
   padding: 10px 14px;
   border: 0;
-  border-radius: 6px;
+  border-radius: $radius-rect-buttons;
   background: $color-white;
   color: $color-blue-dark;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   line-height: 1.4;
   text-align: left;
   cursor: pointer;
@@ -728,7 +728,7 @@ async function updateBlocked() {
   position: relative;
   margin-bottom: 24px;
   padding: 16px;
-  border-radius: 6px;
+  border-radius: 16px;
   background: $color-white;
   color: $color-blue-dark;
   font-size: 0.8125rem;
@@ -873,9 +873,9 @@ async function updateBlocked() {
   gap: 8px;
   border: 1px solid transparent;
   border-radius: $radius-rect-buttons;
-  padding: 12px 18px;
+  padding: 8px 16px;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -974,7 +974,7 @@ async function updateBlocked() {
   padding: 6px 0;
   color: $color-accent;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   text-underline-offset: 3px;
