@@ -13,8 +13,9 @@ export interface Doctor {
   email: string
   isBlocked: boolean
   name?: string
-  username?: string
   accessLevel?: DoctorAccessLevel
+  // Frontend-only metadata; never sent to the backend.
+  pendingFields?: Array<'account' | 'name' | 'email' | 'accessLevel'>
 }
 
 export interface DoctorCapabilities {
@@ -29,7 +30,6 @@ export interface DoctorDirectory {
 
 export interface DoctorDraft {
   name: string
-  username: string
   email: string
   password: string
   accessLevel: DoctorAccessLevel
@@ -44,8 +44,8 @@ async function checkResponse(response: Response, fallback: string): Promise<void
   if (response.status === 404 || response.status === 405) {
     throw new Error('Эта операция пока недоступна. Обновите список или обратитесь к администратору системы.')
   }
-  if (response.status === 409) throw new Error('Этот логин или email уже используется.')
-  if (response.status === 400) throw new Error('Проверьте данные. Логин и email должны быть уникальными, пароль — от 12 до 100 символов.')
+  if (response.status === 409) throw new Error('Этот email уже используется.')
+  if (response.status === 400) throw new Error('Проверьте данные. Email должен быть уникальным, пароль — от 12 до 100 символов.')
   throw new Error(fallback)
 }
 
@@ -55,7 +55,6 @@ function isDoctor(value: unknown): value is Doctor {
   return typeof doctor.id === 'number' && typeof doctor.email === 'string'
     && typeof doctor.isBlocked === 'boolean'
     && (doctor.name === undefined || typeof doctor.name === 'string')
-    && (doctor.username === undefined || typeof doctor.username === 'string')
     && (doctor.accessLevel === undefined || doctorAccessLevels.some(level => level.value === doctor.accessLevel))
 }
 
@@ -74,7 +73,7 @@ export async function fetchDoctors(signal?: AbortSignal): Promise<DoctorDirector
     profiles: !Array.isArray(data) && directory?.capabilities?.profiles === true,
     accessLevels: !Array.isArray(data) && directory?.capabilities?.accessLevels === true,
   }
-  if (doctors.some(doctor => (capabilities.profiles && (!doctor.name?.trim() || !doctor.username?.trim()))
+  if (doctors.some(doctor => (capabilities.profiles && !doctor.name?.trim())
     || (capabilities.accessLevels && !doctor.accessLevel))) {
     throw new Error('В списке врачей отсутствуют данные профиля или права доступа. Обратитесь к администратору системы.')
   }
@@ -86,32 +85,52 @@ export async function saveDoctor(
   draft: DoctorDraft,
   capabilities: DoctorCapabilities,
 ): Promise<Doctor> {
-  if (doctor && !capabilities.profiles && !capabilities.accessLevels) {
-    // Password reset is supported by the existing API, independently of profiles.
-    const response = await apiFetch(`${baseUrl}/users/${doctor.id}/reset-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newPassword: draft.password }),
-    })
-    await checkResponse(response, 'Не удалось изменить пароль. Попробуйте ещё раз.')
-    return doctor
+  const canPersist = capabilities.profiles && capabilities.accessLevels
+
+  if (!canPersist) {
+    // Do not create a real unrestricted account when its requested permissions
+    // cannot be persisted. Preview records exist only in the page's memory.
+    if (doctor && doctor.id > 0 && draft.password) {
+      const response = await apiFetch(`${baseUrl}/users/${doctor.id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: draft.password }),
+      })
+      await checkResponse(response, 'Не удалось изменить пароль. Попробуйте ещё раз.')
+    }
+
+    const pendingFields = new Set<NonNullable<Doctor['pendingFields']>[number]>(doctor?.pendingFields)
+    if (!doctor || doctor.id < 0) pendingFields.add('account')
+    if (draft.name.trim() !== (doctor?.name ?? '')) pendingFields.add('name')
+    if (draft.email.trim() !== doctor?.email) pendingFields.add('email')
+    if (draft.accessLevel !== (doctor?.accessLevel ?? 'RETRAIN')) pendingFields.add('accessLevel')
+
+    return {
+      id: doctor?.id ?? -Date.now(),
+      name: draft.name.trim(),
+      email: draft.email.trim(),
+      accessLevel: draft.accessLevel,
+      isBlocked: doctor?.isBlocked ?? false,
+      pendingFields: [...pendingFields],
+    }
   }
 
   const payload = {
-    ...(!doctor || capabilities.profiles ? { email: draft.email.trim() } : {}),
-    ...(capabilities.profiles ? { name: draft.name.trim(), username: draft.username.trim() } : {}),
-    ...(capabilities.accessLevels ? { accessLevel: draft.accessLevel } : {}),
+    name: draft.name.trim(),
+    email: draft.email.trim(),
+    accessLevel: draft.accessLevel,
     ...(draft.password ? { password: draft.password } : {}),
   }
-  const response = await apiFetch(doctor ? `${baseUrl}/doctors/${doctor.id}` : `${baseUrl}/doctors`, {
-    method: doctor ? 'PUT' : 'POST',
+
+  const response = await apiFetch(doctor && doctor.id > 0 ? `${baseUrl}/doctors/${doctor.id}` : `${baseUrl}/doctors`, {
+    method: doctor && doctor.id > 0 ? 'PUT' : 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
   await checkResponse(response, 'Не удалось сохранить учётную запись. Попробуйте ещё раз.')
   const saved: unknown = await response.json()
   if (!isDoctor(saved)
-    || (capabilities.profiles && (!saved.name?.trim() || !saved.username?.trim()))
+    || (capabilities.profiles && !saved.name?.trim())
     || (capabilities.accessLevels && saved.accessLevel !== draft.accessLevel)) {
     throw new Error('Сервер не подтвердил сохранённые настройки. Закройте окно и обновите список перед повторной попыткой.')
   }

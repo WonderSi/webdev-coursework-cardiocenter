@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, shallowRef, useTemplateRef } from 'vue'
+import AccessLevelTag from '@/components/doctors/AccessLevelTag.vue'
+import SidebarPageIcon from '@/components/SidebarPageIcon.vue'
+import { accessGuide } from '@/config/doctor-access'
 import {
-  doctorAccessLevels,
   saveDoctor,
   type Doctor,
   type DoctorCapabilities,
@@ -22,19 +24,13 @@ const error = shallowRef('')
 const showPassword = shallowRef(false)
 const draft = reactive<DoctorDraft>({
   name: doctor?.name ?? '',
-  username: doctor?.username ?? '',
   email: doctor?.email ?? '',
   password: '',
-  // Legacy DOCTOR accounts currently have all clinical permissions.
-  accessLevel: doctor?.accessLevel ?? (capabilities.accessLevels ? 'VIEW' : 'RETRAIN'),
+  // Существующий врач сохраняет прежний уровень; новый начинает с просмотра.
+  accessLevel: doctor?.accessLevel ?? (doctor ? 'RETRAIN' : 'VIEW'),
 })
-const passwordOnly = computed(
-  () => Boolean(doctor) && !capabilities.profiles && !capabilities.accessLevels,
-)
 const title = computed(() => doctor ? 'Редактирование врача' : 'Новый врач')
-const canSave = computed(
-  () => !saving.value && (!passwordOnly.value || draft.password.length >= 12),
-)
+const canSave = computed(() => !saving.value)
 
 onMounted(() => {
   dialog.value?.showModal()
@@ -94,7 +90,7 @@ async function submit() {
             id="doctor-editor-description"
             class="editor-description"
           >
-            {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись администратора для врача.' }}
+            {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись для врача.' }}
           </p>
         </div>
         <button
@@ -107,21 +103,6 @@ async function submit() {
           ×
         </button>
       </header>
-      <p
-        v-if="!capabilities.profiles || !capabilities.accessLevels"
-        class="availability-note"
-      >
-        <template
-          v-if="!capabilities.profiles"
-        >
-          Имя, отдельный логин и изменение email пока недоступны. Для входа используется email.
-        </template>
-        <template
-          v-if="!capabilities.accessLevels"
-        >
-          Выбор прав пока недоступен: врачи имеют полный доступ к данным и обучению моделей.
-        </template>
-      </p>
       <fieldset
         class="account-fields"
         :disabled="saving"
@@ -144,35 +125,16 @@ async function submit() {
             autocomplete="off"
             maxlength="255"
             placeholder="Фамилия Имя Отчество"
-            :required="capabilities.profiles"
-            :disabled="!capabilities.profiles"
+            required
             pattern=".*\S.*"
-           />
+          />
         </label>
+
         <label
-          class="field"
+          class="field field-wide"
         >
           <span>
-            Логин
-          </span>
-          <input
-            v-model="draft.username"
-            class="text-input"
-            name="username"
-            autocomplete="off"
-            maxlength="50"
-            placeholder="ivan.petrov"
-            pattern="[A-Za-z0-9._\-]{3,50}"
-            title="От 3 до 50 латинских букв, цифр, точек, дефисов или подчёркиваний"
-            :required="capabilities.profiles"
-            :disabled="!capabilities.profiles"
-           />
-        </label>
-        <label
-          class="field"
-        >
-          <span>
-            Email
+            Email (логин)
           </span>
           <input
             v-model="draft.email"
@@ -183,8 +145,7 @@ async function submit() {
             required
             maxlength="255"
             placeholder="doctor@example.ru"
-            :readonly="Boolean(doctor) && !capabilities.profiles"
-           />
+          />
         </label>
         <div
           class="field field-wide"
@@ -194,7 +155,7 @@ async function submit() {
           >
             {{ doctor ? 'Новый пароль' : 'Пароль' }}
             <span
-              v-if="doctor && !passwordOnly"
+              v-if="doctor"
               class="optional-label"
             >
               (необязательно)
@@ -210,33 +171,68 @@ async function submit() {
               name="password"
               :type="showPassword ? 'text' : 'password'"
               autocomplete="new-password"
-              :required="!doctor || passwordOnly"
+              :required="!doctor"
               minlength="12"
               maxlength="100"
               aria-describedby="password-help"
               placeholder="Не менее 12 символов"
-             />
+            />
             <button
               type="button"
               class="password-toggle"
+              :aria-label="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
               :aria-pressed="showPassword"
               aria-controls="doctor-password"
               @click="showPassword = !showPassword"
             >
-              {{ showPassword ? 'Скрыть' : 'Показать' }}
+              <svg
+                v-if="showPassword"
+                class="password-eye"
+                aria-hidden="true"
+                focusable="false"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z"
+                  fill="#8A8FA8"
+                />
+              </svg>
+              <svg
+                v-else
+                class="password-eye"
+                aria-hidden="true"
+                focusable="false"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75"
+                  stroke="#8A8FA8"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </button>
           </div>
           <p
             id="password-help"
             class="field-help"
           >
-            {{ doctor && !passwordOnly ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов. Передайте пароль врачу лично.' }}
+            {{ doctor ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов. Передайте пароль врачу лично.' }}
           </p>
         </div>
       </fieldset>
       <fieldset
         class="access-fields"
-        :disabled="saving || !capabilities.accessLevels"
+        :disabled="saving"
       >
         <legend
           class="section-title"
@@ -248,40 +244,34 @@ async function submit() {
         >
           Каждый следующий уровень включает возможности предыдущего.
         </p>
-        <label
-          v-for="level in doctorAccessLevels"
-          :key="level.value"
-          class="access-option"
-          :class="{ selected: draft.accessLevel === level.value }"
-        >
-          <input
-            v-model="draft.accessLevel"
-            type="radio"
-            name="accessLevel"
-            :value="level.value"
-            required
-           />
-          <span
-            class="access-copy"
+        <div class="access-options-grid" role="group" aria-label="Уровень доступа">
+          <button
+            v-for="level in accessGuide"
+            :key="level.level"
+            type="button"
+            class="access-option"
+            :aria-pressed="draft.accessLevel === level.level"
+            @click="draft.accessLevel = level.level"
+            :class="{ selected: draft.accessLevel === level.level }"
           >
-            <strong
-              class="access-label"
-            >
-              {{ level.label }}
-            </strong>
-            <span
-              class="access-description"
-            >
-              {{ level.description }}
+            <span class="access-option-header">
+              <AccessLevelTag :level="level.level" />
             </span>
-          </span>
-        </label>
+            <span class="access-description" lang="ru">{{ level.description }}</span>
+            <span class="access-pages-title">Доступны вкладки:</span>
+            <span class="access-pages-list">
+              <span
+                v-for="page in level.pages"
+                :key="page.page"
+                class="access-page"
+              >
+                <SidebarPageIcon :page="page.page" class="access-page-icon" />
+                <span class="access-page-label">{{ page.label }}</span>
+              </span>
+            </span>
+          </button>
+        </div>
       </fieldset>
-      <p
-        class="management-note"
-      >
-        Управление врачами доступно только суперадминистратору.
-      </p>
       <p
         v-if="doctor?.isBlocked"
         class="availability-note"
@@ -323,8 +313,12 @@ async function submit() {
 .doctor-editor {
   position: fixed;
   inset: 0;
-  width: min(640px, calc(100% - 32px));
+  width: min(960px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
   max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $color-accent transparent;
   margin: auto;
   padding: 0;
   border: 0;
@@ -332,6 +326,22 @@ async function submit() {
   color: $color-text;
   background: $color-white;
   box-shadow: 0 24px 80px rgba($color-blue-dark, 0.25);
+
+  // WebKit fallback; Firefox использует scrollbar-color и scrollbar-width.
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin-block: 20px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: $color-accent;
+  }
+
   &::backdrop {
     background: rgba($color-blue-dark, 0.45);
     backdrop-filter: blur(4px);
@@ -357,7 +367,7 @@ async function submit() {
 
 .editor-description {
   margin-top: 8px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   line-height: 1.5;
   color: $color-secondary-text;
 }
@@ -419,6 +429,14 @@ async function submit() {
   background: $color-white;
   font: inherit;
   color: $color-text;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.text-input:focus {
+  border-color: $color-accent;
 }
 
 .text-input::placeholder {
@@ -443,6 +461,7 @@ async function submit() {
 
 .password-field {
   display: flex;
+  min-width: 0;
   border: 1px solid rgba($color-secondary, 0.55);
   border-radius: $radius-rect-buttons;
   overflow: hidden;
@@ -450,9 +469,14 @@ async function submit() {
 
 .password-field .text-input {
   border: 0;
+  border-radius: 0;
 }
 
 .password-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   padding: 0 12px;
   border: 0;
   background: transparent;
@@ -473,14 +497,23 @@ async function submit() {
   margin: -6px 0 12px;
 }
 
+.access-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .access-option {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 16px;
+  flex-direction: column;
+  min-width: 0;
+  padding: 16px;
   border: 1px solid #d7ddeb;
   border-radius: 12px;
-  margin-top: 8px;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -489,39 +522,62 @@ async function submit() {
   background: #edf4ff;
 }
 
-.access-option input {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  accent-color: $color-accent;
-}
-
-.access-copy {
+.access-option-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.access-label {
-  font-weight: 600;
-  font-size: 0.875rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .access-description {
-  font-size: 0.8125rem;
   color: $color-secondary-text;
-  line-height: 1.5;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+}
+
+.access-pages-title {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.access-pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.access-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid $color-accent;
+  border-radius: $radius-rect-buttons;
+  color: $color-blue-dark;
+  background: transparent;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.access-page-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.access-page-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .access-fields:disabled .access-option {
   cursor: default;
-}
-
-.management-note {
-  margin: 12px 0 24px;
-  font-size: 0.75rem;
-  color: $color-secondary-text;
-  line-height: 1.5;
 }
 
 .form-error {
@@ -582,18 +638,33 @@ async function submit() {
   cursor: default;
 }
 
-.text-input:focus-visible,
 .button:focus-visible,
 .close-button:focus-visible,
-.password-toggle:focus-visible,
-.access-option input:focus-visible {
+.access-option:focus-visible {
   outline: 3px solid $color-accent;
   outline-offset: 3px;
 }
 
 .password-field:focus-within {
-  outline: 2px solid $color-accent;
-  outline-offset: 2px;
+  border-color: $color-accent;
+}
+
+.password-toggle:focus-visible {
+  outline: 1px solid $color-accent;
+  outline-offset: -4px;
+  border-radius: 6px;
+}
+
+.password-eye {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 850px) {
+  .access-options-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {

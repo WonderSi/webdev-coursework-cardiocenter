@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
+import { accessGuide } from '@/config/doctor-access'
 import SidebarPageIcon from '@/components/SidebarPageIcon.vue'
 import AccessLevelTag from '@/components/doctors/AccessLevelTag.vue'
 import DoctorEditorDialog from '@/components/doctors/DoctorEditorDialog.vue'
@@ -11,31 +12,6 @@ import {
 } from '@/api/doctors.api'
 
 
-// Вкладки перечислены в том же порядке, что и в Sidebar.
-const accessPages = {
-  data: { page: 'view-data', label: 'Просмотр данных' },
-  dashboards: { page: 'dashboards', label: 'Аналитика' },
-  upload: { page: 'upload-data', label: 'Загрузка данных' },
-  training: { page: 'model-training', label: 'Обучение модели' },
-} as const
-
-const accessGuide = [
-  {
-    level: 'VIEW',
-    description: 'Сотрудник может просматривать данные пациентов и аналитику без изменения записей.',
-    pages: [accessPages.data, accessPages.dashboards],
-  },
-  {
-    level: 'EDIT',
-    description: 'Помимо просмотра и аналитики сотрудник может добавлять и изменять данные пациентов.',
-    pages: [accessPages.data, accessPages.dashboards, accessPages.upload],
-  },
-  {
-    level: 'RETRAIN',
-    description: 'Сотруднику доступны все возможности работы с данными, метрики моделей и переобучение.',
-    pages: [accessPages.data, accessPages.dashboards, accessPages.upload, accessPages.training],
-  },
-] as const
 
 const userStore = useUserStore()
 const doctors = shallowRef<Doctor[]>([])
@@ -69,15 +45,15 @@ const hasFilters = computed(() => Boolean(query.value.trim()) || statusFilter.va
 const visibleDoctors = computed(() => {
   const term = query.value.trim().toLocaleLowerCase('ru')
   return doctors.value.filter(doctor => {
-    const matchesQuery = [doctor.name, doctor.username, doctor.email].some(value => value?.toLocaleLowerCase('ru').includes(term))
+    const matchesQuery = [doctor.name, doctor.email].some(value => value?.toLocaleLowerCase('ru').includes(term))
     const matchesStatus = statusFilter.value === 'all' || (statusFilter.value === 'blocked' ? doctor.isBlocked : !doctor.isBlocked)
-    const matchesAccess = accessFilter.value === 'all' || doctor.accessLevel === accessFilter.value
+    const matchesAccess = accessFilter.value === 'all' || accessLevel(doctor) === accessFilter.value
     return matchesQuery && matchesStatus && matchesAccess
   }).sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email, 'ru'))
 })
 
 function accessLevel(doctor: Doctor): DoctorAccessLevel | undefined {
-  return capabilities.value.accessLevels ? doctor.accessLevel : 'RETRAIN'
+  return doctor.accessLevel ?? (capabilities.value.accessLevels ? undefined : 'RETRAIN')
 }
 
 async function loadDoctors() {
@@ -94,7 +70,6 @@ async function loadDoctors() {
     doctors.value = directory.doctors
     capabilities.value = directory.capabilities
     loaded.value = true
-    if (!directory.capabilities.accessLevels) accessFilter.value = 'all'
   } catch (cause) {
     if (controller.signal.aborted) return
     error.value = cause instanceof Error ? cause.message : 'Нет соединения с сервером. Попробуйте ещё раз.'
@@ -138,7 +113,9 @@ function onDoctorSaved(doctor: Doctor) {
   editorOpen.value = false
   // A new or renamed account should not disappear behind an old search.
   resetFilters()
-  feedback.value = isNew ? `Учётная запись ${doctor.email} создана.` : `Изменения для ${doctor.email} сохранены.`
+  feedback.value = doctor.pendingFields?.length
+    ? 'Изменения профиля и прав применены только в этом списке. Сервер пока не сохраняет эти данные; после обновления списка они исчезнут.'
+    : isNew ? `Учётная запись ${doctor.email} создана.` : `Изменения для ${doctor.email} сохранены.`
 }
 
 async function confirmBlock(doctor: Doctor) {
@@ -162,9 +139,11 @@ async function updateBlocked() {
   blockError.value = ''
   try {
     const isBlocked = !doctor.isBlocked
-    await setDoctorBlocked(doctor.id, isBlocked)
+    if (doctor.id > 0) await setDoctorBlocked(doctor.id, isBlocked)
     doctors.value = doctors.value.map(item => item.id === doctor.id ? { ...item, isBlocked } : item)
-    feedback.value = isBlocked ? `Учётная запись ${doctor.email} заблокирована.` : `Доступ для ${doctor.email} восстановлен.`
+    feedback.value = doctor.id < 0
+      ? 'Статус локальной учётной записи изменён только в этом списке.'
+      : isBlocked ? `Учётная запись ${doctor.email} заблокирована.` : `Доступ для ${doctor.email} восстановлен.`
     blockDialog.value?.close()
     blockingDoctor.value = null
   } catch (cause) {
@@ -248,10 +227,10 @@ async function updateBlocked() {
                 </dd>
               </div>
               <div class="account-field-row">
-                <dt class="field-example">Имя пользователя</dt>
+                <dt class="field-example">Email (логин)</dt>
                 <dd>
-                  <strong>Имя пользователя</strong>
-                  — логин сотрудника для входа в систему.
+                  <strong>Email</strong>
+                  — адрес почты сотрудника для входа в систему.
                 </dd>
               </div>
               <div class="account-field-row">
@@ -262,7 +241,7 @@ async function updateBlocked() {
                 </dd>
               </div>
             </dl>
-            <p>Так, данные для входа: имя пользователя и пароль. Имя пользователя должно быть <u>уникальным</u>.</p>
+            <p>Так, данные для входа: email и пароль. Email должен быть <u>уникальным</u>.</p>
           </div>
         </section>
         <div class="info-card-divider" aria-hidden="true"></div>
@@ -429,12 +408,12 @@ async function updateBlocked() {
                 />
                 <path d="m16 16 4.5 4.5" />
               </svg>
-              <span class="sr-only">Поиск по ФИО, логину или email</span>
+              <span class="sr-only">Поиск по ФИО или email</span>
               <input
                 v-model="query"
                 class="search-input"
                 type="search"
-                placeholder="ФИО, логин или email"
+                placeholder="ФИО или email"
                 :disabled="loading || !loaded"
               />
             </label>
@@ -443,7 +422,7 @@ async function updateBlocked() {
               <select
                 v-model="accessFilter"
                 class="filter-select"
-                :disabled="loading || !capabilities.accessLevels"
+                :disabled="loading || !loaded"
               >
                 <option value="all">Все уровни доступа</option>
                 <option
@@ -532,11 +511,11 @@ async function updateBlocked() {
             aria-label="Учётные записи врачей"
           >
             <table class="doctors-table">
-              <caption class="sr-only">Имя, email, логин, смена пароля, права и статус врачей</caption>
+              <caption class="sr-only">Имя, email для входа, смена пароля, права и статус врачей</caption>
               <thead class="table-head">
                 <tr>
                   <th scope="col">Врач</th>
-                  <th scope="col">Логин</th>
+                  <th scope="col">Email (логин)</th>
                   <th scope="col">Пароль</th>
                   <th scope="col">Права доступа</th>
                   <th scope="col">Статус</th>
@@ -557,12 +536,12 @@ async function updateBlocked() {
                       <span class="doctor-avatar" aria-hidden="true">{{ (doctor.name?.trim() || doctor.email).slice(0, 1).toLocaleUpperCase('ru') }}</span>
                       <div class="doctor-name-block">
                         <span class="doctor-name">{{ doctor.name || 'Имя не указано' }}</span>
-                        <span class="doctor-email">{{ doctor.email }}</span>
+                        <span v-if="doctor.pendingFields?.length" class="doctor-email">Локальные изменения</span>
                       </div>
                     </div>
                   </td>
-                  <td data-label="Логин">
-                    <span class="doctor-username">{{ doctor.username || '—' }}</span>
+                  <td data-label="Email (логин)">
+                    <span class="doctor-login">{{ doctor.email }}</span>
                   </td>
                   <td class="password-cell" data-label="Пароль">
                     <button
@@ -1278,7 +1257,7 @@ async function updateBlocked() {
   overflow-wrap: anywhere;
 }
 
-.doctor-username {
+.doctor-login {
   overflow-wrap: anywhere;
 }
 
@@ -1725,7 +1704,7 @@ async function updateBlocked() {
     min-width: 0;
   }
 
-  .doctor-username {
+  .doctor-login {
     min-width: 0;
     text-align: right;
   }
