@@ -52,15 +52,10 @@
         <span>Врачи</span>
       </router-link>
 
-      <div class="retrain-model" v-if="userStore.canAccessSection('MODEL_TRAINING') && showRetrainBlock">
-        <p class="retrain-text">Вы можете переобучить модель <b>(рекомендуется после загрузки данных)</b></p>
-        <button class="retrain-btn"
-          @click="handleRetrain"
-          :disabled="isRetraining">{{ isRetraining? 'Переобучение...' : 'Переобучить' }}</button>
-          <span v-if="retrainError" class="error-msg" style="display:block; margin-top: 8px; font-size: 0.85rem; color: #E24C4C;">
-            {{ retrainError }}
-          </span>
-        </div>
+      <div class="retrain-model" v-if="userStore.canAccessSection('RETRAIN') && showRetrainBlock">
+        <p class="retrain-text">Переобучение из интерфейса временно недоступно.</p>
+        <button class="retrain-btn" disabled>Переобучить</button>
+      </div>
       
     </nav>
 
@@ -87,7 +82,6 @@
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
 import { ref, computed } from 'vue'
-import { retrainModel } from '@/api/modeltraining.api'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -97,26 +91,7 @@ const showRetrainBlock = computed(() => {
   return route.path === '/upload-data' || route.path === '/model-training'
 })
 
-const isRetraining = ref(false)
-const retrainError = ref('')
 const logoutError = ref('')
-
-const handleRetrain = async () => {
-  isRetraining.value = true
-  retrainError.value = ''
-  try {
-    const response = await retrainModel()
-    if (response.status === 'ok') {
-      window.dispatchEvent(new CustomEvent('model-retrained'))
-    } else {
-      retrainError.value = 'Ошибка переобучения со стороны ML сервера'
-    }
-  } catch (e: any) {
-    retrainError.value = 'Ошибка запроса на переобучение: ' + e.message
-  } finally {
-    isRetraining.value = false
-  }
-}
 
 async function handleLogout() {
   logoutError.value = ''

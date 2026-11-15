@@ -63,8 +63,6 @@ export interface OneModelStats {
   tp: number
 }
 
-export interface RetrainStatusResponse { status: string }
-
 export interface FullModelsResponse {
   modelVersion: string
   savedModels: string[]
@@ -77,12 +75,5 @@ export async function fetchModelsStats(): Promise<FullModelsResponse> {
   const res = await apiFetch('/api/admin/model')
   if (res.status === 403) throw new Error('Доступ запрещён')
   if (!res.ok) throw new Error(`Ошибка загрузки метрик: ${res.status}`)
-  return res.json()
-}
-
-export async function retrainModel(): Promise<RetrainStatusResponse> {
-  const res = await apiFetch('/api/admin/retrain', { method: 'POST' })
-  if (res.status === 403) throw new Error('Доступ запрещён')
-  if (!res.ok) throw new Error(`Ошибка запуска переобучения: ${res.status}`)
   return res.json()
 }

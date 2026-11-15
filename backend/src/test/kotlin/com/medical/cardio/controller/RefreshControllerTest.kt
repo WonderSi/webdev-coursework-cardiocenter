@@ -189,14 +189,14 @@ class RefreshControllerTest : ControllerTestBase() {
         val response = mockMvc.perform(refreshRequest(rawToken, csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.role").value("ROLE_SUPER_ADMIN"))
-            .andExpect(jsonPath("$.allowedSections.length()").value(4))
+            .andExpect(jsonPath("$.allowedSections.length()").value(5))
             .andReturn().response
         val access = responseCookies(response).getValue("access_token").value
         assertEquals(listOf("ROLE_SUPER_ADMIN"), jwtService.extractRoles(access))
         mockMvc.get("/api/auth/me") { cookie(Cookie("access_token", access)) }.andExpect {
             status { isOk() }
             jsonPath("$.role") { value("ROLE_SUPER_ADMIN") }
-            jsonPath("$.allowedSections.length()") { value(4) }
+            jsonPath("$.allowedSections.length()") { value(5) }
         }
     }
 

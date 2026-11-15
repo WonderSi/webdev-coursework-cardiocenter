@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.multipart
 
 @TestPropertySource(properties = ["spring.jpa.open-in-view=false"])
 class SectionAccessTest : ControllerTestBase() {
@@ -77,5 +78,20 @@ class SectionAccessTest : ControllerTestBase() {
         adminService.updateDoctorSections(doctor.id, setOf(AdminSection.VIEW_DATA))
         mockMvc.get("/api/admin/dashboard") { cookie(authCookie(doctor)) }.andExpect { status { isForbidden() } }
         mockMvc.get("/api/admin/upload/template") { cookie(authCookie(doctor)) }.andExpect { status { isForbidden() } }
+    }
+
+    @Test
+    fun `retraining permission is independent and revocable with same cookie`() {
+        val cookie = authCookie(doctor)
+        adminService.updateDoctorSections(doctor.id, setOf(AdminSection.MODEL_TRAINING))
+        mockMvc.post("/api/admin/retrain") { cookie(cookie) }.andExpect { status { isForbidden() } }
+
+        adminService.updateDoctorSections(doctor.id, setOf(AdminSection.RETRAIN))
+
+        mockMvc.multipart("/api/admin/retrain") { cookie(cookie) }.andExpect { status { isBadRequest() } }
+        mockMvc.get("/api/admin/model") { cookie(cookie) }.andExpect { status { isForbidden() } }
+
+        adminService.updateDoctorSections(doctor.id, emptySet())
+        mockMvc.post("/api/admin/retrain") { cookie(cookie) }.andExpect { status { isForbidden() } }
     }
 }

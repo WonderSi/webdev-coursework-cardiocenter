@@ -36,8 +36,14 @@ import reactor.core.publisher.Mono
 
 @WebMvcTest(RetrainController::class)
 @Import(RetrainService::class, SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
-@WithMockUser(authorities = ["ROLE_DOCTOR", "SECTION_MODEL_TRAINING"])
+@WithMockUser(authorities = ["ROLE_DOCTOR", "SECTION_MODEL_TRAINING", "SECTION_RETRAIN"])
 class RetrainControllerTest {
+    @Test
+    @WithMockUser(authorities = ["ROLE_DOCTOR", "SECTION_MODEL_TRAINING"])
+    fun `model metrics permission does not permit retraining`() {
+        mvc.post("/api/admin/retrain").andExpect { status { isForbidden() } }
+        verify(mlClient, never()).retrain(any())
+    }
     @Test
     @WithMockUser(roles = ["DOCTOR"])
     fun `doctor without training section cannot access model or schema or retrain`() {

@@ -2,6 +2,7 @@ export const adminSections = [
   { code: 'DASHBOARDS', label: 'Аналитика' },
   { code: 'UPLOAD_DATA', label: 'Загрузка данных' },
   { code: 'MODEL_TRAINING', label: 'Обучение модели' },
+  { code: 'RETRAIN', label: 'Переобучение модели' },
   { code: 'VIEW_DATA', label: 'Просмотр данных' },
 ] as const
 

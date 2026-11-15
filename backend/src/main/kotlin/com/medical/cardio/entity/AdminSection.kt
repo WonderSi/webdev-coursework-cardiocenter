@@ -4,5 +4,6 @@ enum class AdminSection {
     DASHBOARDS,
     UPLOAD_DATA,
     MODEL_TRAINING,
+    RETRAIN,
     VIEW_DATA
 }
