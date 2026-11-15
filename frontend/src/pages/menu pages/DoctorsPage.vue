@@ -546,44 +546,8 @@ async function updateBlocked() {
               </tbody>
             </table>
           </div>
-          <footer class="directory-footer">
-            <span class="footer-lock" aria-hidden="true">
-              <svg
-                width="16"
-                height="18"
-                viewBox="0 0 20 22"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-              >
-                <rect
-                  x="3"
-                  y="9"
-                  width="14"
-                  height="10"
-                  rx="2"
-                />
-                <path d="M6 9V6a4 4 0 0 1 8 0v3" />
-                <path d="M10 13v3" />
-              </svg>
-            </span>
-            Управление врачами доступно только суперадминистратору.
-          </footer>
         </section>
-        <details class="access-guide">
-          <summary class="guide-summary">Что входит в уровни доступа</summary>
-          <div class="guide-levels">
-            <div
-              v-for="level in doctorAccessLevels"
-              :key="level.value"
-              class="guide-level"
-            >
-              <h3 class="guide-title">{{ level.label }}</h3>
-              <p class="guide-description">{{ level.description }}.</p>
-            </div>
-          </div>
-          <p class="guide-note">Доступ к управлению врачами не входит ни в один из этих уровней.</p>
-        </details>
+        
         <p v-if="loaded && !error && (!capabilities.profiles || !capabilities.accessLevels)" class="legacy-note">
           <template v-if="!capabilities.profiles">
             Система пока хранит только email врача. Имя и отдельный логин будут доступны после обновления учётных записей.
