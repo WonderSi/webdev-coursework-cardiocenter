@@ -548,12 +548,6 @@ async function updateBlocked() {
           </div>
         </section>
         
-        <p v-if="loaded && !error && (!capabilities.profiles || !capabilities.accessLevels)" class="legacy-note">
-          <template v-if="!capabilities.profiles">
-            Система пока хранит только email врача. Имя и отдельный логин будут доступны после обновления учётных записей.
-          </template>
-          <template v-if="!capabilities.accessLevels">Сейчас все врачи имеют полный доступ к данным и обучению моделей; ограничение прав пока недоступно.</template>
-        </p>
         <DoctorEditorDialog
           v-if="editorOpen"
           :doctor="editingDoctor"
@@ -1326,16 +1320,6 @@ async function updateBlocked() {
   color: $color-secondary-text;
   font-size: 0.75rem;
   line-height: 1.5;
-}
-
-.legacy-note {
-  padding: 16px 20px;
-  margin-top: 16px;
-  font-size: 0.8125rem;
-  line-height: 1.7;
-  color: $color-blue-dark;
-  background: rgba($color-white, 0.85);
-  border-radius: 12px;
 }
 
 .block-dialog {
