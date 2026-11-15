@@ -1,12 +1,41 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
+import SidebarPageIcon from '@/components/SidebarPageIcon.vue'
+import AccessLevelTag from '@/components/doctors/AccessLevelTag.vue'
 import DoctorEditorDialog from '@/components/doctors/DoctorEditorDialog.vue'
 import { useUserStore } from '@/stores/user.store'
 import {
   doctorAccessLevels, fetchDoctors, setDoctorBlocked,
   type Doctor, type DoctorAccessLevel, type DoctorCapabilities,
 } from '@/api/doctors.api'
+
+
+// Вкладки перечислены в том же порядке, что и в Sidebar.
+const accessPages = {
+  data: { page: 'view-data', label: 'Просмотр данных' },
+  dashboards: { page: 'dashboards', label: 'Аналитика' },
+  upload: { page: 'upload-data', label: 'Загрузка данных' },
+  training: { page: 'model-training', label: 'Обучение модели' },
+} as const
+
+const accessGuide = [
+  {
+    level: 'VIEW',
+    description: 'Сотрудник может просматривать данные пациентов и аналитику без изменения записей.',
+    pages: [accessPages.data, accessPages.dashboards],
+  },
+  {
+    level: 'EDIT',
+    description: 'Помимо просмотра и аналитики сотрудник может добавлять и изменять данные пациентов.',
+    pages: [accessPages.data, accessPages.dashboards, accessPages.upload],
+  },
+  {
+    level: 'RETRAIN',
+    description: 'Сотруднику доступны все возможности работы с данными, метрики моделей и переобучение.',
+    pages: [accessPages.data, accessPages.dashboards, accessPages.upload, accessPages.training],
+  },
+] as const
 
 const userStore = useUserStore()
 const doctors = shallowRef<Doctor[]>([])
@@ -47,9 +76,8 @@ const visibleDoctors = computed(() => {
   }).sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email, 'ru'))
 })
 
-function accessLabel(doctor: Doctor): string {
-  if (!capabilities.value.accessLevels) return 'Полный доступ'
-  return doctorAccessLevels.find(level => level.value === doctor.accessLevel)?.label ?? 'Не указан'
+function accessLevel(doctor: Doctor): DoctorAccessLevel | undefined {
+  return capabilities.value.accessLevels ? doctor.accessLevel : 'RETRAIN'
 }
 
 async function loadDoctors() {
@@ -245,20 +273,26 @@ async function updateBlocked() {
           <div class="info-card-content">
             <p>Есть три уровня прав доступа. Они определяют, какие возможности доступны сотруднику.</p>
             <div class="access-levels-grid">
-              <article class="access-level">
-                <h3 class="access-level-title">Просмотр</h3>
-                <p>Просмотр данных пациентов и аналитики без изменения записей.</p>
-                <!-- Здесь можно добавить иллюстрацию и список доступных вкладок. -->
-              </article>
-              <article class="access-level">
-                <h3 class="access-level-title">Редактирование</h3>
-                <p>Возможности просмотра, а также добавление и изменение данных пациентов.</p>
-                <!-- Здесь можно продолжить описание уровня редактирования. -->
-              </article>
-              <article class="access-level">
-                <h3 class="access-level-title">Полный</h3>
-                <p>Все возможности работы с данными, метрики моделей и переобучение.</p>
-                <!-- Здесь можно продолжить описание полного доступа. -->
+              <article
+                v-for="level in accessGuide"
+                :key="level.level"
+                class="access-level"
+              >
+                <h3 class="access-level-title">
+                  <AccessLevelTag :level="level.level" />
+                </h3>
+                <p class="access-level-description" lang="ru">{{ level.description }}</p>
+                <h4 class="access-pages-title">Доступны вкладки:</h4>
+                <ul class="access-pages-list">
+                  <li
+                    v-for="page in level.pages"
+                    :key="page.page"
+                    class="access-page"
+                  >
+                    <SidebarPageIcon :page="page.page" class="access-page-icon" />
+                    <span class="access-page-label">{{ page.label }}</span>
+                  </li>
+                </ul>
               </article>
             </div>
             <p class="info-note">Управление врачами доступно только суперадминистратору.</p>
@@ -498,12 +532,12 @@ async function updateBlocked() {
             aria-label="Учётные записи врачей"
           >
             <table class="doctors-table">
-              <caption class="sr-only">Имя, логин, email, права и статус врачей</caption>
+              <caption class="sr-only">Имя, email, логин, смена пароля, права и статус врачей</caption>
               <thead class="table-head">
                 <tr>
                   <th scope="col">Врач</th>
                   <th scope="col">Логин</th>
-                  <th scope="col">Email</th>
+                  <th scope="col">Пароль</th>
                   <th scope="col">Права доступа</th>
                   <th scope="col">Статус</th>
                   <th scope="col">
@@ -523,18 +557,25 @@ async function updateBlocked() {
                       <span class="doctor-avatar" aria-hidden="true">{{ (doctor.name?.trim() || doctor.email).slice(0, 1).toLocaleUpperCase('ru') }}</span>
                       <div class="doctor-name-block">
                         <span class="doctor-name">{{ doctor.name || 'Имя не указано' }}</span>
-                        <span class="doctor-role">Администратор</span>
+                        <span class="doctor-email">{{ doctor.email }}</span>
                       </div>
                     </div>
                   </td>
                   <td data-label="Логин">
                     <span class="doctor-username">{{ doctor.username || '—' }}</span>
                   </td>
-                  <td class="email-cell" data-label="Email">
-                    <span>{{ doctor.email }}</span>
+                  <td class="password-cell" data-label="Пароль">
+                    <button
+                      type="button"
+                      class="row-button password-action"
+                      :aria-label="`Изменить пароль: ${doctor.name || doctor.email}`"
+                      @click="openEditor(doctor)"
+                    >
+                      Изменить пароль
+                    </button>
                   </td>
                   <td data-label="Права доступа">
-                    <span class="access-badge">{{ accessLabel(doctor) }}</span>
+                    <AccessLevelTag :level="accessLevel(doctor)" />
                   </td>
                   <td data-label="Статус">
                     <span class="status-badge" :class="doctor.isBlocked ? 'status-blocked' : 'status-active'">
@@ -791,15 +832,66 @@ async function updateBlocked() {
 // Три колонки прав доступа. Здесь можно продолжать макет.
 .access-levels-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
   gap: 32px;
-  margin-block: 12px;
+  margin-block: 20px;
+}
+
+.access-level {
+  min-width: 0;
 }
 
 .access-level-title {
-  margin-bottom: 4px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: inherit;
+  font-weight: 400;
+}
+
+.access-level-description {
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+}
+
+.access-pages-title {
+  margin-top: 16px;
+  margin-bottom: 8px;
   font-size: inherit;
   font-weight: 600;
+}
+
+.access-pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.access-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid $color-accent-lighter;
+  border-radius: 12px;
+  background: transparent;
+  color: $color-blue-dark;
+}
+
+.access-page-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.access-page-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .info-note {
@@ -1180,24 +1272,18 @@ async function updateBlocked() {
   max-width: 260px;
 }
 
-.doctor-role {
+.doctor-email {
   color: $color-secondary-text;
   font-size: 0.75rem;
+  overflow-wrap: anywhere;
 }
 
 .doctor-username {
   overflow-wrap: anywhere;
 }
 
-.email-cell {
-  overflow-wrap: anywhere;
-  min-width: 140px;
-  max-width: 240px;
-}
-
-.access-badge {
-  color: $color-blue-dark;
-  line-height: 1.5;
+.password-cell {
+  min-width: 130px;
 }
 
 .status-badge {
@@ -1440,6 +1526,10 @@ async function updateBlocked() {
 }
 
 @media (max-width: 1100px) {
+  .access-levels-grid {
+    grid-template-columns: 1fr;
+  }
+
   .doctors-table {
     min-width: 900px;
   }
@@ -1635,9 +1725,7 @@ async function updateBlocked() {
     min-width: 0;
   }
 
-  .email-cell span,
-  .doctor-username,
-  .access-badge {
+  .doctor-username {
     min-width: 0;
     text-align: right;
   }

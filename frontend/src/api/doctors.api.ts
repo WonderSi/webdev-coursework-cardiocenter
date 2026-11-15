@@ -4,8 +4,8 @@ export type DoctorAccessLevel = 'VIEW' | 'EDIT' | 'RETRAIN'
 
 export const doctorAccessLevels = [
   { value: 'VIEW', label: 'Просмотр', description: 'Данные пациентов и аналитика' },
-  { value: 'EDIT', label: 'Просмотр и редактирование', description: 'Данные, аналитика и загрузка пациентов' },
-  { value: 'RETRAIN', label: 'Полный доступ', description: 'Данные, загрузка, метрики и переобучение моделей' },
+  { value: 'EDIT', label: 'Редактирование', description: 'Данные, аналитика и загрузка пациентов' },
+  { value: 'RETRAIN', label: 'Полный', description: 'Данные, загрузка, метрики и переобучение моделей' },
 ] as const
 
 export interface Doctor {
