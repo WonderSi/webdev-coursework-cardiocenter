@@ -12,5 +12,4 @@ const currentLayout = DefaultLayout
 </script>
 
 <style scoped>
-
 </style>

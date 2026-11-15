@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "test:access": "node scripts/test-section-access.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

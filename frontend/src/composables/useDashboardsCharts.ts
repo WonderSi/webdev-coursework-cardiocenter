@@ -11,12 +11,13 @@ import {
 
 export function useDashboardCharts() {
   const stats = ref<DashboardStatsResponse | null>(null);
+  const errorMessage = ref('');
 
   onMounted(async () => {
     try {
       stats.value = await fetchDashboardStats();
     } catch (e) {
-      console.error('Dashboard load error:', e);
+      errorMessage.value = e instanceof Error ? e.message : 'Не удалось загрузить аналитику';
     }
   });
 
@@ -361,5 +362,5 @@ export function useDashboardCharts() {
     };
   });
 
-  return { stats, chartAlcohol, chartDiagnoses, chartAgeGender, chartWeight, chartProfessions, chartDistricts };
+  return { stats, errorMessage, chartAlcohol, chartDiagnoses, chartAgeGender, chartWeight, chartProfessions, chartDistricts };
 }

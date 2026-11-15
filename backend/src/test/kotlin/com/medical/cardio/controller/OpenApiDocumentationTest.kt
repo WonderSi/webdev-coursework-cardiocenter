@@ -83,7 +83,7 @@ class OpenApiDocumentationTest {
                 assertEquals(protected, operation.path("security").any { it.has("cookieAuth") }, path)
             }
         }
-        assertEquals(17, operationCount)
+        assertEquals(18, operationCount)
         assertTrue(paths.path("/api/admin/dataset/schema").has("get"))
         assertTrue(paths.path("/api/admin/retrain").path("post")
             .path("requestBody").path("content").has("multipart/form-data"))
@@ -105,6 +105,12 @@ class OpenApiDocumentationTest {
         assertEquals("#/components/schemas/DoctorResponse", created.path("\$ref").asText())
         assertEquals("array", doctors.path("get").at("/responses/200/content/application~1json/schema/type").asText())
         assertTrue(document.at("/components/schemas/DoctorResponse/properties").has("isBlocked"))
+        assertTrue(document.at("/components/schemas/DoctorResponse/properties").has("allowedSections"))
+        val sections = paths.path("/api/admin/super-admin/doctors/{id}/sections").path("put")
+        assertEquals("#/components/schemas/DoctorResponse",
+            sections.at("/responses/200/content/application~1json/schema/\$ref").asText())
+        assertTrue(document.at("/components/schemas/UpdateDoctorSectionsRequest/required")
+            .any { it.asText() == "allowedSections" })
         assertTrue(document.at("/components/schemas/CreateDoctorRequest/properties/password/writeOnly").asBoolean())
         val blocked = paths.path("/api/admin/super-admin/doctors/{id}/blocked").path("put")
         assertFalse(blocked.at("/responses/204").has("content"))
@@ -114,7 +120,7 @@ class OpenApiDocumentationTest {
         val login = paths.path("/api/auth/login").path("post")
         assertTrue(login.path("description").asText().contains("refresh_token"))
         val loginResponse = document.at("/components/schemas/LoginResponse/properties")
-        assertEquals(setOf("email", "role"), loginResponse.fieldNames().asSequence().toSet())
+        assertEquals(setOf("email", "role", "allowedSections"), loginResponse.fieldNames().asSequence().toSet())
         assertEquals("binary", paths.path("/api/admin/upload/template").path("get")
             .at("/responses/200/content/application~1octet-stream/schema/format").asText())
     }

@@ -50,7 +50,8 @@ class RefreshControllerTest : ControllerTestBase() {
     fun setUp() {
         user = adminUserRepository.save(AdminUserEntity(
             email = "refresh-controller@cardio.test",
-            passwordHash = passwordEncoder.encode("TestPassword@2000")
+            passwordHash = passwordEncoder.encode("TestPassword@2000"),
+            allowedSections = mutableSetOf(com.medical.cardio.entity.AdminSection.UPLOAD_DATA)
         ))
     }
 
@@ -81,6 +82,7 @@ class RefreshControllerTest : ControllerTestBase() {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.email").value(user.email))
             .andExpect(jsonPath("$.role").value("ROLE_DOCTOR"))
+            .andExpect(jsonPath("$.allowedSections[0]").value("UPLOAD_DATA"))
             .andExpect(jsonPath("$.accessToken").doesNotExist())
             .andExpect(jsonPath("$.refreshToken").doesNotExist())
             .andReturn().response
@@ -187,9 +189,28 @@ class RefreshControllerTest : ControllerTestBase() {
         val response = mockMvc.perform(refreshRequest(rawToken, csrf()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.role").value("ROLE_SUPER_ADMIN"))
+            .andExpect(jsonPath("$.allowedSections.length()").value(4))
             .andReturn().response
         val access = responseCookies(response).getValue("access_token").value
         assertEquals(listOf("ROLE_SUPER_ADMIN"), jwtService.extractRoles(access))
+        mockMvc.get("/api/auth/me") { cookie(Cookie("access_token", access)) }.andExpect {
+            status { isOk() }
+            jsonPath("$.role") { value("ROLE_SUPER_ADMIN") }
+            jsonPath("$.allowedSections.length()") { value(4) }
+        }
+    }
+
+    @Test
+    fun `refresh returns current sections after permissions changed`() {
+        val rawToken = login(false).getValue("refresh_token").value
+        adminUserRepository.save(AdminUserEntity(
+            id = user.id, email = user.email, passwordHash = user.passwordHash,
+            allowedSections = mutableSetOf(com.medical.cardio.entity.AdminSection.DASHBOARDS)
+        ))
+        mockMvc.perform(refreshRequest(rawToken, csrf()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.allowedSections.length()").value(1))
+            .andExpect(jsonPath("$.allowedSections[0]").value("DASHBOARDS"))
     }
 
     @Test

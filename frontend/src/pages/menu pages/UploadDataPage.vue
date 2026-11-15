@@ -458,8 +458,9 @@ async function submitSinglePatient() {
 
     if (!res.ok) {
       const body = await res.json().catch(() => null)
-      patientBackendError.value = (res.status === 401 || res.status === 403)
-        ? 'Сессия истекла — войдите заново'
+      patientBackendError.value = res.status === 403
+        ? 'Доступ запрещён'
+        : res.status === 401 ? 'Сессия истекла — войдите заново'
         : body?.error ?? `Ошибка при сохранении пациента (${res.status})`
       showPatientErrors.value = true
       return
@@ -615,8 +616,9 @@ async function uploadFiles() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => null)
-        globalError.value = (res.status === 401 || res.status === 403)
-          ? 'Сессия истекла — войдите заново'
+        globalError.value = res.status === 403
+          ? 'Доступ запрещён'
+          : res.status === 401 ? 'Сессия истекла — войдите заново'
           : body?.error ?? `Ошибка при загрузке ${file.name}: статус ${res.status}`
         throw new Error('Upload Interrupted')
       }
@@ -650,8 +652,9 @@ async function downloadTemplate() {
   try {
     const res = await apiFetch('/api/admin/upload/template')
     if (!res.ok) {
-      globalError.value = res.status === 401 || res.status === 403
-        ? 'Сессия истекла — войдите заново'
+      globalError.value = res.status === 403
+        ? 'Доступ запрещён'
+        : res.status === 401 ? 'Сессия истекла — войдите заново'
         : `Не удалось скачать шаблон (${res.status})`
       return
     }

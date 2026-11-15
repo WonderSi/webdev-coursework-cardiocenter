@@ -1,6 +1,9 @@
 package com.medical.cardio.security
 
 import com.medical.cardio.repository.AdminUserRepository
+import com.medical.cardio.entity.AdminSection
+import com.medical.cardio.entity.Role
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -21,13 +24,16 @@ class AdminUserDetailsService(
 
         UsernameNotFoundException
     */
+    @Transactional(readOnly = true)
     override fun loadUserByUsername(email: String): UserDetails =
         adminUserRepository.findByEmail(email)
             ?.let { entity ->
                 val authority = SimpleGrantedAuthority("ROLE_${entity.role}")
+                val sections = if (entity.role == Role.SUPER_ADMIN) AdminSection.entries.toSet()
+                    else entity.allowedSections.toSet()
                 User.withUsername(entity.email)
                     .password(entity.passwordHash)
-                    .authorities(listOf(authority))
+                    .authorities(listOf(authority) + sections.map { SimpleGrantedAuthority("SECTION_$it") })
                     .disabled(entity.isBlocked)
                     .build()
             }

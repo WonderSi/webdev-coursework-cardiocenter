@@ -6,6 +6,8 @@ import com.medical.cardio.dto.LoginResponse
 import com.medical.cardio.dto.LoginResult
 import com.medical.cardio.dto.RefreshResult
 import com.medical.cardio.entity.AdminUserEntity
+import com.medical.cardio.entity.AdminSection
+import com.medical.cardio.entity.Role
 import com.medical.cardio.repository.AdminUserRepository
 import com.medical.cardio.security.JwtService
 import org.springframework.security.authentication.AuthenticationManager
@@ -71,5 +73,7 @@ class AuthService(
         .build()
 
     private fun userResponse(user: AdminUserEntity): LoginResponse =
-        LoginResponse(email = user.email, role = "ROLE_${user.role}")
+        LoginResponse(email = user.email, role = "ROLE_${user.role}",
+            allowedSections = if (user.role == Role.SUPER_ADMIN) AdminSection.entries.toSet()
+                else user.allowedSections.toSet())
 }
