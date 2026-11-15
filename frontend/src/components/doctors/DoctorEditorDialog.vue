@@ -90,7 +90,7 @@ async function submit() {
             id="doctor-editor-description"
             class="editor-description"
           >
-            {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись для врача.' }}
+            {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись для врача. Помните - логин уникален.' }}
           </p>
         </div>
         <button
@@ -131,7 +131,7 @@ async function submit() {
         </label>
 
         <label
-          class="field field-wide"
+          class="field"
         >
           <span>
             Email (логин)
@@ -148,7 +148,7 @@ async function submit() {
           />
         </label>
         <div
-          class="field field-wide"
+          class="field"
         >
           <label
             for="doctor-password"
@@ -226,7 +226,7 @@ async function submit() {
             id="password-help"
             class="field-help"
           >
-            {{ doctor ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов. Передайте пароль врачу лично.' }}
+            {{ doctor ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов.' }}
           </p>
         </div>
       </fieldset>
@@ -242,7 +242,7 @@ async function submit() {
         <p
           class="access-help"
         >
-          Каждый следующий уровень включает возможности предыдущего.
+          Каждый следующий уровень включает все возможности предыдущего.
         </p>
         <div class="access-options-grid" role="group" aria-label="Уровень доступа">
           <button
@@ -327,7 +327,6 @@ async function submit() {
   background: $color-white;
   box-shadow: 0 24px 80px rgba($color-blue-dark, 0.25);
 
-  // WebKit fallback; Firefox использует scrollbar-color и scrollbar-width.
   &::-webkit-scrollbar {
     width: 6px;
   }
@@ -489,7 +488,7 @@ async function submit() {
 .access-fields {
   border: 0;
   padding: 0;
-  margin-top: 28px;
+  margin-top: 24px;
   min-width: 0;
 }
 
@@ -558,7 +557,7 @@ async function submit() {
   align-items: center;
   gap: 8px;
   padding: 8px;
-  border: 1px solid $color-accent;
+  border: 1px solid $color-blue-dark;
   border-radius: $radius-rect-buttons;
   color: $color-blue-dark;
   background: transparent;
@@ -594,8 +593,6 @@ async function submit() {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding-top: 24px;
-  border-top: 1px solid #e2e7f0;
   margin-top: 24px;
 }
 
@@ -619,13 +616,14 @@ async function submit() {
 }
 
 .button-secondary {
-  border: 1px solid #c6cedd;
+  border: 1px solid $color-accent;
   background: transparent;
-  color: $color-blue-dark;
+  color: $color-accent;
 }
 
 .button-secondary:hover:not(:disabled) {
-  background: #edf4ff;
+  background: $color-accent;
+  color: $color-white;
 }
 
 .button:disabled,
