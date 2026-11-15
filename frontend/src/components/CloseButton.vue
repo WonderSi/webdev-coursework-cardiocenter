@@ -62,8 +62,7 @@ const emit = defineEmits<{ click: [event: MouseEvent] }>()
 }
 
 .close-btn:focus-visible {
-  outline: 3px solid $color-accent;
-  outline-offset: 3px;
+  @include focus-ring(3px, 3px);
 }
 
 .close-btn:disabled {

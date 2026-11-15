@@ -1,39 +1,11 @@
 import { apiFetch } from './client'
-
-export type DoctorAccessLevel = 'VIEW' | 'EDIT' | 'RETRAIN'
-
-export const doctorAccessLevels = [
-  { value: 'VIEW', label: 'Просмотр', description: 'Данные пациентов и аналитика' },
-  { value: 'EDIT', label: 'Редактирование', description: 'Данные, аналитика и загрузка пациентов' },
-  { value: 'RETRAIN', label: 'Полный', description: 'Данные, загрузка, метрики и переобучение моделей' },
-] as const
-
-export interface Doctor {
-  id: number
-  email: string
-  isBlocked: boolean
-  name?: string
-  accessLevel?: DoctorAccessLevel
-  // Frontend-only metadata; never sent to the backend.
-  pendingFields?: Array<'account' | 'name' | 'email' | 'accessLevel'>
-}
-
-export interface DoctorCapabilities {
-  profiles: boolean
-  accessLevels: boolean
-}
-
-export interface DoctorDirectory {
-  doctors: Doctor[]
-  capabilities: DoctorCapabilities
-}
-
-export interface DoctorDraft {
-  name: string
-  email: string
-  password: string
-  accessLevel: DoctorAccessLevel
-}
+import { doctorAccessLevels } from '@/config/doctor-access'
+import type {
+  DoctorDto,
+  DoctorDirectory,
+  DoctorDraft,
+  DoctorCapabilities,
+} from '@/types/doctor'
 
 const baseUrl = '/api/admin/super-admin'
 
@@ -45,14 +17,17 @@ async function checkResponse(response: Response, fallback: string): Promise<void
     throw new Error('Эта операция пока недоступна. Обновите список или обратитесь к администратору системы.')
   }
   if (response.status === 409) throw new Error('Этот email уже используется.')
-  if (response.status === 400) throw new Error('Проверьте данные. Email должен быть уникальным, пароль — от 12 до 100 символов.')
+  if (response.status === 400) {
+    throw new Error('Проверьте данные. Email должен быть уникальным, пароль — от 12 до 100 символов.')
+  }
   throw new Error(fallback)
 }
 
-function isDoctor(value: unknown): value is Doctor {
+function isDoctor(value: unknown): value is DoctorDto {
   if (!value || typeof value !== 'object') return false
   const doctor = value as Record<string, unknown>
-  return typeof doctor.id === 'number' && typeof doctor.email === 'string'
+  return typeof doctor.id === 'number' && Number.isSafeInteger(doctor.id) && doctor.id > 0
+    && typeof doctor.email === 'string' && Boolean(doctor.email.trim())
     && typeof doctor.isBlocked === 'boolean'
     && (doctor.name === undefined || typeof doctor.name === 'string')
     && (doctor.accessLevel === undefined || doctorAccessLevels.some(level => level.value === doctor.accessLevel))
@@ -80,41 +55,12 @@ export async function fetchDoctors(signal?: AbortSignal): Promise<DoctorDirector
   return { doctors, capabilities }
 }
 
-export async function saveDoctor(
-  doctor: Doctor | null,
+export async function persistDoctor(
+  doctor: DoctorDto | null,
   draft: DoctorDraft,
   capabilities: DoctorCapabilities,
-): Promise<Doctor> {
-  const canPersist = capabilities.profiles && capabilities.accessLevels
-
-  if (!canPersist) {
-    // Do not create a real unrestricted account when its requested permissions
-    // cannot be persisted. Preview records exist only in the page's memory.
-    if (doctor && doctor.id > 0 && draft.password) {
-      const response = await apiFetch(`${baseUrl}/users/${doctor.id}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword: draft.password }),
-      })
-      await checkResponse(response, 'Не удалось изменить пароль. Попробуйте ещё раз.')
-    }
-
-    const pendingFields = new Set<NonNullable<Doctor['pendingFields']>[number]>(doctor?.pendingFields)
-    if (!doctor || doctor.id < 0) pendingFields.add('account')
-    if (draft.name.trim() !== (doctor?.name ?? '')) pendingFields.add('name')
-    if (draft.email.trim() !== doctor?.email) pendingFields.add('email')
-    if (draft.accessLevel !== (doctor?.accessLevel ?? 'RETRAIN')) pendingFields.add('accessLevel')
-
-    return {
-      id: doctor?.id ?? -Date.now(),
-      name: draft.name.trim(),
-      email: draft.email.trim(),
-      accessLevel: draft.accessLevel,
-      isBlocked: doctor?.isBlocked ?? false,
-      pendingFields: [...pendingFields],
-    }
-  }
-
+  signal?: AbortSignal,
+): Promise<DoctorDto> {
   const payload = {
     name: draft.name.trim(),
     email: draft.email.trim(),
@@ -122,8 +68,11 @@ export async function saveDoctor(
     ...(draft.password ? { password: draft.password } : {}),
   }
 
-  const response = await apiFetch(doctor && doctor.id > 0 ? `${baseUrl}/doctors/${doctor.id}` : `${baseUrl}/doctors`, {
-    method: doctor && doctor.id > 0 ? 'PUT' : 'POST',
+  const isExisting = doctor !== null && doctor.id > 0
+  const url = isExisting ? `${baseUrl}/doctors/${doctor.id}` : `${baseUrl}/doctors`
+  const response = await apiFetch(url, {
+    method: isExisting ? 'PUT' : 'POST',
+    signal,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
@@ -137,11 +86,26 @@ export async function saveDoctor(
   return saved
 }
 
-export async function setDoctorBlocked(id: number, isBlocked: boolean): Promise<void> {
+export async function setDoctorBlocked(id: number, isBlocked: boolean, signal?: AbortSignal): Promise<void> {
   const response = await apiFetch(`${baseUrl}/doctors/${id}/blocked`, {
     method: 'PUT',
+    signal,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ isBlocked }),
   })
   await checkResponse(response, 'Не удалось изменить статус врача. Попробуйте ещё раз.')
+}
+
+export async function resetDoctorPassword(
+  id: number,
+  newPassword: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  const response = await apiFetch(`${baseUrl}/users/${id}/reset-password`, {
+    method: 'POST',
+    signal,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ newPassword }),
+  })
+  await checkResponse(response, 'Не удалось изменить пароль. Попробуйте ещё раз.')
 }

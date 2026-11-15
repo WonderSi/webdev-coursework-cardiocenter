@@ -1,0 +1,26 @@
+@use './variables' as *;
+
+@mixin focus-ring($width: 3px, $offset: 3px) {
+  outline: $width solid $color-accent;
+  outline-offset: $offset;
+}
+
+@mixin custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: $color-accent transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    margin-block: 20px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: $color-accent;
+  }
+}

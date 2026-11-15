@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, shallowRef, useTemplateRef } from 'vue'
+import { computed, onMounted, onScopeDispose, reactive, shallowRef, useTemplateRef } from 'vue'
 import FieldValidationAlert from '@/components/doctors/FieldValidationAlert.vue'
 import CloseButton from '@/components/CloseButton.vue'
-import AccessLevelTag from '@/components/doctors/AccessLevelTag.vue'
-import SidebarPageIcon from '@/components/SidebarPageIcon.vue'
+import DoctorAccessDetails from './DoctorAccessDetails.vue'
 import { accessGuide } from '@/config/doctor-access'
-import {
-  saveDoctor,
-  type Doctor,
-  type DoctorCapabilities,
-  type DoctorDraft,
-} from '@/api/doctors.api'
+import { saveDoctor, doctorErrorMessage } from '@/services/doctors'
+import type { Doctor, DoctorCapabilities, DoctorDraft } from '@/types/doctor'
 
 const { doctor, capabilities } = defineProps<{
   doctor: Doctor | null
@@ -24,6 +19,7 @@ const dialog = useTemplateRef<HTMLDialogElement>('dialog')
 const form = useTemplateRef<HTMLFormElement>('form')
 const fieldError = shallowRef<{ field: string; message: string } | null>(null)
 const saving = shallowRef(false)
+const controller = new AbortController()
 const error = shallowRef('')
 const showPassword = shallowRef(false)
 const draft = reactive<DoctorDraft>({
@@ -39,6 +35,12 @@ const canSave = computed(() => !saving.value)
 onMounted(() => {
   dialog.value?.showModal()
   dialog.value?.querySelector<HTMLInputElement>('input:not([disabled]):not([readonly])')?.focus()
+})
+
+onScopeDispose(() => {
+  controller.abort()
+  draft.password = ''
+  dialog.value?.close()
 })
 
 function close() {
@@ -91,16 +93,15 @@ async function submit() {
   if (!validateForm()) return
   saving.value = true
   try {
-    const saved = await saveDoctor(doctor, draft, capabilities)
+    const saved = await saveDoctor(doctor, draft, capabilities, controller.signal)
+    if (controller.signal.aborted) return
     draft.password = ''
     dialog.value?.close()
     emit('saved', saved)
   } catch (cause) {
-    error.value = cause instanceof Error
-      ? cause.message
-      : 'Нет соединения с сервером. Попробуйте ещё раз.'
+    if (!controller.signal.aborted) error.value = doctorErrorMessage(cause, 'Не удалось сохранить учётную запись.')
   } finally {
-    saving.value = false
+    if (!controller.signal.aborted) saving.value = false
   }
 }
 </script>
@@ -122,20 +123,10 @@ async function submit() {
         :aria-busy="saving"
         @submit.prevent="submit"
       >
-        <header
-          class="editor-header"
-        >
+        <header class="editor-header">
           <div>
-            <h2
-              id="doctor-editor-title"
-              class="editor-title"
-            >
-              {{ title }}
-            </h2>
-            <p
-              id="doctor-editor-description"
-              class="editor-description"
-            >
+            <h2 id="doctor-editor-title" class="editor-title">{{ title }}</h2>
+            <p id="doctor-editor-description" class="editor-description">
               {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись для врача. Помните - логин уникален.' }}
             </p>
           </div>
@@ -145,16 +136,9 @@ async function submit() {
             @click="close"
           />
         </header>
-        <fieldset
-          class="account-fields"
-          :disabled="saving"
-        >
-          <label
-            class="field field-wide"
-          >
-            <span>
-              ФИО
-            </span>
+        <fieldset class="account-fields" :disabled="saving">
+          <label class="field field-wide">
+            <span>ФИО</span>
             <input
               v-model="draft.name"
               class="text-input"
@@ -173,13 +157,8 @@ async function submit() {
               :message="fieldError.message"
             />
           </label>
-
-          <label
-            class="field"
-          >
-            <span>
-              Email (логин)
-            </span>
+          <label class="field">
+            <span>Email (логин)</span>
             <input
               v-model="draft.email"
               class="text-input"
@@ -198,23 +177,12 @@ async function submit() {
               :message="fieldError.message"
             />
           </label>
-          <div
-            class="field"
-          >
-            <label
-              for="doctor-password"
-            >
+          <div class="field">
+            <label for="doctor-password">
               {{ doctor ? 'Новый пароль' : 'Пароль' }}
-              <span
-                v-if="doctor"
-                class="optional-label"
-              >
-                (необязательно)
-              </span>
+              <span v-if="doctor" class="optional-label">(необязательно)</span>
             </label>
-            <div
-              class="password-field"
-            >
+            <div class="password-field">
               <input
                 id="doctor-password"
                 v-model="draft.password"
@@ -248,10 +216,7 @@ async function submit() {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z"
-                    fill="#8A8FA8"
-                  />
+                  <path d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z" fill="#8A8FA8" />
                 </svg>
                 <svg
                   v-else
@@ -279,29 +244,19 @@ async function submit() {
               id="doctor-password-error"
               :message="fieldError.message"
             />
-            <p
-              id="password-help"
-              class="field-help"
-            >
+            <p id="password-help" class="field-help">
               {{ doctor ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов.' }}
             </p>
           </div>
         </fieldset>
-        <fieldset
-          class="access-fields"
-          :disabled="saving"
-        >
-          <legend
-            class="section-title"
+        <fieldset class="access-fields" :disabled="saving">
+          <legend class="section-title">Права доступа</legend>
+          <p class="access-help">Каждый следующий уровень включает все возможности предыдущего.</p>
+          <div
+            class="access-options-grid"
+            role="group"
+            aria-label="Уровень доступа"
           >
-            Права доступа
-          </legend>
-          <p
-            class="access-help"
-          >
-            Каждый следующий уровень включает все возможности предыдущего.
-          </p>
-          <div class="access-options-grid" role="group" aria-label="Уровень доступа">
             <button
               v-for="level in accessGuide"
               :key="level.level"
@@ -311,30 +266,11 @@ async function submit() {
               @click="draft.accessLevel = level.level"
               :class="{ selected: draft.accessLevel === level.level }"
             >
-              <span class="access-option-header">
-                <AccessLevelTag :level="level.level" />
-              </span>
-              <span class="access-description" lang="ru">{{ level.description }}</span>
-              <span class="access-pages-title">Доступны вкладки:</span>
-              <span class="access-pages-list">
-                <span
-                  v-for="page in level.pages"
-                  :key="page.page"
-                  class="access-page"
-                >
-                  <SidebarPageIcon :page="page.page" class="access-page-icon" />
-                  <span class="access-page-label">{{ page.label }}</span>
-                </span>
-              </span>
+              <DoctorAccessDetails :level="level.level" />
             </button>
           </div>
         </fieldset>
-        <p
-          v-if="doctor?.isBlocked"
-          class="availability-note"
-        >
-          Учётная запись заблокирована. Сохранение настроек не восстановит вход.
-        </p>
+        <p v-if="doctor?.isBlocked" class="availability-note">Учётная запись заблокирована. Сохранение настроек не восстановит вход.</p>
         <p
           v-if="error"
           class="form-error"
@@ -342,9 +278,7 @@ async function submit() {
         >
           {{ error }}
         </p>
-        <footer
-          class="editor-actions"
-        >
+        <footer class="editor-actions">
           <button
             type="button"
             class="button button-secondary"
@@ -368,6 +302,7 @@ async function submit() {
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+
 .doctor-editor {
   position: fixed;
   inset: 0;
@@ -389,27 +324,11 @@ async function submit() {
   }
 }
 
-// Скроллбар находится внутри карточки и не пересекает её скруглённые углы.
 .editor-scroll {
   max-height: calc(100vh - 64px);
   max-height: calc(100dvh - 64px);
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: $color-accent transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    margin-block: 20px;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    background: $color-accent;
-  }
+  @include custom-scrollbar;
 }
 
 .editor-form {
@@ -443,7 +362,7 @@ async function submit() {
 
 .availability-note {
   padding: 12px 16px;
-  background: #edf4ff;
+  background: $color-ui-surface-hover;
   border-left: 3px solid $color-accent;
   border-radius: 8px;
   font-size: 0.8125rem;
@@ -482,7 +401,7 @@ async function submit() {
 .text-input {
   width: 100%;
   min-width: 0;
-  border: 1px solid rgba($color-secondary, 0.55);
+  border: 1px solid $color-field-border;
   border-radius: $radius-rect-buttons;
   padding: 12px;
   background: $color-white;
@@ -521,7 +440,7 @@ async function submit() {
 .password-field {
   display: flex;
   min-width: 0;
-  border: 1px solid rgba($color-secondary, 0.55);
+  border: 1px solid $color-field-border;
   border-radius: $radius-rect-buttons;
   overflow: hidden;
 }
@@ -563,6 +482,12 @@ async function submit() {
 }
 
 .access-option {
+  --access-description-color: #{$color-secondary-text};
+  --access-page-padding: 8px;
+  --access-page-font-size: 0.8125rem;
+  --access-pages-title-size: 0.875rem;
+  --access-description-line-height: 1.6;
+  --access-description-font-size: 0.875rem;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -578,61 +503,7 @@ async function submit() {
 
 .access-option.selected {
   border-color: $color-accent;
-  background: #edf4ff;
-}
-
-.access-option-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.access-description {
-  color: $color-secondary-text;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  text-align: justify;
-  text-align-last: left;
-  hyphens: auto;
-}
-
-.access-pages-title {
-  margin-top: 16px;
-  margin-bottom: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.access-pages-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.access-page {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border: 1px solid $color-blue-dark;
-  border-radius: $radius-rect-buttons;
-  color: $color-blue-dark;
-  background: transparent;
-  font-size: 0.8125rem;
-  line-height: 1.4;
-}
-
-.access-page-icon {
-  display: block;
-  flex-shrink: 0;
-}
-
-.access-page-label {
-  min-width: 0;
-  overflow-wrap: anywhere;
+  background: $color-ui-surface-hover;
 }
 
 .access-fields:disabled .access-option {
@@ -695,10 +566,13 @@ async function submit() {
   cursor: default;
 }
 
-.button:focus-visible,
+.button:focus-visible {
+  @include focus-ring(3px, 3px);
+}
+
 .access-option:focus-visible {
-  outline: 3px solid $color-accent;
-  outline-offset: 3px;
+  border-color: $color-accent;
+  outline: none;
 }
 
 .password-field:focus-within {

@@ -2,14 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
 import { useSurveyStore } from '@/stores/survey.store'
 import HomePage from '@/pages/HomePage.vue'
-import SurveyPage from '@/pages/SurveyPage.vue'
-import ResultsPage from '@/pages/ResultsPage.vue'
-import LoginPage from '@/pages/LoginPage.vue'
-import DashboardsPage from '@/pages/menu pages/DashboardsPage.vue'
-import ViewDataPage from '@/pages/menu pages/ViewDataPage.vue'
-import UploadDataPage from '@/pages/menu pages/UploadDataPage.vue'
-import ModelTrainingPage from '@/pages/menu pages/ModelTrainingPage.vue'
-import DoctorsPage from '@/pages/menu pages/DoctorsPage.vue'
+
+const SurveyPage = () => import('@/pages/SurveyPage.vue')
+const ResultsPage = () => import('@/pages/ResultsPage.vue')
+const LoginPage = () => import('@/pages/LoginPage.vue')
+const DashboardsPage = () => import('@/pages/menu pages/DashboardsPage.vue')
+const ViewDataPage = () => import('@/pages/menu pages/ViewDataPage.vue')
+const UploadDataPage = () => import('@/pages/menu pages/UploadDataPage.vue')
+const ModelTrainingPage = () => import('@/pages/menu pages/ModelTrainingPage.vue')
+const DoctorsPage = () => import('@/pages/menu pages/DoctorsPage.vue')
 
 type AppRole = 'ROLE_DOCTOR' | 'ROLE_SUPER_ADMIN'
 

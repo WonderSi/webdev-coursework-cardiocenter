@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { doctorAccessLevels, type DoctorAccessLevel } from '@/api/doctors.api'
+import { doctorAccessLevels } from '@/config/doctor-access'
+import type { DoctorAccessLevel } from '@/types/doctor'
 
-const { level } = defineProps<{ level?: DoctorAccessLevel }>()
+const { level, size = 'default' } = defineProps<{
+  level?: DoctorAccessLevel
+  size?: 'default' | 'compact'
+}>()
 const label = computed(() => doctorAccessLevels.find(item => item.value === level)?.label ?? 'Не указан')
+const tagClasses = computed(() => [
+  { 'access-level-tag--compact': size === 'compact' },
+  level ? `access-level-tag--${level.toLowerCase()}` : undefined,
+])
 </script>
 
 <template>
-  <span
-    class="access-level-tag"
-    :class="level ? 'access-level-tag--' + level.toLowerCase() : undefined"
-  >
+  <span class="access-level-tag" :class="tagClasses">
     {{ label }}
   </span>
 </template>
@@ -30,6 +35,11 @@ const label = computed(() => doctorAccessLevels.find(item => item.value === leve
   font-weight: 400;
   line-height: 1;
   white-space: nowrap;
+}
+
+.access-level-tag--compact {
+  padding: 5px 8px;
+  font-size: inherit;
 }
 
 .access-level-tag--view {
