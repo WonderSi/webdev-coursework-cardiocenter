@@ -148,53 +148,25 @@ async function updateBlocked() {
 </script>
 
 <template>
-  <!--
-    Структура страницы:
-    page-main-card
-      page-header: заголовок + кнопка справки
-      info-card: три секции, в каждой заголовок + содержимое
-      directory-card: действия + поиск + фильтры + таблица
-      диалоги редактирования и блокировки
-  -->
   <Sidebar class="doctors-sidebar" />
   <main class="doctors-page">
     <section class="page-main-card" aria-labelledby="doctors-page-title">
-      <!-- 1. Шапка: заголовок слева, кнопка справки справа. -->
-      <header class="page-header">
-        <div class="page-header-title">
-          <h1 id="doctors-page-title" class="page-title">
-            Управление учётными записями врачей
-          </h1>
-        </div>
-        <div class="page-header-actions">
-          <button
-            ref="helpButton"
-            type="button"
-            class="info-btn"
-            :aria-expanded="isHelpOpen"
-            aria-controls="doctors-page-help"
-            @click="isHelpOpen = !isHelpOpen"
-          >
-            <span class="info-icon" aria-hidden="true">
-              <svg
-                class="info-icon-svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="9" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <circle cx="12" cy="17" r="0.75" fill="currentColor" stroke="none" />
-              </svg>
-            </span>
-            <span class="info-btn-label">Справка (как пользоваться страницей)</span>
-          </button>
-        </div>
+      <!-- Шапка главной карточки -->
+      <header class="card-header">
+        <h1 id="doctors-page-title" class="page-title">Управление учётными записями врачей</h1>
+        <button
+          ref="helpButton"
+          type="button"
+          class="info-btn"
+          :aria-expanded="isHelpOpen"
+          aria-controls="doctors-page-help"
+          @click="isHelpOpen = !isHelpOpen"
+        >
+          <span class="help-icon" aria-hidden="true">?</span>
+          <span>Справка (как пользоваться страницей)</span>
+        </button>
       </header>
-      <!-- 2. Справка. Каждая секция состоит из заголовка и блока содержимого. -->
+      <!-- Начало макета справки. Тексты и наполнение колонок можно дописать здесь. -->
       <aside
         v-if="isHelpOpen"
         id="doctors-page-help"
@@ -210,28 +182,28 @@ async function updateBlocked() {
           ×
         </button>
         <!-- 1. Поля учётной записи -->
-        <section class="info-card-section account-fields-section" aria-labelledby="account-fields-title">
+        <section class="info-card-section" aria-labelledby="account-fields-title">
           <h2 id="account-fields-title" class="info-card-header">Поля учётной записи</h2>
           <div class="info-card-content">
             <p>Учётная запись состоит из трёх полей для заполнения:</p>
             <dl class="account-field-list">
               <div class="account-field-row">
                 <dt class="field-example">Имя</dt>
-                <dd class="account-field-description">
+                <dd>
                   <strong>Имя</strong>
                   — то, что видите только вы. Можно указать ФИО сотрудника.
                 </dd>
               </div>
               <div class="account-field-row">
                 <dt class="field-example">Имя пользователя</dt>
-                <dd class="account-field-description">
+                <dd>
                   <strong>Имя пользователя</strong>
                   — логин сотрудника для входа в систему.
                 </dd>
               </div>
               <div class="account-field-row">
                 <dt class="field-example">Пароль</dt>
-                <dd class="account-field-description">
+                <dd>
                   <strong>Пароль</strong>
                   — используется сотрудником для входа.
                 </dd>
@@ -241,7 +213,7 @@ async function updateBlocked() {
           </div>
         </section>
         <!-- 2. Права доступа: каркас трёх колонок для дальнейшей доработки -->
-        <section class="info-card-section account-access-section" aria-labelledby="account-access-title">
+        <section class="info-card-section" aria-labelledby="account-access-title">
           <h2 id="account-access-title" class="info-card-header">Права доступа</h2>
           <div class="info-card-content">
             <p>Есть три уровня прав доступа. Они определяют, какие возможности доступны сотруднику.</p>
@@ -266,7 +238,7 @@ async function updateBlocked() {
           </div>
         </section>
         <!-- 3. Блокировка пользователя -->
-        <section class="info-card-section account-block-section" aria-labelledby="account-block-title">
+        <section class="info-card-section" aria-labelledby="account-block-title">
           <h2 id="account-block-title" class="info-card-header">Блокировка пользователя</h2>
           <div class="info-card-content">
             <p>Блокировка временно закрывает вход в систему. Учётная запись и данные сохраняются.</p>
@@ -327,7 +299,7 @@ async function updateBlocked() {
           </div>
         </section>
       </aside>
-      <!-- 3. Основное содержимое: уведомления, поиск, фильтры и список врачей. -->
+      <!-- Основное содержимое: поиск, фильтры и список врачей -->
       <section
         v-if="!userStore.isSuperAdmin"
         class="directory-card state-panel"
@@ -375,7 +347,6 @@ async function updateBlocked() {
               </button>
             </div>
           </div>
-          <!-- Поиск и выбор уровня доступа -->
           <div class="directory-toolbar">
             <label class="search-field">
               <svg
@@ -422,7 +393,6 @@ async function updateBlocked() {
               </select>
             </label>
           </div>
-          <!-- Фильтры статуса и количество результатов -->
           <div class="status-bar">
             <div
               class="status-filters"
@@ -620,7 +590,6 @@ async function updateBlocked() {
           </template>
           <template v-if="!capabilities.accessLevels">Сейчас все врачи имеют полный доступ к данным и обучению моделей; ограничение прав пока недоступно.</template>
         </p>
-        <!-- Диалоги создания, редактирования и блокировки -->
         <DoctorEditorDialog
           v-if="editorOpen"
           :doctor="editingDoctor"
@@ -680,11 +649,6 @@ async function updateBlocked() {
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
-
-// Стили расположены в порядке разметки. Медиазапросы находятся в конце.
-// Именованные секции справки: account-fields-section, account-access-section,
-// account-block-section — позволяют настраивать каждую секцию отдельно.
-
 // Контейнер страницы и главная карточка.
 .doctors-page {
   display: flex;
@@ -708,21 +672,12 @@ async function updateBlocked() {
 }
 
 // Шапка и кнопка справки.
-.page-header {
+.card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px 24px;
   margin-bottom: 24px;
-}
-
-.page-header-title {
-  min-width: 0;
-}
-
-.page-header-actions {
-  flex-shrink: 0;
-  max-width: 100%;
 }
 
 .page-title {
@@ -757,23 +712,15 @@ async function updateBlocked() {
   background: #edf4ff;
 }
 
-.info-icon {
-  display: inline-flex;
-  flex: 0 0 18px;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-}
-
-.info-icon-svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.info-btn-label {
-  min-width: 0;
+.help-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.75rem;
 }
 
 // Справочный блок: общая структура трёх секций.
@@ -991,7 +938,6 @@ async function updateBlocked() {
   border-radius: $radius-glass-card;
 }
 
-// Панель списка: заголовок и действия.
 .directory-actions {
   display: flex;
   align-items: center;
@@ -1038,7 +984,6 @@ async function updateBlocked() {
   text-decoration: underline;
 }
 
-// Поиск и выбор уровня доступа.
 .directory-toolbar {
   display: flex;
   gap: 16px;
@@ -1108,7 +1053,6 @@ async function updateBlocked() {
   min-width: 180px;
 }
 
-// Фильтры статуса и счётчики.
 .status-bar {
   padding: 0 28px 16px;
   display: flex;
@@ -1158,7 +1102,6 @@ async function updateBlocked() {
   font-size: 0.75rem;
 }
 
-// Таблица и карточки врачей.
 .table-container {
   position: relative;
   overflow-x: auto;
@@ -1374,7 +1317,6 @@ async function updateBlocked() {
   overflow-wrap: anywhere;
 }
 
-// Дополнительная памятка под списком.
 .access-guide {
   margin-top: 24px;
   border: 1px solid rgba($color-white, 0.55);
@@ -1432,7 +1374,6 @@ async function updateBlocked() {
   border-radius: 12px;
 }
 
-// Диалог подтверждения блокировки.
 .block-dialog {
   position: fixed;
   inset: 0;
@@ -1517,7 +1458,6 @@ async function updateBlocked() {
   outline-offset: 3px;
 }
 
-// Адаптивность: планшеты, мобильное меню и карточки списка.
 @media (max-width: 1100px) {
   .doctors-table {
     min-width: 900px;
@@ -1570,7 +1510,7 @@ async function updateBlocked() {
     padding: 20px;
   }
 
-  .page-header {
+  .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
