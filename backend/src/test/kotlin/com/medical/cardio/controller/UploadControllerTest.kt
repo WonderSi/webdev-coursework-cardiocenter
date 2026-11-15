@@ -49,7 +49,11 @@ class UploadControllerTest : ControllerTestBase() {
             AdminUserEntity(
                 email = "upload-test@cardio.ru",
                 passwordHash = passwordEncoder.encode("ValidPass@2000"),
-                role = Role.DOCTOR
+                role = Role.DOCTOR,
+                allowedSections = mutableSetOf(
+                    com.medical.cardio.entity.AdminSection.UPLOAD_DATA,
+                    com.medical.cardio.entity.AdminSection.DASHBOARDS
+                )
             )
         )
     }

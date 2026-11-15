@@ -7,6 +7,8 @@ import com.medical.cardio.dto.DoctorResponse
 import com.medical.cardio.dto.CreateDoctorRequest
 import com.medical.cardio.entity.Role
 import com.medical.cardio.entity.AdminUserEntity
+import com.medical.cardio.entity.AdminSection
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AdminService(
@@ -22,11 +24,13 @@ class AdminService(
         adminUserRepository.save(user)
     }
 
+    @Transactional(readOnly = true)
     fun getDoctors(): List<DoctorResponse> {
         val doctors = adminUserRepository.findAllByRole(Role.DOCTOR)
-        return doctors.map { DoctorResponse(it.id, it.email, it.isBlocked) }
+        return doctors.map { doctorResponse(it) }
     }
 
+    @Transactional
     fun createDoctor(request: CreateDoctorRequest): DoctorResponse {
         if (adminUserRepository.existsByEmail(request.email)) {
             throw IllegalArgumentException("Пользователь с таким email уже существует")
@@ -35,12 +39,26 @@ class AdminService(
         val user = AdminUserEntity(
             email = request.email,
             passwordHash = passwordEncoder.encode(request.password),
-            role = Role.DOCTOR
+            role = Role.DOCTOR,
+            allowedSections = request.allowedSections.toMutableSet()
         )
 
         val savedUser = adminUserRepository.save(user)
-        return DoctorResponse(savedUser.id, savedUser.email, savedUser.isBlocked)
+        return doctorResponse(savedUser)
     }
+
+    @Transactional
+    fun updateDoctorSections(userId: Long, allowedSections: Set<AdminSection>): DoctorResponse {
+        val user = adminUserRepository.findById(userId)
+            .orElseThrow { NoSuchElementException("User with id $userId not found") }
+        require(user.role == Role.DOCTOR) { "Изменять разделы можно только у врача" }
+        user.allowedSections.clear()
+        user.allowedSections.addAll(allowedSections)
+        return doctorResponse(user)
+    }
+
+    private fun doctorResponse(user: AdminUserEntity): DoctorResponse =
+        DoctorResponse(user.id, user.email, user.isBlocked, user.allowedSections.toSet())
 
     fun updateDoctorBlocked(userId: Long, isBlocked: Boolean) {
         val user = adminUserRepository.findById(userId)

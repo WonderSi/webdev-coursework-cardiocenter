@@ -4,6 +4,7 @@ import com.medical.cardio.dto.CreateDoctorRequest
 import com.medical.cardio.dto.DoctorResponse
 import com.medical.cardio.dto.ResetPasswordRequest
 import com.medical.cardio.dto.UpdateDoctorBlockedRequest
+import com.medical.cardio.dto.UpdateDoctorSectionsRequest
 import com.medical.cardio.service.AdminService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -52,7 +53,7 @@ class AdminController(
 
     @Operation(
         summary = "Создать учётную запись врача",
-        description = "Создаёт активного DOCTOR с уникальным email. Пароль хранится в виде BCrypt-хэша."
+        description = "Создаёт активного DOCTOR с уникальным email и allowedSections (по умолчанию пустой список). Пароль хранится в виде BCrypt-хэша."
     )
     @ApiResponses(value = [
         ApiResponse(responseCode = "201", description = "Врач создан", useReturnTypeSchema = true),
@@ -102,4 +103,20 @@ class AdminController(
         adminService.updateDoctorBlocked(id, request.isBlocked)
         return ResponseEntity.noContent().build()
     }
+
+    @Operation(summary = "Заменить разрешённые разделы врача",
+        description = "Полностью заменяет allowedSections. [] удаляет все разрешения. Изменять SUPER_ADMIN запрещено.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "Врач с обновлёнными разделами", useReturnTypeSchema = true),
+        ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized"),
+        ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden")
+    ])
+    @PutMapping("/doctors/{id}/sections")
+    fun updateDoctorSections(
+        @Parameter(description = "ID учётной записи", example = "1") @PathVariable id: Long,
+        @RequestBody @Valid request: UpdateDoctorSectionsRequest
+    ): ResponseEntity<DoctorResponse> =
+        ResponseEntity.ok(adminService.updateDoctorSections(id, request.allowedSections))
 }

@@ -2,6 +2,8 @@ package com.medical.cardio.controller
 
 import com.medical.cardio.dto.LoginRequest
 import com.medical.cardio.dto.LoginResponse
+import com.medical.cardio.entity.AdminSection
+import com.medical.cardio.entity.Role
 import com.medical.cardio.dto.CsrfTokenResponse
 import com.medical.cardio.security.AuthCookieService
 import com.medical.cardio.service.AuthService
@@ -141,7 +143,12 @@ class AuthController(
         ResponseEntity.ok(
             LoginResponse(
                 email = user.username,
-                role = user.authorities.first().authority
+                role = user.authorities.first { authority ->
+                    Role.entries.any { authority.authority == "ROLE_$it" }
+                }.authority,
+                allowedSections = AdminSection.entries.filter { section ->
+                    user.authorities.any { it.authority == "SECTION_$section" || it.authority == "ROLE_SUPER_ADMIN" }
+                }.toSet()
             )
         )
 

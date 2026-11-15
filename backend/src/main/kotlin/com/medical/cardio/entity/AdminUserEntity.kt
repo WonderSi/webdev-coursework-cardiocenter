@@ -21,5 +21,14 @@ class AdminUserEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    val role: Role = Role.DOCTOR
+    val role: Role = Role.DOCTOR,
+
+    @ElementCollection
+    @CollectionTable(
+        name = "admin_user_sections",
+        joinColumns = [JoinColumn(name = "admin_user_id")]
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "section", nullable = false, length = 30)
+    var allowedSections: MutableSet<AdminSection> = mutableSetOf()
 )

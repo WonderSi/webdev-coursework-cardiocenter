@@ -1,5 +1,6 @@
 package com.medical.cardio.dto
 
+import com.medical.cardio.entity.AdminSection
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -22,5 +23,7 @@ data class LoginResponse(
     @field:Schema(description = "Email сотрудника", example = "doctor@example.com")
     val email: String,
     @field:Schema(description = "Роль сотрудника с префиксом ROLE_", example = "ROLE_DOCTOR")
-    val role: String
+    val role: String,
+    @field:Schema(description = "Доступные разделы. SUPER_ADMIN получает все разделы.")
+    val allowedSections: Set<AdminSection>
 )

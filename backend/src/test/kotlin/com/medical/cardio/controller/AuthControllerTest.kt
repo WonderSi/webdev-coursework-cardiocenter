@@ -62,7 +62,8 @@ class AuthControllerTest : ControllerTestBase() {
             AdminUserEntity(
                 email = "auth-test@cardio.ru",
                 passwordHash = passwordEncoder.encode("ValidPass@2000"),
-                role = Role.DOCTOR
+                role = Role.DOCTOR,
+                allowedSections = mutableSetOf(com.medical.cardio.entity.AdminSection.UPLOAD_DATA)
             )
         )
     }
@@ -82,6 +83,7 @@ class AuthControllerTest : ControllerTestBase() {
             status { isOk() }
             jsonPath("$.email") { value("auth-test@cardio.ru") }
             jsonPath("$.role") { value("ROLE_DOCTOR") }
+            jsonPath("$.allowedSections[0]") { value("UPLOAD_DATA") }
             jsonPath("$.accessToken") { doesNotExist() }
             jsonPath("$.refreshToken") { doesNotExist() }
             header { exists("Set-Cookie") }

@@ -114,7 +114,12 @@ class SecurityConfig(
             ).permitAll()
             auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             auth.requestMatchers("/api/admin/super-admin/**").hasRole("SUPER_ADMIN")
-            auth.requestMatchers("/api/admin/**").hasAnyRole("DOCTOR", "SUPER_ADMIN")
+            auth.requestMatchers("/api/admin/dashboard").hasAnyAuthority("ROLE_SUPER_ADMIN", "SECTION_DASHBOARDS")
+            auth.requestMatchers("/api/admin/upload", "/api/admin/upload/**", "/api/admin/patients")
+                .hasAnyAuthority("ROLE_SUPER_ADMIN", "SECTION_UPLOAD_DATA")
+            auth.requestMatchers("/api/admin/model", "/api/admin/dataset/schema", "/api/admin/retrain")
+                .hasAnyAuthority("ROLE_SUPER_ADMIN", "SECTION_MODEL_TRAINING")
+            auth.requestMatchers("/api/admin/**").hasRole("SUPER_ADMIN")
             auth.anyRequest().authenticated()
         }
         .exceptionHandling {

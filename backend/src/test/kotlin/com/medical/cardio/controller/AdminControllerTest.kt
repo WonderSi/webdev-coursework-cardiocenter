@@ -7,6 +7,8 @@ import com.medical.cardio.support.ControllerTestBase
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.springframework.beans.factory.annotation.Autowired
@@ -120,7 +122,7 @@ class AdminControllerTest : ControllerTestBase() {
             status { isOk() }
             content {
                 json(
-                    """[{"id":${doctorUser.id},"email":"${doctorUser.email}","isBlocked":${doctorUser.isBlocked}}]""",
+                    """[{"id":${doctorUser.id},"email":"${doctorUser.email}","isBlocked":${doctorUser.isBlocked},"allowedSections":[]}]""",
                     JsonCompareMode.STRICT
                 )
             }
@@ -186,6 +188,7 @@ class AdminControllerTest : ControllerTestBase() {
             cookie(cookie)
         }.andExpect {
             status { isCreated() }
+            jsonPath("$.allowedSections") { isEmpty() }
         }
 
         val savedDoctor = adminUserRepository.findByEmail("doctor@example.com") 
@@ -301,5 +304,98 @@ class AdminControllerTest : ControllerTestBase() {
         }.andExpect {
             status { isBadRequest() }
         }
+    }
+
+    @Test
+    fun `creates doctor with sections and returns them in list`() {
+        mockMvc.post("/api/admin/super-admin/doctors") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"doctor@example.com","password":"ValidPass@2000","allowedSections":["UPLOAD_DATA"]}"""
+            cookie(authCookie(extendedUser))
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.allowedSections[0]") { value("UPLOAD_DATA") }
+        }
+        mockMvc.get("/api/admin/super-admin/doctors") {
+            cookie(authCookie(extendedUser))
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$[?(@.email == 'doctor@example.com')].allowedSections[0]") { value("UPLOAD_DATA") }
+        }
+    }
+
+    @Test
+    fun `replaces sections and then clears them`() {
+        for (sections in listOf("[\"DASHBOARDS\"]", "[\"UPLOAD_DATA\"]", "[]")) {
+            mockMvc.put("/api/admin/super-admin/doctors/${doctorUser.id}/sections") {
+                contentType = MediaType.APPLICATION_JSON
+                content = """{"allowedSections":$sections}"""
+                cookie(authCookie(extendedUser))
+            }.andExpect {
+                status { isOk() }
+                content { json("""{"allowedSections":$sections}""") }
+            }
+            mockMvc.get("/api/admin/super-admin/doctors") {
+                cookie(authCookie(extendedUser))
+            }.andExpect {
+                status { isOk() }
+                content { json("""[{"id":${doctorUser.id},"allowedSections":$sections}]""") }
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["{}", "{\"allowedSections\":null}", "{\"allowedSections\":[\"UNKNOWN\"]}", "{\"allowedSections\":[null]}"])
+    fun `invalid sections update returns 400`(body: String) {
+        mockMvc.put("/api/admin/super-admin/doctors/${doctorUser.id}/sections") {
+            contentType = MediaType.APPLICATION_JSON
+            content = body
+            cookie(authCookie(extendedUser))
+        }.andExpect { status { isBadRequest() } }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["null", "[\"UNKNOWN\"]", "[null]"])
+    fun `invalid sections on creation returns 400`(sections: String) {
+        mockMvc.post("/api/admin/super-admin/doctors") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"email":"doctor@example.com","password":"ValidPass@2000","allowedSections":$sections}"""
+            cookie(authCookie(extendedUser))
+        }.andExpect { status { isBadRequest() } }
+    }
+
+    @Test
+    fun `doctor cannot change own sections`() {
+        mockMvc.put("/api/admin/super-admin/doctors/${doctorUser.id}/sections") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"allowedSections":["UPLOAD_DATA"]}"""
+            cookie(authCookie(doctorUser))
+        }.andExpect { status { isForbidden() } }
+    }
+
+    @Test
+    fun `sections update requires authentication`() {
+        mockMvc.put("/api/admin/super-admin/doctors/${doctorUser.id}/sections") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"allowedSections":[]}"""
+        }.andExpect { status { isUnauthorized() } }
+    }
+
+    @Test
+    fun `sections update of missing doctor returns 404`() {
+        mockMvc.put("/api/admin/super-admin/doctors/${Long.MAX_VALUE}/sections") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"allowedSections":[]}"""
+            cookie(authCookie(extendedUser))
+        }.andExpect { status { isNotFound() } }
+    }
+
+    @Test
+    fun `sections update of super admin returns 400`() {
+        mockMvc.put("/api/admin/super-admin/doctors/${extendedUser.id}/sections") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"allowedSections":[]}"""
+            cookie(authCookie(extendedUser))
+        }.andExpect { status { isBadRequest() } }
     }
 }

@@ -36,8 +36,18 @@ import reactor.core.publisher.Mono
 
 @WebMvcTest(RetrainController::class)
 @Import(RetrainService::class, SecurityConfig::class, JwtAuthFilter::class, ProblemResponseWriter::class)
-@WithMockUser(roles = ["DOCTOR"])
+@WithMockUser(authorities = ["ROLE_DOCTOR", "SECTION_MODEL_TRAINING"])
 class RetrainControllerTest {
+    @Test
+    @WithMockUser(roles = ["DOCTOR"])
+    fun `doctor without training section cannot access model or schema or retrain`() {
+        mvc.get("/api/admin/model").andExpect { status { isForbidden() } }
+        mvc.get("/api/admin/dataset/schema").andExpect { status { isForbidden() } }
+        mvc.post("/api/admin/retrain").andExpect { status { isForbidden() } }
+        verify(mlClient, never()).getMetrics()
+        verify(mlClient, never()).getDatasetSchema()
+        verify(mlClient, never()).retrain(any())
+    }
     @BeforeEach
     fun activeModelVersion() {
         whenever(mlClient.getModelVersion()).thenReturn(Mono.just("test-bundle"))
