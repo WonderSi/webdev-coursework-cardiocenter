@@ -152,8 +152,8 @@ async function updateBlocked() {
   <main class="doctors-page">
     <section class="page-main-card" aria-labelledby="doctors-page-title">
       <!-- Шапка главной карточки -->
-      <header class="card-header">
-        <h1 id="doctors-page-title" class="page-title">Управление учётными записями врачей</h1>
+      <header class="page-header">
+        <h1 id="doctors-page-title" class="page-title">Управление аккаунтами врачей</h1>
         <button
           ref="helpButton"
           type="button"
@@ -162,7 +162,21 @@ async function updateBlocked() {
           aria-controls="doctors-page-help"
           @click="isHelpOpen = !isHelpOpen"
         >
-          <span class="help-icon" aria-hidden="true">?</span>
+          <svg
+            class="info-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle cx="12" cy="12" r="9" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <circle cx="12" cy="17" r="0.75" fill="currentColor" stroke="none" />
+          </svg>
           <span>Справка (как пользоваться страницей)</span>
         </button>
       </header>
@@ -179,7 +193,18 @@ async function updateBlocked() {
           aria-label="Закрыть справку"
           @click="closeHelp"
         >
-          ×
+          <svg
+            class="info-close-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
         </button>
         <!-- 1. Поля учётной записи -->
         <section class="info-card-section" aria-labelledby="account-fields-title">
@@ -191,7 +216,7 @@ async function updateBlocked() {
                 <dt class="field-example">Имя</dt>
                 <dd>
                   <strong>Имя</strong>
-                  — то, что видите только вы. Можно указать ФИО сотрудника.
+                  — то, что видите только вы. Можно указать ФИО сотрудника для удобства.
                 </dd>
               </div>
               <div class="account-field-row">
@@ -205,13 +230,15 @@ async function updateBlocked() {
                 <dt class="field-example">Пароль</dt>
                 <dd>
                   <strong>Пароль</strong>
-                  — используется сотрудником для входа.
+                  — используется сотрудником для входа в комбинации с логином.
                 </dd>
               </div>
             </dl>
-            <p>Данные для входа: имя пользователя и пароль. Имя пользователя должно быть уникальным.</p>
+            <p>Так, данные для входа: имя пользователя и пароль. Имя пользователя должно быть <u>уникальным</u>.</p>
           </div>
         </section>
+        <div class="info-card-divider" aria-hidden="true"></div>
+
         <!-- 2. Права доступа: каркас трёх колонок для дальнейшей доработки -->
         <section class="info-card-section" aria-labelledby="account-access-title">
           <h2 id="account-access-title" class="info-card-header">Права доступа</h2>
@@ -237,11 +264,13 @@ async function updateBlocked() {
             <p class="info-note">Управление врачами доступно только суперадминистратору.</p>
           </div>
         </section>
+        <div class="info-card-divider" aria-hidden="true"></div>
+
         <!-- 3. Блокировка пользователя -->
         <section class="info-card-section" aria-labelledby="account-block-title">
           <h2 id="account-block-title" class="info-card-header">Блокировка пользователя</h2>
           <div class="info-card-content">
-            <p>Блокировка временно закрывает вход в систему. Учётная запись и данные сохраняются.</p>
+            <p>Блокировка временно закрывает пользователю вход в систему. Учётная запись и данные сохраняются.</p>
             <div class="lock-examples">
               <p class="lock-example-row">
                 <span class="lock-example lock-example-active" aria-hidden="true">
@@ -618,13 +647,13 @@ async function updateBlocked() {
   padding: 24px;
   border: 1px solid rgba($color-white, 0.5);
   border-radius: $radius-glass-card;
-  background: rgba($color-white, 0.68);
+  background: rgba($color-white, 0.65);
 }
 
 // Шапка и кнопка справки
-.card-header {
+.page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 20px 24px;
   margin-bottom: 24px;
@@ -633,9 +662,9 @@ async function updateBlocked() {
 .page-title {
   min-width: 0;
   color: $color-text;
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.35;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
@@ -662,22 +691,18 @@ async function updateBlocked() {
   background: #edf4ff;
 }
 
-.help-icon {
-  display: grid;
-  flex-shrink: 0;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-size: 0.75rem;
+.info-icon {
+  display: block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
 }
 
 // Справочный блок: общая структура трёх секций.
 .info-card {
   position: relative;
   margin-bottom: 24px;
-  padding: 16px;
+  padding: 20px;
   border-radius: 16px;
   background: $color-white;
   color: $color-blue-dark;
@@ -685,42 +710,57 @@ async function updateBlocked() {
   line-height: 1.5;
 }
 
+.info-card-section {
+  margin-inline: 16px;
+}
+
 .info-close-btn {
   position: absolute;
   top: 8px;
   right: 8px;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
+  padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   background: transparent;
   color: $color-text;
-  font: inherit;
-  font-size: 1.375rem;
+  line-height: 1;
   cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.info-close-icon {
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .info-close-btn:hover {
-  background: #edf4ff;
+  background: $color-red-bg;
+  color: $color-cold-red;
 }
 
-.info-card-section + .info-card-section {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 2px solid $color-accent;
+.info-card-divider {
+  height: 2px;
+  margin: 16px 0px;
+  background: $color-accent-lighter;
 }
 
 .info-card-header {
   margin-bottom: 6px;
   padding-right: 28px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 800;
 }
 
 .info-card-content {
-  padding-left: 24px;
+  padding: 0;
+  font-size: 1rem;
 }
 
 // Поля учётной записи.
@@ -739,12 +779,13 @@ async function updateBlocked() {
 
 .field-example {
   justify-self: end;
-  padding: 0 6px;
+  padding: 0px 8px;
   border: 1px solid $color-accent;
-  border-radius: 5px;
+  border-radius: 7px;
   color: $color-secondary-text;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   line-height: 1.4;
+  text-wrap: nowrap;
 }
 
 // Три колонки прав доступа. Здесь можно продолжать макет.
@@ -1247,7 +1288,7 @@ async function updateBlocked() {
 
 .state-description {
   color: $color-secondary-text;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   line-height: 1.6;
   max-width: 55ch;
 }
@@ -1450,7 +1491,7 @@ async function updateBlocked() {
     padding: 20px;
   }
 
-  .card-header {
+  .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
@@ -1488,10 +1529,6 @@ async function updateBlocked() {
 
   .page-title {
     font-size: 1.25rem;
-  }
-
-  .info-card-content {
-    padding-left: 0;
   }
 
   .account-field-row {
