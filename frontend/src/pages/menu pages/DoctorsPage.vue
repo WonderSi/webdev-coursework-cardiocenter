@@ -460,14 +460,6 @@ async function updateBlocked() {
             >
               Сбросить фильтры
             </button>
-            <button
-              v-else
-              type="button"
-              class="button button-primary"
-              @click="openEditor()"
-            >
-              Добавить врача
-            </button>
           </div>
           <div
             v-else
