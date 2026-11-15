@@ -10,7 +10,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 
-useUserStore().fetchMe().finally(() => {
+useUserStore().fetchMe().catch(() => {}).finally(() => {
   app.use(router)
   app.mount('#app')
 })

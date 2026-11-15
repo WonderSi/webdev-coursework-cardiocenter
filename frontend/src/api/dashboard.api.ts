@@ -63,6 +63,7 @@ import { apiFetch } from './client'
 
 export async function fetchDashboardStats(): Promise<DashboardStatsResponse> {
   const res = await apiFetch('/api/admin/dashboard')
+  if (res.status === 403) throw new Error('Доступ запрещён')
   if (!res.ok) throw new Error(`Dashboard fetch failed: ${res.status}`)
   return res.json()
 }

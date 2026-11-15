@@ -1,6 +1,7 @@
 <template>
   <Sidebar/>
   <div class="dashboards-grid-container">
+    <p v-if="errorMessage" class="col-6" role="alert">{{ errorMessage }}</p>
 
     <div class="kpi-column col-1 row-2">
       <div class="dashboard-card kpi-card">
@@ -99,6 +100,7 @@ use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent, LegendCom
 
 const {
   stats,
+  errorMessage,
   chartAlcohol,
   chartDiagnoses,
   chartAgeGender,
