@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, shallowRef, useTemplateRef } from 'vue'
+import FieldValidationAlert from '@/components/doctors/FieldValidationAlert.vue'
+import CloseButton from '@/components/CloseButton.vue'
 import AccessLevelTag from '@/components/doctors/AccessLevelTag.vue'
 import SidebarPageIcon from '@/components/SidebarPageIcon.vue'
 import { accessGuide } from '@/config/doctor-access'
@@ -19,6 +21,8 @@ const emit = defineEmits<{
   saved: [doctor: Doctor]
 }>()
 const dialog = useTemplateRef<HTMLDialogElement>('dialog')
+const form = useTemplateRef<HTMLFormElement>('form')
+const fieldError = shallowRef<{ field: string; message: string } | null>(null)
 const saving = shallowRef(false)
 const error = shallowRef('')
 const showPassword = shallowRef(false)
@@ -44,10 +48,48 @@ function close() {
   emit('close')
 }
 
+// Проверяем ограничения полей, но показываем собственное сообщение вместо
+// системного окна браузера. Первый неверный input получает фокус.
+function validationMessage(input: HTMLInputElement): string {
+  if (!input.willValidate) return ''
+  if (input.name === 'name' && !input.value.trim()) return 'Укажите ФИО.'
+  if (input.validity.valueMissing) {
+    return input.name === 'email' ? 'Укажите email для входа.' : 'Укажите пароль.'
+  }
+  if (input.validity.typeMismatch) return 'Введите корректный email с символом @.'
+  if (input.name === 'password' && input.value) {
+    if (input.value.length < 12) return 'Пароль должен содержать не менее 12 символов.'
+    if (input.value.length > 100) return 'Пароль должен содержать не более 100 символов.'
+  }
+  return input.validity.valid ? '' : input.validationMessage
+}
+
+function validateForm(): boolean {
+  fieldError.value = null
+  const inputs = form.value?.querySelectorAll<HTMLInputElement>('input') ?? []
+  for (const input of inputs) {
+    const message = validationMessage(input)
+    if (message) {
+      fieldError.value = { field: input.name, message }
+      input.focus()
+      return false
+    }
+  }
+  return true
+}
+
+function updateFieldError(event: Event) {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || fieldError.value?.field !== input.name) return
+  const message = validationMessage(input)
+  fieldError.value = message ? { field: input.name, message } : null
+}
+
 async function submit() {
   if (!canSave.value) return
-  saving.value = true
   error.value = ''
+  if (!validateForm()) return
+  saving.value = true
   try {
     const saved = await saveDoctor(doctor, draft, capabilities)
     draft.password = ''
@@ -71,240 +113,256 @@ async function submit() {
     aria-describedby="doctor-editor-description"
     @cancel.prevent="close"
   >
-    <form
-      class="editor-form"
-      :aria-busy="saving"
-      @submit.prevent="submit"
-    >
-      <header
-        class="editor-header"
+    <div class="editor-scroll">
+      <form
+        ref="form"
+        class="editor-form"
+        novalidate
+        @input="updateFieldError"
+        :aria-busy="saving"
+        @submit.prevent="submit"
       >
-        <div>
-          <h2
-            id="doctor-editor-title"
-            class="editor-title"
-          >
-            {{ title }}
-          </h2>
-          <p
-            id="doctor-editor-description"
-            class="editor-description"
-          >
-            {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись для врача. Помните - логин уникален.' }}
-          </p>
-        </div>
-        <button
-          type="button"
-          class="close-button"
-          aria-label="Закрыть"
+        <header
+          class="editor-header"
+        >
+          <div>
+            <h2
+              id="doctor-editor-title"
+              class="editor-title"
+            >
+              {{ title }}
+            </h2>
+            <p
+              id="doctor-editor-description"
+              class="editor-description"
+            >
+              {{ doctor ? 'Данные учётной записи и доступ к системе.' : 'Создайте учётную запись для врача. Помните - логин уникален.' }}
+            </p>
+          </div>
+          <CloseButton
+            class="close-button"
+            :disabled="saving"
+            @click="close"
+          />
+        </header>
+        <fieldset
+          class="account-fields"
           :disabled="saving"
-          @click="close"
-        >
-          ×
-        </button>
-      </header>
-      <fieldset
-        class="account-fields"
-        :disabled="saving"
-      >
-        <legend
-          class="section-title"
-        >
-          Учётная запись
-        </legend>
-        <label
-          class="field field-wide"
-        >
-          <span>
-            ФИО
-          </span>
-          <input
-            v-model="draft.name"
-            class="text-input"
-            name="name"
-            autocomplete="off"
-            maxlength="255"
-            placeholder="Фамилия Имя Отчество"
-            required
-            pattern=".*\S.*"
-          />
-        </label>
-
-        <label
-          class="field"
-        >
-          <span>
-            Email (логин)
-          </span>
-          <input
-            v-model="draft.email"
-            class="text-input"
-            name="email"
-            type="email"
-            autocomplete="off"
-            required
-            maxlength="255"
-            placeholder="doctor@example.ru"
-          />
-        </label>
-        <div
-          class="field"
         >
           <label
-            for="doctor-password"
+            class="field field-wide"
           >
-            {{ doctor ? 'Новый пароль' : 'Пароль' }}
-            <span
-              v-if="doctor"
-              class="optional-label"
-            >
-              (необязательно)
+            <span>
+              ФИО
             </span>
+            <input
+              v-model="draft.name"
+              class="text-input"
+              name="name"
+              :aria-invalid="fieldError?.field === 'name' ? true : undefined"
+              :aria-describedby="fieldError?.field === 'name' ? 'doctor-name-error' : undefined"
+              autocomplete="off"
+              maxlength="255"
+              placeholder="Фамилия Имя Отчество"
+              required
+              pattern=".*\S.*"
+            />
+            <FieldValidationAlert
+              v-if="fieldError?.field === 'name'"
+              id="doctor-name-error"
+              :message="fieldError.message"
+            />
+          </label>
+
+          <label
+            class="field"
+          >
+            <span>
+              Email (логин)
+            </span>
+            <input
+              v-model="draft.email"
+              class="text-input"
+              name="email"
+              :aria-invalid="fieldError?.field === 'email' ? true : undefined"
+              :aria-describedby="fieldError?.field === 'email' ? 'doctor-email-error' : undefined"
+              type="email"
+              autocomplete="off"
+              required
+              maxlength="255"
+              placeholder="doctor@example.ru"
+            />
+            <FieldValidationAlert
+              v-if="fieldError?.field === 'email'"
+              id="doctor-email-error"
+              :message="fieldError.message"
+            />
           </label>
           <div
-            class="password-field"
+            class="field"
           >
-            <input
-              id="doctor-password"
-              v-model="draft.password"
-              class="text-input"
-              name="password"
-              :type="showPassword ? 'text' : 'password'"
-              autocomplete="new-password"
-              :required="!doctor"
-              minlength="12"
-              maxlength="100"
-              aria-describedby="password-help"
-              placeholder="Не менее 12 символов"
-            />
-            <button
-              type="button"
-              class="password-toggle"
-              :aria-label="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
-              :aria-pressed="showPassword"
-              aria-controls="doctor-password"
-              @click="showPassword = !showPassword"
+            <label
+              for="doctor-password"
             >
-              <svg
-                v-if="showPassword"
-                class="password-eye"
-                aria-hidden="true"
-                focusable="false"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+              {{ doctor ? 'Новый пароль' : 'Пароль' }}
+              <span
+                v-if="doctor"
+                class="optional-label"
               >
-                <path
-                  d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z"
-                  fill="#8A8FA8"
-                />
-              </svg>
-              <svg
-                v-else
-                class="password-eye"
-                aria-hidden="true"
-                focusable="false"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                (необязательно)
+              </span>
+            </label>
+            <div
+              class="password-field"
+            >
+              <input
+                id="doctor-password"
+                v-model="draft.password"
+                class="text-input"
+                name="password"
+                :aria-invalid="fieldError?.field === 'password' ? true : undefined"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="new-password"
+                :required="!doctor"
+                minlength="12"
+                maxlength="100"
+                :aria-describedby="fieldError?.field === 'password' ? 'password-help doctor-password-error' : 'password-help'"
+                placeholder="Не менее 12 символов"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                :aria-label="showPassword ? 'Скрыть пароль' : 'Показать пароль'"
+                :aria-pressed="showPassword"
+                aria-controls="doctor-password"
+                @click="showPassword = !showPassword"
               >
-                <path
-                  d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75"
-                  stroke="#8A8FA8"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+                <svg
+                  v-if="showPassword"
+                  class="password-eye"
+                  aria-hidden="true"
+                  focusable="false"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z"
+                    fill="#8A8FA8"
+                  />
+                </svg>
+                <svg
+                  v-else
+                  class="password-eye"
+                  aria-hidden="true"
+                  focusable="false"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75"
+                    stroke="#8A8FA8"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <FieldValidationAlert
+              v-if="fieldError?.field === 'password'"
+              id="doctor-password-error"
+              :message="fieldError.message"
+            />
+            <p
+              id="password-help"
+              class="field-help"
+            >
+              {{ doctor ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов.' }}
+            </p>
+          </div>
+        </fieldset>
+        <fieldset
+          class="access-fields"
+          :disabled="saving"
+        >
+          <legend
+            class="section-title"
+          >
+            Права доступа
+          </legend>
+          <p
+            class="access-help"
+          >
+            Каждый следующий уровень включает все возможности предыдущего.
+          </p>
+          <div class="access-options-grid" role="group" aria-label="Уровень доступа">
+            <button
+              v-for="level in accessGuide"
+              :key="level.level"
+              type="button"
+              class="access-option"
+              :aria-pressed="draft.accessLevel === level.level"
+              @click="draft.accessLevel = level.level"
+              :class="{ selected: draft.accessLevel === level.level }"
+            >
+              <span class="access-option-header">
+                <AccessLevelTag :level="level.level" />
+              </span>
+              <span class="access-description" lang="ru">{{ level.description }}</span>
+              <span class="access-pages-title">Доступны вкладки:</span>
+              <span class="access-pages-list">
+                <span
+                  v-for="page in level.pages"
+                  :key="page.page"
+                  class="access-page"
+                >
+                  <SidebarPageIcon :page="page.page" class="access-page-icon" />
+                  <span class="access-page-label">{{ page.label }}</span>
+                </span>
+              </span>
             </button>
           </div>
-          <p
-            id="password-help"
-            class="field-help"
-          >
-            {{ doctor ? 'Оставьте пустым, чтобы сохранить текущий пароль.' : 'От 12 до 100 символов.' }}
-          </p>
-        </div>
-      </fieldset>
-      <fieldset
-        class="access-fields"
-        :disabled="saving"
-      >
-        <legend
-          class="section-title"
-        >
-          Права доступа
-        </legend>
+        </fieldset>
         <p
-          class="access-help"
+          v-if="doctor?.isBlocked"
+          class="availability-note"
         >
-          Каждый следующий уровень включает все возможности предыдущего.
+          Учётная запись заблокирована. Сохранение настроек не восстановит вход.
         </p>
-        <div class="access-options-grid" role="group" aria-label="Уровень доступа">
+        <p
+          v-if="error"
+          class="form-error"
+          role="alert"
+        >
+          {{ error }}
+        </p>
+        <footer
+          class="editor-actions"
+        >
           <button
-            v-for="level in accessGuide"
-            :key="level.level"
             type="button"
-            class="access-option"
-            :aria-pressed="draft.accessLevel === level.level"
-            @click="draft.accessLevel = level.level"
-            :class="{ selected: draft.accessLevel === level.level }"
+            class="button button-secondary"
+            :disabled="saving"
+            @click="close"
           >
-            <span class="access-option-header">
-              <AccessLevelTag :level="level.level" />
-            </span>
-            <span class="access-description" lang="ru">{{ level.description }}</span>
-            <span class="access-pages-title">Доступны вкладки:</span>
-            <span class="access-pages-list">
-              <span
-                v-for="page in level.pages"
-                :key="page.page"
-                class="access-page"
-              >
-                <SidebarPageIcon :page="page.page" class="access-page-icon" />
-                <span class="access-page-label">{{ page.label }}</span>
-              </span>
-            </span>
+            Отмена
           </button>
-        </div>
-      </fieldset>
-      <p
-        v-if="doctor?.isBlocked"
-        class="availability-note"
-      >
-        Учётная запись заблокирована. Сохранение настроек не восстановит вход.
-      </p>
-      <p
-        v-if="error"
-        class="form-error"
-        role="alert"
-      >
-        {{ error }}
-      </p>
-      <footer
-        class="editor-actions"
-      >
-        <button
-          type="button"
-          class="button button-secondary"
-          :disabled="saving"
-          @click="close"
-        >
-          Отмена
-        </button>
-        <button
-          type="submit"
-          class="button button-primary"
-          :disabled="!canSave"
-        >
-          {{ saving ? 'Сохранение…' : doctor ? 'Сохранить изменения' : 'Создать учётную запись' }}
-        </button>
-      </footer>
-    </form>
+          <button
+            type="submit"
+            class="button button-primary"
+            :disabled="!canSave"
+          >
+            {{ saving ? 'Сохранение…' : doctor ? 'Сохранить изменения' : 'Создать учётную запись' }}
+          </button>
+        </footer>
+      </form>
+    </div>
   </dialog>
 </template>
 
@@ -316,16 +374,28 @@ async function submit() {
   width: min(960px, calc(100% - 32px));
   max-height: calc(100vh - 32px);
   max-height: calc(100dvh - 32px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: $color-accent transparent;
+  overflow: hidden;
   margin: auto;
-  padding: 0;
+  padding: 16px 8px;
   border: 0;
   border-radius: $radius-glass-card;
   color: $color-text;
   background: $color-white;
   box-shadow: 0 24px 80px rgba($color-blue-dark, 0.25);
+
+  &::backdrop {
+    background: rgba($color-blue-dark, 0.45);
+    backdrop-filter: blur(4px);
+  }
+}
+
+// Скроллбар находится внутри карточки и не пересекает её скруглённые углы.
+.editor-scroll {
+  max-height: calc(100vh - 64px);
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $color-accent transparent;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -340,15 +410,10 @@ async function submit() {
     border-radius: 10px;
     background: $color-accent;
   }
-
-  &::backdrop {
-    background: rgba($color-blue-dark, 0.45);
-    backdrop-filter: blur(4px);
-  }
 }
 
 .editor-form {
-  padding: 32px;
+  padding: 16px 24px;
 }
 
 .editor-header {
@@ -365,20 +430,15 @@ async function submit() {
 }
 
 .editor-description {
-  margin-top: 8px;
+  margin-top: 16px;
   font-size: 0.9rem;
   line-height: 1.5;
   color: $color-secondary-text;
+  margin-bottom: 24px;
 }
 
 .close-button {
-  border: 0;
-  background: transparent;
-  font-size: 1.8rem;
-  line-height: 1;
-  padding: 2px 6px;
-  color: $color-secondary-text;
-  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .availability-note {
@@ -626,8 +686,7 @@ async function submit() {
   color: $color-white;
 }
 
-.button:disabled,
-.close-button:disabled {
+.button:disabled {
   opacity: 0.55;
   cursor: wait;
 }
@@ -637,7 +696,6 @@ async function submit() {
 }
 
 .button:focus-visible,
-.close-button:focus-visible,
 .access-option:focus-visible {
   outline: 3px solid $color-accent;
   outline-offset: 3px;
@@ -667,7 +725,7 @@ async function submit() {
 
 @media (max-width: 560px) {
   .editor-form {
-    padding: 24px 20px;
+    padding: 8px 12px;
   }
 
   .account-fields {

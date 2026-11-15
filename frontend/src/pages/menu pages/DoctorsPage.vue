@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, shallowRef, useTemplateRef, watch } from 'vue'
+import CloseButton from '@/components/CloseButton.vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { accessGuide } from '@/config/doctor-access'
 import SidebarPageIcon from '@/components/SidebarPageIcon.vue'
+import DoctorLockIcon from '@/components/doctors/DoctorLockIcon.vue'
 import AccessLevelTag from '@/components/doctors/AccessLevelTag.vue'
 import DoctorEditorDialog from '@/components/doctors/DoctorEditorDialog.vue'
 import { useUserStore } from '@/stores/user.store'
@@ -19,7 +21,6 @@ const capabilities = shallowRef<DoctorCapabilities>({ profiles: false, accessLev
 const loading = shallowRef(false)
 const loaded = shallowRef(false)
 const error = shallowRef('')
-const feedback = shallowRef('')
 // Справка — отдельный блок страницы, закрытый при первом открытии.
 const isHelpOpen = shallowRef(false)
 const helpButton = useTemplateRef<HTMLButtonElement>('helpButton')
@@ -63,7 +64,6 @@ async function loadDoctors() {
   loadController = controller
   loading.value = true
   error.value = ''
-  feedback.value = ''
   try {
     const directory = await fetchDoctors(controller.signal)
     if (controller.signal.aborted) return
@@ -103,25 +103,20 @@ function resetFilters() {
 function openEditor(doctor: Doctor | null = null) {
   editingDoctor.value = doctor
   editorOpen.value = true
-  feedback.value = ''
 }
 
 function onDoctorSaved(doctor: Doctor) {
-  const isNew = !editingDoctor.value
   const existing = doctors.value.some(item => item.id === doctor.id)
   doctors.value = existing ? doctors.value.map(item => item.id === doctor.id ? doctor : item) : [...doctors.value, doctor]
   editorOpen.value = false
   // A new or renamed account should not disappear behind an old search.
   resetFilters()
-  feedback.value = doctor.pendingFields?.length
-    ? 'Изменения профиля и прав применены только в этом списке. Сервер пока не сохраняет эти данные; после обновления списка они исчезнут.'
-    : isNew ? `Учётная запись ${doctor.email} создана.` : `Изменения для ${doctor.email} сохранены.`
+
 }
 
 async function confirmBlock(doctor: Doctor) {
   blockingDoctor.value = doctor
   blockError.value = ''
-  feedback.value = ''
   await nextTick()
   blockDialog.value?.showModal()
 }
@@ -141,9 +136,6 @@ async function updateBlocked() {
     const isBlocked = !doctor.isBlocked
     if (doctor.id > 0) await setDoctorBlocked(doctor.id, isBlocked)
     doctors.value = doctors.value.map(item => item.id === doctor.id ? { ...item, isBlocked } : item)
-    feedback.value = doctor.id < 0
-      ? 'Статус локальной учётной записи изменён только в этом списке.'
-      : isBlocked ? `Учётная запись ${doctor.email} заблокирована.` : `Доступ для ${doctor.email} восстановлен.`
     blockDialog.value?.close()
     blockingDoctor.value = null
   } catch (cause) {
@@ -194,25 +186,11 @@ async function updateBlocked() {
         class="info-card"
         aria-label="Справка по управлению учётными записями"
       >
-        <button
-          type="button"
+        <CloseButton
           class="info-close-btn"
-          aria-label="Закрыть справку"
+          label="Закрыть справку"
           @click="closeHelp"
-        >
-          <svg
-            class="info-close-icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-            stroke-linecap="round"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <path d="m6 6 12 12M18 6 6 18" />
-          </svg>
-        </button>
+        />
         <!-- 1. Поля учётной записи -->
         <section class="info-card-section" aria-labelledby="account-fields-title">
           <h2 id="account-fields-title" class="info-card-header">Поля учётной записи</h2>
@@ -287,24 +265,7 @@ async function updateBlocked() {
             <div class="lock-examples">
               <p class="lock-example-row">
                 <span class="lock-example lock-example-active" aria-hidden="true">
-                  <svg
-                    width="16"
-                    height="18"
-                    viewBox="0 0 20 22"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                  >
-                    <rect
-                      x="3"
-                      y="9"
-                      width="14"
-                      height="10"
-                      rx="2"
-                    />
-                    <path d="M14 9V6a4 4 0 0 0-8 0" />
-                    <path d="M10 13v3" />
-                  </svg>
+                  <DoctorLockIcon />
                 </span>
                 <span>
                   <strong>Замок открыт</strong>
@@ -313,24 +274,7 @@ async function updateBlocked() {
               </p>
               <p class="lock-example-row">
                 <span class="lock-example lock-example-blocked" aria-hidden="true">
-                  <svg
-                    width="16"
-                    height="18"
-                    viewBox="0 0 20 22"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.6"
-                  >
-                    <rect
-                      x="3"
-                      y="9"
-                      width="14"
-                      height="10"
-                      rx="2"
-                    />
-                    <path d="M6 9V6a4 4 0 0 1 8 0v3" />
-                    <path d="M10 13v3" />
-                  </svg>
+                  <DoctorLockIcon locked />
                 </span>
                 <span>
                   <strong>Замок закрыт</strong>
@@ -352,13 +296,6 @@ async function updateBlocked() {
         <RouterLink to="/dashboards" class="text-link">Перейти к аналитике</RouterLink>
       </section>
       <template v-else>
-        <p
-          v-if="feedback"
-          class="feedback-banner"
-          role="status"
-        >
-          {{ feedback }}
-        </p>
         <section
           class="directory-card"
           aria-label="Список врачей"
@@ -536,7 +473,6 @@ async function updateBlocked() {
                       <span class="doctor-avatar" aria-hidden="true">{{ (doctor.name?.trim() || doctor.email).slice(0, 1).toLocaleUpperCase('ru') }}</span>
                       <div class="doctor-name-block">
                         <span class="doctor-name">{{ doctor.name || 'Имя не указано' }}</span>
-                        <span v-if="doctor.pendingFields?.length" class="doctor-email">Локальные изменения</span>
                       </div>
                     </div>
                   </td>
@@ -554,13 +490,21 @@ async function updateBlocked() {
                     </button>
                   </td>
                   <td data-label="Права доступа">
-                    <AccessLevelTag :level="accessLevel(doctor)" />
+                    <AccessLevelTag :level="accessLevel(doctor)" class="table-access-tag" />
                   </td>
                   <td data-label="Статус">
-                    <span class="status-badge" :class="doctor.isBlocked ? 'status-blocked' : 'status-active'">
-                      <span class="status-dot" aria-hidden="true"></span>
-                      {{ doctor.isBlocked ? 'Заблокирован' : 'Активен' }}
-                    </span>
+                    <button
+                      type="button"
+                      class="status-lock-button"
+                      :class="doctor.isBlocked ? 'status-blocked' : 'status-active'"
+                      :aria-label="`${doctor.isBlocked ? 'Разблокировать' : 'Заблокировать'} ${doctor.name || doctor.email}`"
+                      :aria-pressed="doctor.isBlocked"
+                      :title="doctor.isBlocked ? 'Заблокирован. Восстановить доступ' : 'Активен. Заблокировать'"
+                      :disabled="blockPending"
+                      @click="confirmBlock(doctor)"
+                    >
+                      <DoctorLockIcon :locked="doctor.isBlocked" class="status-lock-icon" />
+                    </button>
                   </td>
                   <td class="actions-cell">
                     <div class="row-actions">
@@ -572,15 +516,6 @@ async function updateBlocked() {
                       >
                         Редактировать
                       </button>
-                      <button
-                        type="button"
-                        class="row-button"
-                        :class="{ 'row-button-danger': !doctor.isBlocked }"
-                        :aria-label="`${doctor.isBlocked ? 'Разблокировать' : 'Заблокировать'} ${doctor.name || doctor.email}`"
-                        @click="confirmBlock(doctor)"
-                      >
-                        {{ doctor.isBlocked ? 'Разблокировать' : 'Заблокировать' }}
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -588,7 +523,7 @@ async function updateBlocked() {
             </table>
           </div>
         </section>
-        
+
         <DoctorEditorDialog
           v-if="editorOpen"
           :doctor="editingDoctor"
@@ -738,31 +673,6 @@ async function updateBlocked() {
   position: absolute;
   top: 8px;
   right: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: $color-text;
-  line-height: 1;
-  cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-.info-close-icon {
-  display: block;
-  flex: 0 0 16px;
-  width: 16px;
-  height: 16px;
-}
-
-.info-close-btn:hover {
-  background: $color-red-bg;
-  color: $color-cold-red;
 }
 
 .info-card-divider {
@@ -909,8 +819,7 @@ async function updateBlocked() {
   color: #ad1d37;
 }
 
-.info-btn:focus-visible,
-.info-close-btn:focus-visible {
+.info-btn:focus-visible {
   outline: 3px solid $color-accent;
   outline-offset: 3px;
 }
@@ -1251,12 +1160,6 @@ async function updateBlocked() {
   max-width: 260px;
 }
 
-.doctor-email {
-  color: $color-secondary-text;
-  font-size: 0.75rem;
-  overflow-wrap: anywhere;
-}
-
 .doctor-login {
   overflow-wrap: anywhere;
 }
@@ -1265,14 +1168,41 @@ async function updateBlocked() {
   min-width: 130px;
 }
 
-.status-badge {
+.table-access-tag {
+  padding: 5px 8px;
+  font-size: inherit;
+}
+
+.status-lock-button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 9px;
-  border-radius: 7px;
-  font-size: 0.75rem;
-  white-space: nowrap;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.status-lock-icon {
+  display: block;
+  width: 18px;
+  height: 20px;
+}
+
+.status-lock-button:hover:not(:disabled) {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.status-lock-button:focus-visible {
+  outline: 2px solid $color-accent;
+  outline-offset: 3px;
+}
+
+.status-lock-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
 .status-active {
@@ -1283,13 +1213,6 @@ async function updateBlocked() {
 .status-blocked {
   background: #fce8ed;
   color: #ad1d37;
-}
-
-.status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
 }
 
 .row-actions {
@@ -1312,10 +1235,6 @@ async function updateBlocked() {
 .row-button:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.row-button-danger {
-  color: #b01836;
 }
 
 .directory-footer {
@@ -1360,17 +1279,6 @@ async function updateBlocked() {
 
 .state-panel .button {
   margin-top: 8px;
-}
-
-.feedback-banner {
-  padding: 14px 20px;
-  border-radius: 12px;
-  background: #e4f2e9;
-  color: #176936;
-  margin-bottom: 20px;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
 }
 
 .access-guide {
@@ -1430,7 +1338,7 @@ async function updateBlocked() {
   width: min(480px, calc(100% - 32px));
   max-height: calc(100dvh - 32px);
   background: $color-white;
-  color: $color-text;
+  color: $color-blue-dark;
   box-shadow: 0 24px 80px rgba($color-blue-dark, 0.25);
 }
 
@@ -1444,9 +1352,10 @@ async function updateBlocked() {
 }
 
 .block-title {
-  font-size: 1.375rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.5;
+  
 }
 
 .block-identity {
@@ -1473,7 +1382,7 @@ async function updateBlocked() {
 .block-error {
   padding: 12px;
   border-radius: 10px;
-  color: #b01835;
+  color: $color-red;
   background: $color-red-bg;
   margin-top: 16px;
   font-size: 0.875rem;
