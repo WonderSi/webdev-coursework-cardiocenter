@@ -105,70 +105,49 @@
     </div>
 
     <div class="one-patient-input-card">
-      <div class="input-patient-part-one"> 
+      <div class="input-patient-part-one">
         <div class="input-patient-one-col1">
           <div class="section-header">Внести одного пациента</div>
 
           <div class="section-info">
             <div class="input-row">
-              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.gender }">Пол:</div>
-              <div class="radio-group-horizontal" :class="{ 'group-error': showPatientErrors && patientFieldErrors.gender }">
-                <label class="radio-label">Мужской<input type="radio" v-model="singlePatient.gender" :value="1"></label>
-                <label class="radio-label">Женский<input type="radio" v-model="singlePatient.gender" :value="2"></label>
+              <label for="patient-model" class="patient-subheader">Модель:</label>
+              <div class="input-group model-input">
+                <select id="patient-model" v-model="singlePatient.modelKind" class="select-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.modelKind }">
+                  <option :value="null" disabled>Выберите модель</option>
+                  <option v-for="option in MODEL_OPTIONS" :key="option.valueId" :value="option.valueId">{{ option.label }}</option>
+                </select>
               </div>
             </div>
-
             <div class="input-row">
-              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.age }">Возраст:</div>
-              <div class="input-group">
-                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.age }" placeholder="27" v-model="singlePatient.age">
-                <span class="unit">лет</span>
+              <div class="patient-subheader">Пол:</div>
+              <div class="radio-group-horizontal">
+                <label class="radio-label"><input type="radio" name="patient-gender" v-model="singlePatient.gender" :value="1">Мужской</label>
+                <label class="radio-label"><input type="radio" name="patient-gender" v-model="singlePatient.gender" :value="2">Женский</label>
               </div>
             </div>
-
-            <div class="input-row">
-              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.height }">Рост:</div>
+            <div v-for="field in PERSONAL_FIELDS" :key="field.key" class="input-row">
+              <label :for="`patient-${field.key}`" class="patient-subheader">{{ field.label }}:</label>
               <div class="input-group">
-                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.height }" placeholder="165" v-model="singlePatient.height">
-                <span class="unit">см</span>
-              </div>
-            </div>
-
-            <div class="input-row">
-              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.weight }">Вес:</div>
-              <div class="input-group">
-                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.weight }" placeholder="60" v-model="singlePatient.weight">
-                <span class="unit">кг</span>
-              </div>
-            </div>
-
-            <div class="input-row">
-              <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.hipMeasurement }">Объём бёдер:</div>
-              <div class="input-group">
-                <input type="number" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.hipMeasurement }" placeholder="90" v-model="singlePatient.hipMeasurement">
-                <span class="unit">см</span>
+                <input :id="`patient-${field.key}`" type="number" v-model.number="singlePatient[field.key]" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors[field.key] }" :placeholder="field.placeholder" :min="field.min" :max="field.max" :step="field.step">
+                <span class="unit">{{ field.unit }}</span>
               </div>
             </div>
           </div>
-
           <div class="div-line"></div>
-
-          <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.alcohol }">Алкоголь:</div>
-          <div class="radio-group-vertical" :class="{ 'group-error-vert': showPatientErrors && patientFieldErrors.alcohol }">
-            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="3"> Употребляю</label>
-            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="2"> Употреблял ранее</label>
-            <label class="radio-label"><input type="radio" v-model="singlePatient.alcohol" :value="1"> Никогда не употреблял</label>
+          <div class="patient-subheader">Алкоголь:</div>
+          <div class="radio-group-vertical">
+            <label class="radio-label"><input type="radio" name="patient-alcohol" v-model="singlePatient.alcohol" :value="3">Употребляю</label>
+            <label class="radio-label"><input type="radio" name="patient-alcohol" v-model="singlePatient.alcohol" :value="2">Употреблял ранее</label>
+            <label class="radio-label"><input type="radio" name="patient-alcohol" v-model="singlePatient.alcohol" :value="1">Никогда не употреблял</label>
           </div>
         </div>
-        
         <div class="input-patient-one-col2">
-          <div class="patient-subheader" style="flex-shrink: 0;" :class="{ 'label-error': showPatientErrors && patientFieldErrors.profession }">Основной род деятельности:</div>
-
-          <div class="list-wrapper" :class="{ 'group-error-vert': showPatientErrors && patientFieldErrors.profession }">
-            <div class="scrollable-radio-list radio-group-vertical" style="margin-top: 0;">
-              <label class="radio-label" v-for="prof in PROFESSIONS" :key="prof.valueId">
-                <input type="radio" v-model="singlePatient.profession" :value="prof.valueId">
-                {{ prof.label }}
+          <div class="patient-subheader">Основной род деятельности:</div>
+          <div class="list-wrapper">
+            <div class="scrollable-radio-list radio-group-vertical">
+              <label v-for="profession in PROFESSIONS" :key="profession.valueId" class="radio-label">
+                <input type="radio" name="patient-profession" v-model="singlePatient.profession" :value="profession.valueId">{{ profession.label }}
               </label>
             </div>
           </div>
@@ -180,56 +159,40 @@
       <div class="input-patient-part-two">
         <div class="part-two-columns">
           <div class="part-two-col1">
-            <div class="patient-subheader" :class="{ 'label-error': showPatientErrors && patientFieldErrors.region }">Район проживания:</div>
+            <div class="patient-subheader">Район проживания:</div>
             <div class="div-line-small"></div>
-            <div class="radio-group-vertical" :class="{ 'group-error-vert': showPatientErrors && patientFieldErrors.region }">
-              <label class="radio-label" v-for="reg in REGIONS" :key="reg.valueId">
-                <input type="radio" v-model="singlePatient.region" :value="reg.valueId">
-                {{ reg.label }}
+            <div class="radio-group-vertical">
+              <label v-for="region in REGIONS" :key="region.valueId" class="radio-label">
+                <input type="radio" name="patient-region" v-model="singlePatient.region" :value="region.valueId">{{ region.label }}
               </label>
             </div>
           </div>
-
           <div class="part-two-col2">
             <div class="patient-subheader">Лабораторные параметры:</div>
             <div class="div-line-small"></div>
-            <div class="lab-inputs" style="margin-top: 16px;">
-              <div class="input-row" v-for="lab in LABS" :key="lab.key">
-                <div class="lab-label">{{ lab.label }}:</div>
+            <div class="lab-inputs">
+              <div v-for="lab in LABS" :key="lab.key" class="input-row">
+                <label :for="`patient-${lab.key}`" class="lab-label">{{ lab.label }}:</label>
                 <div class="input-group">
-                  <input type="number" class="input-field" :placeholder="lab.placeholder" v-model="singlePatient[lab.key]">
-                  <span class="unit" style="width: auto; margin-left: 4px;">{{ lab.unit }}</span>
+                  <input :id="`patient-${lab.key}`" type="number" v-model.number="singlePatient[lab.key]" class="input-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors[lab.key] }" :placeholder="lab.placeholder" min="0" max="9999.99" step="any">
+                  <span class="unit">{{ lab.unit }}</span>
                 </div>
               </div>
             </div>
           </div>
-          
           <div class="part-two-col3">
-            <div class="patient-subheader">Хронические заболевания и диагнозы:</div>
+            <div class="patient-subheader">Хронические заболевания:</div>
             <div class="div-line-small"></div>
-
-            <div class="disease-list-wrapper">
-              <div class="lab-inputs" style="margin-top: 16px;">
-                <div v-for="disease in DISEASES" :key="disease.key" class="disease-item">
-                  <div class="lab-label disease-label">{{ disease.label }}</div>
-                
-                  <div class="disease-controls">
-                    <div class="radio-group-horizontal">
-                      <label class="radio-label">Нет<input type="radio" v-model="singlePatient[disease.key]" :value="0"></label>
-                      <label class="radio-label">Да<input type="radio" v-model="singlePatient[disease.key]" :value="1"></label>
-                    </div>
-                  
-                    <Transition name="fade">
-                      <div v-if="singlePatient[disease.key] === 1" class="inline-year-input">
-                        <span class="lab-label inline-label" :class="{ 'label-error': showPatientErrors && patientFieldErrors[disease.yearKey] }">Год:</span>
-                        <div class="input-group">
-                          <input type="number" class="input-field year-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors[disease.yearKey] }" placeholder="2018" v-model="singlePatient[disease.yearKey]">
-                        </div>
-                      </div>
-                    </Transition>
+            <div class="lab-inputs">
+              <div class="disease-item">
+                <div class="lab-label disease-label">Есть ли хронические заболевания лёгких?</div>
+                <div class="disease-controls">
+                  <div class="radio-group-horizontal" :class="{ 'group-error': showPatientErrors && patientFieldErrors.chronicLungDisease }">
+                    <label class="radio-label">Нет<input type="radio" name="patient-lung" v-model="singlePatient.chronicLungDisease" :value="0"></label>
+                    <label class="radio-label">Да<input type="radio" name="patient-lung" v-model="singlePatient.chronicLungDisease" :value="1"></label>
                   </div>
                 </div>
-              </div> 
+              </div>
             </div>
           </div>
         </div>
@@ -256,6 +219,17 @@
 import { ref, reactive, computed, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import { apiFetch } from '@/api/client'
+import { SURVEY_CONFIG } from '@/config/survey.config'
+import { PROFESSIONS } from '@/config/professions'
+
+const formFields = SURVEY_CONFIG.groups.flatMap(group => group.fields)
+const MODEL_OPTIONS = formFields.find(field => field.key === 'modelKind')?.options ?? []
+const REGIONS = formFields.find(field => field.key === 'region')?.options ?? []
+const PERSONAL_FIELDS = [
+  { key: 'age', label: 'Возраст', unit: 'лет', placeholder: '27', min: 18, max: 120, step: '1' },
+  { key: 'height', label: 'Рост', unit: 'см', placeholder: '165', min: 50, max: 250, step: 'any' },
+  { key: 'weight', label: 'Вес', unit: 'кг', placeholder: '60', min: 20, max: 300, step: 'any' },
+] as const
 
 // --- ИНТЕРФЕЙСЫ И КОНСТАНТЫ
 interface RowError {
@@ -288,63 +262,25 @@ const reports = ref<UploadReport[]>([])
 const submittingPatient = ref(false)
 const patientSuccess = ref(false)
 
-// --- СПРАВОЧНИКИ ИЗ survey.config.ts
-const PROFESSIONS = [
-  { valueId: 14, label: 'Представители законодательных органов власти, высокопоставленные должностные лица, менеджеры и руководители' },
-  { valueId: 10, label: 'Квалифицированные специалисты сельского хозяйства и рыболовного' },
-  { valueId: 4, label: 'Низкоквалифицированные и неквалифицированные работники, рабочие, ручной труд' },
-  { valueId: 1, label: 'Ведение домашнего хозяйства' },
-  { valueId: 2, label: 'Вооруженные силы' },
-  { valueId: 5, label: 'Операторы и монтажники установок и машинного оборудования' },
-  { valueId: 6, label: 'Служащие, сфера обслуживания, работники среднего звена' },
-  { valueId: 7, label: 'Никогда не работающие домохозяйки' },
-  { valueId: 8, label: 'Дипломированные специалисты, умственный труд' },
-  { valueId: 3, label: 'Лица свободных профессий' },
-  { valueId: 11, label: 'Пенсионеры' },
-  { valueId: 12, label: 'Ремесленники и представители других отраслей промышленности' },
-  { valueId: 13, label: 'Техники и младшие специалисты' },
-  { valueId: 9, label: 'Другое' },
-]
-
-const REGIONS = [
-  { valueId: 6, label: 'Сельская местность' },
-  { valueId: 2, label: 'Центральный' },
-  { valueId: 3, label: 'Заводской' },
-  { valueId: 1, label: 'Рудничный' },
-  { valueId: 4, label: 'Кировский' },
-  { valueId: 5, label: 'Ленинский' },
-]
+// --- СПРАВОЧНИК РАЙОНОВ
 
 type PatientKeys = keyof typeof singlePatient;
 
 const LABS: { key: PatientKeys, label: string, placeholder: string, unit: string }[] = [
   { key: 'glucose', label: 'Глюкоза', placeholder: '4,5', unit: 'ммоль/л' },
   { key: 'cholesterol', label: 'Холестерин', placeholder: '5,3', unit: 'ммоль/л' },
-  { key: 'nonHdlCholesterol', label: 'Холестерин не-ЛПВП', placeholder: '3,2', unit: 'ммоль/л' },
-  { key: 'vldlCholesterol', label: 'Холестерин ЛПОНП', placeholder: '0,8', unit: 'ммоль/л' },
   { key: 'hdlCholesterol', label: 'Холестерин ЛПВП', placeholder: '1,2', unit: 'ммоль/л' },
   { key: 'ldlCholesterol', label: 'Холестерин ЛПНП', placeholder: '3,0', unit: 'ммоль/л' },
-  { key: 'apolipoproteinA', label: 'Апо А', placeholder: '1,5', unit: 'г/л' },
-  { key: 'apolipoproteinB', label: 'Апо B', placeholder: '0,9', unit: 'г/л' },
   { key: 'triglycerides', label: 'Триглицериды', placeholder: '1,7', unit: 'ммоль/л' },
 ]
 
-const DISEASES: { key: PatientKeys, yearKey: PatientKeys, label: string }[] = [
-  { key: 'stroke', yearKey: 'strokeYear', label: 'Диагностировался ли инсульт?' },
-  { key: 'heartFailure', yearKey: 'heartFailureYear', label: 'Диагностировалась ли сердечная недостаточность (СН)?' },
-  { key: 'cad', yearKey: 'cadYear', label: 'Диагностировалось ли нарушение ритма или другие ИБС?' },
-  { key: 'angina', yearKey: 'anginaYear', label: 'Диагностировалась ли стенокардия?' },
-  { key: 'myocardialInfarction', yearKey: 'myocardialInfarctionYear', label: 'Диагностировался ли инфаркт миокарда?' },
-  { key: 'arterialHypertension', yearKey: 'arterialHypertensionYear', label: 'Диагностировалась ли артериальная гипертензия (АГ)?' },
-]
-
-// --- СОСТОЯНИЕ ФОРМЫ ПАЦИЕНТА (СООТВЕТСТВИЕ survey.config.ts)
 const singlePatient = reactive({
+  modelKind: null as 'city' | 'region' | null,
+  chronicLungDisease: null as number | null,
   gender: null as number | null,
   age: null as number | null,
   height: null as number | null,
   weight: null as number | null,
-  hipMeasurement: null as number | null,
   
   alcohol: null as number | null,
   profession: null as number | null,
@@ -352,26 +288,10 @@ const singlePatient = reactive({
 
   glucose: null as number | null,
   cholesterol: null as number | null,
-  nonHdlCholesterol: null as number | null,
-  vldlCholesterol: null as number | null,
   hdlCholesterol: null as number | null,
   ldlCholesterol: null as number | null,
-  apolipoproteinA: null as number | null,
-  apolipoproteinB: null as number | null,
   triglycerides: null as number | null,
 
-  stroke: 0 as number | null, 
-  strokeYear: null as number | null,
-  heartFailure: 0 as number | null, 
-  heartFailureYear: null as number | null,
-  cad: 0 as number | null, 
-  cadYear: null as number | null,
-  angina: 0 as number | null, 
-  anginaYear: null as number | null,
-  myocardialInfarction: 0 as number | null, 
-  myocardialInfarctionYear: null as number | null,
-  arterialHypertension: 0 as number | null, 
-  arterialHypertensionYear: null as number | null,
 })
 
 // --- ВАЛИДАЦИЯ ФОРМЫ ПАЦИЕНТА
@@ -381,13 +301,14 @@ const patientBackendError = ref<string | null>(null)
 const patientFieldErrors = computed<Record<string, string>>(() => {
   const errors: Record<string, string> = {}
   const p = singlePatient
-  const currentYear = new Date().getFullYear()
+  if (p.modelKind === null) errors.modelKind = 'Выберите модель'
+  if (p.chronicLungDisease === null) errors.chronicLungDisease = 'Укажите наличие хронических заболеваний лёгких'
 
   if (p.gender === null) errors.gender = 'Укажите пол'
 
   const ageVal = p.age !== null && (p.age as any) !== '' ? Number(p.age) : null
   if (ageVal === null) errors.age = 'Укажите возраст'
-  else if (isNaN(ageVal) || ageVal < 18 || ageVal > 120) errors.age = 'Возраст: 18–120 лет'
+  else if (!Number.isInteger(ageVal) || ageVal < 18 || ageVal > 120) errors.age = 'Возраст: целое число от 18 до 120 лет'
 
   if (p.alcohol === null) errors.alcohol = 'Укажите употребление алкоголя'
   if (p.profession === null) errors.profession = 'Укажите род деятельности'
@@ -396,7 +317,6 @@ const patientFieldErrors = computed<Record<string, string>>(() => {
   const rangeChecks: { key: keyof typeof p; required: boolean; min: number; max: number; empty: string; range: string }[] = [
     { key: 'height',         required: true,  min: 50,  max: 250, empty: 'Укажите рост',        range: 'Рост: 50–250 см' },
     { key: 'weight',         required: true,  min: 20,  max: 300, empty: 'Укажите вес',         range: 'Вес: 20–300 кг' },
-    { key: 'hipMeasurement', required: false, min: 40,  max: 200, empty: '',                    range: 'Объём бёдер: 40–200 см' },
   ]
   for (const { key, required, min, max, empty, range } of rangeChecks) {
     const v = p[key]
@@ -409,15 +329,12 @@ const patientFieldErrors = computed<Record<string, string>>(() => {
     }
   }
 
-  for (const { key, yearKey } of DISEASES) {
-    const yearVal = p[yearKey]
-    if (p[key] === 1) {
-      if (yearVal === null || (yearVal as any) === '') {
-        errors[yearKey] = 'Укажите год'
-      } else {
-        const y = Number(yearVal)
-        if (isNaN(y) || y < 1900 || y > currentYear) errors[yearKey] = `Год: 1900–${currentYear}`
-      }
+  for (const lab of LABS) {
+    const value = p[lab.key]
+    if (value === null || (value as unknown) === '') continue
+    const numeric = Number(value)
+    if (!Number.isFinite(numeric) || numeric < 0 || numeric > 9999.99) {
+      errors[lab.key] = `${lab.label}: число от 0 до 9999,99`
     }
   }
 
@@ -453,7 +370,7 @@ async function submitSinglePatient() {
     const res = await apiFetch('/api/admin/patients', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, year: singlePatient.modelKind === 'city' ? 2021 : null }),
     })
 
     if (!res.ok) {
@@ -461,21 +378,17 @@ async function submitSinglePatient() {
       patientBackendError.value = res.status === 403
         ? 'Доступ запрещён'
         : res.status === 401 ? 'Сессия истекла — войдите заново'
-        : body?.error ?? `Ошибка при сохранении пациента (${res.status})`
+        : body?.detail ?? body?.error ?? `Ошибка при сохранении пациента (${res.status})`
       showPatientErrors.value = true
       return
     }
 
     Object.assign(singlePatient, {
+      modelKind: null, chronicLungDisease: null,
       gender: null, age: null, height: null, weight: null,
-      hipMeasurement: null, alcohol: null, profession: null, region: null,
-      glucose: null, cholesterol: null, nonHdlCholesterol: null,
-      vldlCholesterol: null, hdlCholesterol: null, ldlCholesterol: null,
-      apolipoproteinA: null, apolipoproteinB: null, triglycerides: null,
-      stroke: null, strokeYear: null, heartFailure: null, heartFailureYear: null,
-      cad: null, cadYear: null, angina: null, anginaYear: null,
-      myocardialInfarction: null, myocardialInfarctionYear: null,
-      arterialHypertension: null, arterialHypertensionYear: null,
+      alcohol: null, profession: null, region: null,
+      glucose: null, cholesterol: null, hdlCholesterol: null,
+      ldlCholesterol: null, triglycerides: null,
     })
     patientBackendError.value = null
     patientSuccess.value = true
@@ -1231,7 +1144,7 @@ async function downloadTemplate() {
   align-items: center;
   gap: 10px;
 
-  .input-field {
+  .input-field, .select-field {
     width: 60px;
     height: 24px;
     padding: 8px 12px;
@@ -1259,6 +1172,19 @@ async function downloadTemplate() {
       -webkit-appearance: none;
       margin: 0;
     }
+  }
+
+  .select-field {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    text-align: left;
+  }
+
+  &.model-input {
+    flex: 1;
+    min-width: 0;
+    margin-left: 16px;
   }
 
   .unit {

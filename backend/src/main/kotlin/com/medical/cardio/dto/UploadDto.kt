@@ -24,7 +24,7 @@ data class RowError(
 data class PatientManualCreateRequest(
     @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Модель обследования: city или region. Обязательное поле.", allowableValues = ["city", "region"], example = "city")
     val modelKind: String? = null,
-    @field:Schema(description = "Для city: 2013, 2017, 2019 или 2021; для region: null", example = "2021")
+    @field:Schema(description = "Для city: 2021; если не передан или null, используется 2021. Другие годы отклоняются. Для region: null", example = "2021")
     val year: Int? = null,
     @field:Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Хронические заболевания лёгких: явный ответ 0 или 1 обязателен", example = "0")
     val chronicLungDisease: Int? = null,

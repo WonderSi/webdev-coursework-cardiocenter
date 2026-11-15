@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive } from 'vue'
 import { SURVEY_CONFIG } from '@/config/survey.config'
 
 export interface GlossaryOption {
@@ -77,10 +77,6 @@ export const useSurveyStore = defineStore('survey', () => {
   const submitted = ref(false)
   const modelVersion = ref<string | null>(null)
 
-  watch(() => answers.modelKind, (kind) => {
-    if (kind !== 'city') answers.year = null
-  })
-
   // Загрузка из локального конфига
   function loadConfig() {
     reset()
@@ -128,7 +124,7 @@ export const useSurveyStore = defineStore('survey', () => {
 
     return {
       modelKind: answers.modelKind,
-      year: answers.modelKind === 'city' ? parseNum(answers.year) : null,
+      year: answers.modelKind === 'city' ? 2021 : null,
       chronicLungDisease: answers.chronicLungDisease,
       genderId: answers.gender ?? undefined,
       age: parseNum(answers.age) ?? undefined,

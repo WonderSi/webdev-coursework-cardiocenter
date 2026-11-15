@@ -98,9 +98,9 @@ class UploadService(
         val refRows = mutableListOf(
             "Назначение" to "Импорт обследований в БД и аналитику. Это не обучающий CSV patients_wide.",
             "model_kind (обязательно)" to "city — отдельное обследование; region — за период наблюдения",
-            "year" to "Для city: 2013, 2017, 2019 или 2021. Для region: пустая ячейка",
+            "year" to "Для city: 2021 или пустая ячейка (2021 автоматически). Для region: пустая ячейка",
             "chronic_lung_disease (обязательно)" to "Хронические заболевания лёгких: 0 — нет, 1 — есть; неизвестное не заменять нулём",
-            "Обязательные поля" to "model_kind, chronic_lung_disease, gender, age, height, weight, alcohol, profession, region; year обязателен для city",
+            "Обязательные поля" to "model_kind, chronic_lung_disease, gender, age, height, weight, alcohol, profession, region",
             "Необязательные поля" to "hip_measurement, glucose, cholesterol, hdl_cholesterol, ldl_cholesterol, triglycerides",
             "Кодировка профессий" to "notebook-13-v1, коды 1–13; старые коды 1–14 не подходят",
             "Числа" to "Возраст — целое число; десятичный разделитель в CSV — точка; неизвестные анализы оставлять пустыми",

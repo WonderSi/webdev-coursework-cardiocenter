@@ -22,7 +22,7 @@ object PatientMapper {
             ldlCholesterol = row["ldl_cholesterol"]?.trim()?.toBigDecimalOrNull(),
             triglycerides = row["triglycerides"]?.trim()?.toBigDecimalOrNull(),
             modelKind = row.getValue("model_kind").trim(),
-            modelYear = row["year"]?.trim()?.toIntOrNull(),
+            modelYear = if (row.getValue("model_kind").trim() == "city") PatientImportSchema.CITY_YEAR else null,
             chronicLungDisease = row.getValue("chronic_lung_disease").trim().toInt()
         )
 }

@@ -4,6 +4,7 @@ import com.medical.cardio.dto.PatientManualCreateRequest
 
 object PatientImportSchema {
     const val PROFESSION_GLOSSARY = "profession"
+    const val CITY_YEAR = 2021
 
     val headers: List<String> = listOf(
         "model_kind", "year", "chronic_lung_disease", "gender", "age", "height", "weight",

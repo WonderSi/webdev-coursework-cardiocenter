@@ -1,3 +1,4 @@
+import { PROFESSIONS } from './professions'
 import type { SurveyConfig } from '@/stores/survey.store'
 
 export const SURVEY_CONFIG: SurveyConfig = {
@@ -5,7 +6,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
     {
       id: 1,
       title: 'Выберите модель и укажите пол и возраст:',
-      requiredFields: ['modelKind', 'year', 'gender', 'age'],
+      requiredFields: ['modelKind', 'gender', 'age'],
       fields: [
         {
           key: 'modelKind', type: 'select', label: 'Модель прогнозирования',
@@ -13,11 +14,6 @@ export const SURVEY_CONFIG: SurveyConfig = {
             { valueId: 'city', label: 'City — отдельное обследование' },
             { valueId: 'region', label: 'Region — сводные данные' },
           ],
-        },
-        {
-          key: 'year', type: 'select', label: 'Период экологических данных',
-          visibleWhen: { key: 'modelKind', value: 'city' },
-          options: [2013, 2017, 2019, 2021].map(year => ({ valueId: year, label: String(year) })),
         },
         {
           key: 'gender',
@@ -90,21 +86,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
           type: 'radio',
           label: 'Профессия',
           vertical: true,
-          options: [
-            { valueId: 1, label: "Руководители и представители власти" },
-            { valueId: 2, label: "Специалисты высшего уровня квалификации" },
-            { valueId: 3, label: "Специалисты среднего уровня квалификации" },
-            { valueId: 4, label: "Служащие по подготовке и оформлению документации" },
-            { valueId: 5, label: "Работники сферы услуг, охраны и продавцы" },
-            { valueId: 6, label: "Квалифицированные работники сельского/лесного хозяйства, рыбоводства" },
-            { valueId: 7, label: "Рабочие промышленных предприятий, строительства и транспорта" },
-            { valueId: 8, label: "Операторы установок и машин, сборщики" },
-            { valueId: 9, label: "Неквалифицированные рабочие" },
-            { valueId: 10, label: "Военнослужащие" },
-            { valueId: 11, label: "Пенсионер" },
-            { valueId: 12, label: "Ведение домашнего хозяйства" },
-            { valueId: 13, label: "Другое" },
-          ],
+          options: PROFESSIONS,
         },
       ],
     },
