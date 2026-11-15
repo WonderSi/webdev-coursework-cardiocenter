@@ -20,14 +20,15 @@ const label = computed(() => doctorAccessLevels.find(item => item.value === leve
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   max-width: 100%;
-  padding: 6px 12px;
+  padding: 8px 12px 6px 12px;
   border-radius: 8px;
   background: #eef0f4;
   color: #565c66;
   font-size: 1rem;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1;
   white-space: nowrap;
 }
 
