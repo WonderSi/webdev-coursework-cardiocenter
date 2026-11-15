@@ -197,7 +197,7 @@ class UploadControllerTest : ControllerTestBase() {
 
     @Test
     fun `manual city and region preserve model fields and use new profession codes`() {
-        for ((kind, year, district) in listOf(Triple("city", 2017, 6), Triple("region", null, 1))) {
+        for ((kind, year, district) in listOf(Triple("city", 2021, 6), Triple("region", null, 1))) {
             val body = validPatient() + mapOf("modelKind" to kind, "year" to year, "region" to district)
             mockMvc.post("/api/admin/patients") {
                 cookie(authCookie(testUser))
@@ -212,7 +212,7 @@ class UploadControllerTest : ControllerTestBase() {
         """.trimIndent(), testUser.id)
         assertEquals(2, rows.size)
         assertEquals("city", rows[0]["model_kind"])
-        assertEquals(2017, rows[0]["model_year"])
+        assertEquals(2021, rows[0]["model_year"])
         assertEquals("region", rows[1]["model_kind"])
         assertNull(rows[1]["model_year"])
         rows.forEach { row ->
@@ -232,7 +232,9 @@ class UploadControllerTest : ControllerTestBase() {
         val invalid = listOf(
             validPatient() - "chronicLungDisease",
             validPatient() + ("chronicLungDisease" to 2),
-            validPatient() - "year",
+            validPatient() + ("year" to 2013),
+            validPatient() + ("year" to 2017),
+            validPatient() + ("year" to 2019),
             validPatient() + ("year" to 2020),
             validPatient() + ("modelKind" to "region"),
             validPatient() + ("modelKind" to "other"),
@@ -267,10 +269,35 @@ class UploadControllerTest : ControllerTestBase() {
     }
 
     @Test
+    fun `city without year defaults to 2021 in manual input and CSV`() {
+        for (body in listOf(validPatient() - "year", validPatient() + ("year" to null))) {
+            mockMvc.post("/api/admin/patients") {
+                cookie(authCookie(testUser))
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(body)
+            }.andExpect { status { isOk() } }
+            mockMvc.multipart("/api/admin/upload") {
+                cookie(authCookie(testUser))
+                file(MockMultipartFile("file", "patients.csv", "text/csv", csv(body).toByteArray()))
+            }.andExpect {
+                status { isOk() }
+                jsonPath("$.savedRows") { value(1) }
+                jsonPath("$.skippedRows") { value(0) }
+            }
+        }
+        assertEquals(listOf(2021, 2021, 2021, 2021), jdbc.queryForList(
+            "SELECT model_year FROM patients WHERE creator_id = ? ORDER BY id", Int::class.java, testUser.id))
+    }
+
+    @Test
     fun `downloaded template imports city and region and invalidates cached analytics`() {
         mockMvc.get("/api/admin/dashboard") { cookie(authCookie(testUser)) }.andExpect {
             status { isOk() }
-            jsonPath("$.totalPatients") { value(0) }
+            jsonPath("$.totalRecords") { value(0) }
+        }
+        mockMvc.get("/api/admin/dashboard?modelKind=region") { cookie(authCookie(testUser)) }.andExpect {
+            status { isOk() }
+            jsonPath("$.totalRecords") { value(0) }
         }
         val template = mockMvc.get("/api/admin/upload/template") {
             cookie(authCookie(testUser))
@@ -301,7 +328,11 @@ class UploadControllerTest : ControllerTestBase() {
         }
         mockMvc.get("/api/admin/dashboard") { cookie(authCookie(testUser)) }.andExpect {
             status { isOk() }
-            jsonPath("$.totalPatients") { value(2) }
+            jsonPath("$.totalRecords") { value(1) }
+        }
+        mockMvc.get("/api/admin/dashboard?modelKind=region") { cookie(authCookie(testUser)) }.andExpect {
+            status { isOk() }
+            jsonPath("$.totalRecords") { value(1) }
         }
         assertEquals(listOf("city", "region"), jdbc.queryForList("SELECT model_kind FROM patients ORDER BY id", String::class.java))
     }
