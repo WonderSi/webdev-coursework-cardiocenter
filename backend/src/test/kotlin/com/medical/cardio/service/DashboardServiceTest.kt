@@ -4,219 +4,150 @@ import com.medical.cardio.BaseIntegrationTest
 import com.medical.cardio.entity.AdminUserEntity
 import com.medical.cardio.entity.DiagnosisEntity
 import com.medical.cardio.entity.PatientEntity
-import com.medical.cardio.entity.Role
-import com.medical.cardio.repository.AdminUserRepository
-import com.medical.cardio.repository.DiagnosisRepository
-import com.medical.cardio.repository.GlossaryRepository
-import com.medical.cardio.repository.GlossaryValueRepository
-import com.medical.cardio.repository.PatientRepository
+import com.medical.cardio.repository.*
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.cache.CacheManager
+import kotlin.test.*
 
 class DashboardServiceTest : BaseIntegrationTest() {
-
-    @Autowired private lateinit var dashboardService: DashboardService
-    @Autowired private lateinit var patientRepository: PatientRepository
-    @Autowired private lateinit var diagnosisRepository: DiagnosisRepository
-    @Autowired private lateinit var adminUserRepository: AdminUserRepository
-    @Autowired private lateinit var glossaryRepository: GlossaryRepository
-    @Autowired private lateinit var glossaryValueRepository: GlossaryValueRepository
-    @Autowired private lateinit var passwordEncoder: PasswordEncoder
-
-    private var testAdminId: Long = 0
-    private var maleGenderId: Long = 0
-    private var femaleGenderId: Long = 0
-    private var diagnosisValueId: Long = 0
+    @Autowired private lateinit var dashboard: DashboardService
+    @Autowired private lateinit var patients: PatientRepository
+    @Autowired private lateinit var diagnoses: DiagnosisRepository
+    @Autowired private lateinit var users: AdminUserRepository
+    @Autowired private lateinit var glossaries: GlossaryRepository
+    @Autowired private lateinit var values: GlossaryValueRepository
+    @Autowired private lateinit var cache: CacheManager
+    private var userId = 0L
 
     @BeforeEach
     fun setUp() {
-        diagnosisRepository.deleteAll()
-        patientRepository.deleteAll()
-
-        testAdminId = adminUserRepository.save(
-            AdminUserEntity(
-                email = "dashboard-svc-test@cardio.ru",
-                passwordHash = passwordEncoder.encode("TestPass@2000"),
-                role = Role.DOCTOR
-            )
-        ).id
-
-        val genderGlossary = glossaryRepository.findByName("gender")!!
-        val genderValues = glossaryValueRepository.findAllByGlossaryId(genderGlossary.id)
-        maleGenderId = genderValues.first { it.code == 1 }.id
-        femaleGenderId = genderValues.first { it.code == 2 }.id
-
-        val diagnosisGlossary = glossaryRepository.findByName("diagnosis")!!
-        diagnosisValueId = glossaryValueRepository.findAllByGlossaryId(diagnosisGlossary.id).first().id
+        diagnoses.deleteAll()
+        patients.deleteAll()
+        cache.getCache("dashboard-stats")?.clear()
+        userId = users.save(AdminUserEntity(email = "dashboard-test@test.invalid", passwordHash = "unused-test-hash")).id
     }
 
     @AfterEach
-    fun tearDown() {
-        diagnosisRepository.deleteAll()
-        patientRepository.deleteAll()
-        adminUserRepository.deleteById(testAdminId)
+    fun cleanUp() {
+        diagnoses.deleteAll()
+        patients.deleteAll()
+        users.deleteById(userId)
+        cache.getCache("dashboard-stats")?.clear()
     }
 
-    private fun savePatient(genderId: Long, age: Int): PatientEntity =
-        patientRepository.save(
-            PatientEntity(
-                creator = adminUserRepository.getReferenceById(testAdminId),
-                gender = glossaryValueRepository.getReferenceById(genderId),
-                age = age,
-                modelKind = "region",
-                chronicLungDisease = 0
-            )
-        )
+    private fun glossary(name: String, code: Int) = values.findAllByGlossaryId(
+        requireNotNull(glossaries.findByName(name)).id).first { it.code == code }
+
+    private fun patient(kind: String = "city", age: Int = 40, gender: Int = 1,
+                        height: String? = "175", weight: String? = "80", lung: Int = 0,
+                        glucose: String? = null, profession: Int? = null): PatientEntity =
+        patients.saveAndFlush(PatientEntity(
+            creator = users.getReferenceById(userId), gender = glossary("gender", gender), age = age,
+            modelKind = kind, modelYear = if (kind == "city") 2021 else null,
+            chronicLungDisease = lung, height = height?.toBigDecimal(), weight = weight?.toBigDecimal(),
+            glucose = glucose?.toBigDecimal(), profession = profession?.let { glossary("profession", it) },
+            alcohol = glossary("alcohol", 1), region = glossary("region", 1)
+        ))
 
     @Test
-    fun `getStats with no patients returns zero totals and empty lists`() {
-        val stats = dashboardService.getStats()
-
-        assertEquals(0L, stats.totalPatients)
-        assertTrue(stats.genderDistribution.isEmpty())
+    fun `empty model has zero counts and no invented diagnosis status`() {
+        val stats = dashboard.getStats("city")
+        assertEquals(0L, stats.totalRecords)
         assertNull(stats.averageAge)
-        assertEquals(0, stats.genderDiagnoses.maleDiagnosed)
-        assertEquals(0, stats.genderDiagnoses.malePercent)
-        assertEquals(0, stats.genderDiagnoses.femaleDiagnosed)
-        assertEquals(0, stats.genderDiagnoses.femalePercent)
-        assertTrue(stats.topProfessions.isEmpty())
-        assertTrue(stats.topDiagnoses.isEmpty())
-        assertTrue(stats.districts.isEmpty())
-    }
-
-    @Test
-    fun `getStats always returns fixed-length ageGender weightBmi and alcohol lists`() {
-        val stats = dashboardService.getStats()
-
+        assertEquals(0L, stats.diagnosedRecords)
+        assertTrue(stats.recordedDiagnoses.isEmpty())
+        assertTrue(stats.labCoverage.all { it.filledCount == 0L && it.missingCount == 0L && it.percent == 0.0 })
         assertEquals(6, stats.ageGender.size)
-        assertEquals(4, stats.weightBmi.size)
-        assertEquals(3, stats.alcohol.size)
+        assertTrue(stats.bmi.all { it.count == 0L })
     }
 
     @Test
-    fun `getStats counts total patients correctly`() {
-        savePatient(maleGenderId, 40)
-        savePatient(maleGenderId, 50)
-        savePatient(femaleGenderId, 35)
-
-        val stats = dashboardService.getStats()
-
-        assertEquals(3L, stats.totalPatients)
+    fun `all charts and cache keys isolate city from region`() {
+        patient(age = 30, lung = 1, profession = 1)
+        patient(age = 50, gender = 2, profession = 2)
+        patient(kind = "region", age = 90, profession = 13)
+        val city = dashboard.getStats("city")
+        val region = dashboard.getStats("region")
+        assertEquals(2L, city.totalRecords)
+        assertEquals(1L, region.totalRecords)
+        assertEquals(40.0, city.averageAge)
+        assertEquals(90.0, region.averageAge)
+        assertEquals(2L, city.genderDistribution.sumOf { it.count })
+        assertEquals(2L, city.ageGender.sumOf { it.maleCount + it.femaleCount })
+        for (categories in listOf(city.bmi, city.alcohol, city.professions, city.districts, city.lungDisease)) {
+            assertEquals(2L, categories.sumOf { it.count })
+        }
+        assertEquals(1L, city.lungDisease.first { it.name == "Да" }.count)
+        assertEquals(50.0, city.lungDisease.first { it.name == "Да" }.percent)
+        assertEquals(0L, region.lungDisease.first { it.name == "Да" }.count)
+        assertEquals(2L, dashboard.getStats("city").totalRecords)
     }
 
     @Test
-    fun `getStats gender distribution counts per gender`() {
-        savePatient(maleGenderId, 40)
-        savePatient(maleGenderId, 50)
-        savePatient(femaleGenderId, 35)
-
-        val stats = dashboardService.getStats()
-
-        val maleStat = stats.genderDistribution.first { it.label == "Мужской" }
-        val femaleStat = stats.genderDistribution.first { it.label == "Женский" }
-
-        assertEquals(2L, maleStat.count)
-        assertEquals(1L, femaleStat.count)
-        assertEquals(66, maleStat.percent)
-        assertEquals(33, femaleStat.percent)
+    fun `lab completeness treats zero as filled and null as missing`() {
+        patient(glucose = "0")
+        patient(glucose = "5.2")
+        patient(glucose = null)
+        patient(kind = "region", glucose = "9")
+        val stats = dashboard.getStats("city")
+        val glucose = stats.labCoverage.first { it.field == "glucose" }
+        assertEquals(2L, glucose.filledCount)
+        assertEquals(1L, glucose.missingCount)
+        assertEquals(66.7, glucose.percent)
+        val cholesterol = stats.labCoverage.first { it.field == "cholesterol" }
+        assertEquals(0L, cholesterol.filledCount)
+        assertEquals(3L, cholesterol.missingCount)
     }
 
     @Test
-    fun `getStats averageAge is computed correctly`() {
-        savePatient(maleGenderId, 40)
-        savePatient(femaleGenderId, 60)
-
-        val stats = dashboardService.getStats()
-
-        assertNotNull(stats.averageAge)
-        assertEquals(50.0, stats.averageAge!!, 0.1)
+    fun `BMI missing or zero measurements are unknown not obese`() {
+        patient(height = null)
+        patient(height = "0")
+        patient(weight = null)
+        patient(height = "180", weight = "70")
+        val stats = dashboard.getStats()
+        assertEquals(3L, stats.bmi.first { it.name == "Нет данных" }.count)
+        assertEquals(1L, stats.bmi.first { it.name == "Нормальный" }.count)
+        assertEquals(0L, stats.bmi.first { it.name == "Ожирение" }.count)
     }
 
     @Test
-    fun `getStats ageGender groups are in correct order`() {
-        val stats = dashboardService.getStats()
-
-        val expected = listOf("<30", "30-39", "40-49", "50-59", "60-69", "70+")
-        assertEquals(expected, stats.ageGender.map { it.ageGroup })
+    fun `professions include small groups and missing values without ranking by disease`() {
+        patient(profession = 1)
+        patient(profession = 13)
+        patient(profession = null)
+        val stats = dashboard.getStats()
+        assertEquals(3, stats.professions.size)
+        assertEquals(1L, stats.professions.first { it.name == "Нет данных" }.count)
+        assertEquals(33.3, stats.professions.first { it.name == "Другое" }.percent)
     }
 
     @Test
-    fun `getStats ageGender buckets patients into correct groups`() {
-        savePatient(maleGenderId, 25)    // <30
-        savePatient(maleGenderId, 35)    // 30-39
-        savePatient(femaleGenderId, 75)  // 70+
-
-        val stats = dashboardService.getStats()
-
-        val under30 = stats.ageGender.first { it.ageGroup == "<30" }
-        assertEquals(1, under30.healthyMale)
-        assertEquals(0, under30.diagnosedMale)
-
-        val thirties = stats.ageGender.first { it.ageGroup == "30-39" }
-        assertEquals(1, thirties.healthyMale)
-
-        val seventyPlus = stats.ageGender.first { it.ageGroup == "70+" }
-        assertEquals(1, seventyPlus.healthyFemale)
+    fun `diagnosis counts only recorded positives and respects model filter`() {
+        val city = patient()
+        patient()
+        val region = patient(kind = "region")
+        val diagnosis = glossary("diagnosis", 1)
+        repeat(2) { diagnoses.saveAndFlush(DiagnosisEntity(patient = city, diagnosis = diagnosis)) }
+        diagnoses.saveAndFlush(DiagnosisEntity(patient = region, diagnosis = diagnosis))
+        val stats = dashboard.getStats("city")
+        assertEquals(2L, stats.totalRecords)
+        assertEquals(1L, stats.diagnosedRecords)
+        assertEquals(1L, stats.recordedDiagnoses.single().count)
+        assertEquals(50.0, stats.recordedDiagnoses.single().percent)
     }
 
     @Test
-    fun `getStats weightBmi categories are in correct order`() {
-        val stats = dashboardService.getStats()
-
-        val expected = listOf("Недостаточный", "Нормальный", "Избыточный", "Ожирение")
-        assertEquals(expected, stats.weightBmi.map { it.category })
+    fun `age group boundaries count observations exactly once`() {
+        for (age in listOf(29, 30, 39, 40, 49, 50, 59, 60, 69, 70)) patient(age = age)
+        assertEquals(listOf(1L, 2L, 2L, 2L, 2L, 1L), dashboard.getStats().ageGender.map { it.maleCount })
     }
 
     @Test
-    fun `getStats alcohol categories are in correct order`() {
-        val stats = dashboardService.getStats()
-
-        val expected = listOf("Употребляю", "Употреблял ранее", "Никогда не употреблял")
-        assertEquals(expected, stats.alcohol.map { it.category })
-    }
-
-    @Test
-    fun `getStats genderDiagnoses distinguishes diagnosed from healthy`() {
-        val male1 = savePatient(maleGenderId, 50)
-        savePatient(maleGenderId, 55)
-        savePatient(femaleGenderId, 45)
-
-        diagnosisRepository.save(
-            DiagnosisEntity(
-                patient = patientRepository.getReferenceById(male1.id),
-                diagnosis = glossaryValueRepository.getReferenceById(diagnosisValueId)
-            )
-        )
-
-        val stats = dashboardService.getStats()
-
-        assertEquals(1, stats.genderDiagnoses.maleDiagnosed)
-        assertEquals(50, stats.genderDiagnoses.malePercent)
-        assertEquals(0, stats.genderDiagnoses.femaleDiagnosed)
-        assertEquals(0, stats.genderDiagnoses.femalePercent)
-    }
-
-    @Test
-    fun `getStats topDiagnoses counts diagnoses correctly`() {
-        val p1 = savePatient(maleGenderId, 50)
-        val p2 = savePatient(femaleGenderId, 45)
-
-        val diagRef = glossaryValueRepository.getReferenceById(diagnosisValueId)
-        diagnosisRepository.save(DiagnosisEntity(patient = patientRepository.getReferenceById(p1.id), diagnosis = diagRef))
-        diagnosisRepository.save(DiagnosisEntity(patient = patientRepository.getReferenceById(p2.id), diagnosis = diagRef))
-
-        val stats = dashboardService.getStats()
-
-        assertTrue(stats.topDiagnoses.isNotEmpty())
-        val top = stats.topDiagnoses.first()
-        assertEquals(2, top.diagnosedCount)
-        assertEquals(100, top.percent)
+    fun `unknown model is rejected`() {
+        assertFailsWith<IllegalArgumentException> { dashboard.getStats("other") }
     }
 }

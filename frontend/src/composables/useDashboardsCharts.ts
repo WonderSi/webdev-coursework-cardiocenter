@@ -1,366 +1,103 @@
-import { ref, computed, onMounted } from 'vue';
-import type { DashboardStatsResponse } from '@/api/dashboard.api';
-import { fetchDashboardStats } from '@/api/dashboard.api';
-import {
-  CHART_COLORS,
-  COMMON_TOOLTIP,
-  TOOLTIP_ALT,
-  AXIS_STYLE,
-  COMMON_GRID
-} from '@/utils/chartConstants';
+import { ref, computed, watch, onScopeDispose } from 'vue'
+import { fetchDashboardStats, type DashboardStatsResponse, type DashboardModelKind, type DashboardCategory } from '@/api/dashboard.api'
+import { CHART_COLORS, COMMON_TOOLTIP, AXIS_STYLE } from '@/utils/chartConstants'
 
 export function useDashboardCharts() {
-  const stats = ref<DashboardStatsResponse | null>(null);
-  const errorMessage = ref('');
+  const stats = ref<DashboardStatsResponse | null>(null)
+  const modelKind = ref<DashboardModelKind>('city')
+  const loading = ref(false)
+  const errorMessage = ref('')
+  let pending: AbortController | null = null
+  let sequence = 0
 
-  onMounted(async () => {
+  async function load(): Promise<void> {
+    const request = ++sequence
+    pending?.abort()
+    pending = new AbortController()
+    loading.value = true
+    errorMessage.value = ''
+    stats.value = null
     try {
-      stats.value = await fetchDashboardStats();
-    } catch (e) {
-      errorMessage.value = e instanceof Error ? e.message : 'Не удалось загрузить аналитику';
+      const result = await fetchDashboardStats(modelKind.value, pending.signal)
+      if (request === sequence) stats.value = result
+    } catch (error) {
+      if (request === sequence && !pending.signal.aborted) {
+        errorMessage.value = error instanceof Error ? error.message : 'Не удалось загрузить аналитику.'
+      }
+    } finally {
+      if (request === sequence) loading.value = false
     }
-  });
+  }
 
-  // Употребление алкоголя
-  const chartAlcohol = computed(() => {
-    const data = stats.value?.alcohol ?? [];
-    return {
-      renderer: 'svg',
-      tooltip: {
-        ...COMMON_TOOLTIP,
-        trigger: 'item',
-        formatter: (params: any) => `
-          <div style="margin-bottom: 8px; font-size: 15px;"><strong>${params.name}</strong></div>
-          <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
-            <span>${params.marker} Всего:</span>
-            <span style="font-weight: 700;">${params.value} чел.</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; gap: 20px;">
-            <span style="margin-left: 14px; opacity: 0.8;">Риск ССЗ:</span>
-            <span style="font-weight: 700; color: ${CHART_COLORS.red};">${params.data.diagnosedPercent}%</span>
-          </div>
-        `
-      },
-      series: [{
-        type: 'pie',
-        radius: ['30%', '80%'],
-        center: ['50%', '50%'],
-        itemStyle: { borderRadius: 0, borderColor: 'transparent', borderWidth: 4 },
-        label: { show: false, position: 'center' },
-        emphasis: {
-          label: { show: true, fontSize: 16, fontWeight: 'bold', color: CHART_COLORS.darkBlue, formatter: '{b}' }
-        },
-        data: data.map(item => {
-          let sliceColor = CHART_COLORS.primaryBlue;
-          if (item.category === 'Употребляю') sliceColor = CHART_COLORS.coldRed;
-          if (item.category === 'Употреблял ранее') sliceColor = CHART_COLORS.lightRed;
-          return {
-            value: item.healthyCount + item.diagnosedCount,
-            name: item.category,
-            diagnosedPercent: item.diagnosedPercent,
-            itemStyle: { color: sliceColor }
-          };
-        })
-      }]
-    };
-  });
+  watch(modelKind, load, { immediate: true })
+  onScopeDispose(() => { sequence++; pending?.abort() })
 
-  // Частые диагнозы (Horizontal Bar)
-  const chartDiagnoses = computed(() => {
-    const data = stats.value?.topDiagnoses ?? [];
-    return {
-      renderer: 'svg',
-      tooltip: {
-        ...COMMON_TOOLTIP,
-        formatter: (params: any) => {
-          const item = data[params[0].dataIndex];
-          if (!item) return '';
-          return `
-            <div style="margin-bottom: 8px; font-size: 15px;"><strong>${item.diagName}</strong></div>
-            <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
-              <span>Диагностировано:</span>
-              <span style="font-weight: 700;">${item.diagnosedCount}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; gap: 20px;">
-              <span>Доля от всех ССЗ:</span>
-              <span style="font-weight: 700; color: ${CHART_COLORS.primaryBlue};">${item.percent}%</span>
-            </div>
-          `;
-        }
-      },
-      grid: COMMON_GRID,
-      xAxis: {
-        type: 'value',
-        name: 'число пациентов',
-        nameLocation: 'center',
-        nameGap: 40,
-        nameTextStyle: AXIS_STYLE.nameTextStyle,
-        splitLine: AXIS_STYLE.splitLine,
-        axisLabel: AXIS_STYLE.labelRegular,
-      },
-      yAxis: {
-        type: 'category',
-        z: 10,
-        inverse: true,
-        data: data.map(item => item.diagName),
-        axisLabel: AXIS_STYLE.labelBold,
-        axisLine: { lineStyle: AXIS_STYLE.lineStyle },
-        axisTick: { show: false }
-      },
-      series: [{
-        name: 'Случаи',
-        type: 'bar',
-        data: data.map(item => item.diagnosedCount),
-        itemStyle: { color: CHART_COLORS.primaryBlue, borderRadius: [0, 2, 2, 0] },
-        barWidth: 25,
-        label: {
-          show: true,
-          position: 'right',
-          formatter: '{c}',
-          color: CHART_COLORS.darkBlue,
-          fontWeight: 600,
-          fontSize: 16
-        }
-      }]
-    };
-  });
+  const categoryColors: Record<string, string> = {
+    'Мужской': CHART_COLORS.primaryBlue,
+    'Женский': CHART_COLORS.lightRed,
+    'Да': CHART_COLORS.lightRed,
+    'Нет': CHART_COLORS.primaryBlue,
+    'Нет данных': CHART_COLORS.gridLine,
+    'Употребляю': CHART_COLORS.coldRed,
+    'Употреблял ранее': CHART_COLORS.lightRed,
+    'Никогда не употреблял': CHART_COLORS.primaryBlue,
+    'Недостаточный': CHART_COLORS.blueMed,
+    'Нормальный': CHART_COLORS.primaryBlue,
+    'Избыточный': CHART_COLORS.lightRed,
+    'Ожирение': CHART_COLORS.coldRed,
+  }
+  const pie = (data: DashboardCategory[]) => ({
+    tooltip: { ...COMMON_TOOLTIP, trigger: 'item', formatter: '{b}: {c} записей ({d}%)' },
+    legend: { bottom: 0, textStyle: AXIS_STYLE.labelRegular },
+    color: [CHART_COLORS.primaryBlue, CHART_COLORS.lightRed, CHART_COLORS.blueMed, CHART_COLORS.coldRed],
+    series: [{ type: 'pie', radius: ['35%', '65%'], center: ['50%', '43%'],
+      label: { show: false }, data: data.filter(item => item.count > 0).map(item => ({
+        name: item.name, value: item.count, itemStyle: { color: categoryColors[item.name] ?? CHART_COLORS.primaryBlue },
+      })) }],
+  })
+  const bars = (data: DashboardCategory[], coloredCategories = false) => ({
+    tooltip: { ...COMMON_TOOLTIP, valueFormatter: (value: number) => `${value} записей` },
+    grid: { top: 5, left: 0, right: 40, bottom: 30, containLabel: true },
+    xAxis: { type: 'value', minInterval: 1, axisLabel: AXIS_STYLE.labelRegular, splitLine: AXIS_STYLE.splitLine },
+    yAxis: { type: 'category', inverse: true, data: data.map(item => item.name),
+      axisLabel: { ...AXIS_STYLE.labelRegular, width: 240, overflow: 'truncate' }, axisTick: { show: false } },
+    series: [{ type: 'bar', data: data.map(item => coloredCategories
+      ? { value: item.count, itemStyle: { color: categoryColors[item.name] ?? CHART_COLORS.primaryBlue } }
+      : item.count), barMaxWidth: 28,
+      itemStyle: { color: CHART_COLORS.primaryBlue }, label: { show: true, position: 'right' } }],
+  })
 
-  // Возрастно-половая структура
-  const chartAgeGender = computed(() => {
-    const data = stats.value?.ageGender ?? [];
-    return {
-      renderer: 'svg',
-      tooltip: {
-        ...TOOLTIP_ALT,
-        formatter: function (params: any) {
-          let res = `<div style="margin-bottom: 8px; font-size: 16px;">
-                        <strong>${params[0].axisValue}</strong>
-                      </div>`;
-          params.forEach((item: any) => {
-            res += `<div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
-                      <span>${item.marker} ${item.seriesName}</span>
-                      <span style="font-weight: 700;">${item.value}</span>
-                    </div>`;
-          });
-          return res;
-        }
-      },
-      legend: { show: false },
-      grid: { top: '0%', left: '5%', right: '0%', bottom: '15%', containLabel: true },
-      xAxis: {
-        type: 'category',
-        z: 10,
-        name: 'возрастная группа',
-        nameLocation: 'center',
-        nameGap: 40,
-        nameTextStyle: AXIS_STYLE.nameTextStyle,
-        axisLabel: AXIS_STYLE.labelRegular,
-        axisLine: { show: true, lineStyle: AXIS_STYLE.lineStyle },
-        data: data.map(item => item.ageGroup),
-        axisTick: { show: false }
-      },
-      yAxis: {
-        type: 'value',
-        name: 'число пациентов',
-        nameLocation: 'middle',
-        nameGap: 40,
-        nameRotate: -90,
-        nameTextStyle: AXIS_STYLE.nameTextStyle,
-        axisLabel: { ...AXIS_STYLE.labelRegular, verticalAlign: 'bottom', padding: [0, 0, 0, 0] },
-        splitLine: AXIS_STYLE.splitLine,
-        axisLine: { show: true, lineStyle: AXIS_STYLE.lineStyle },
-      },
-      series: [
-        {
-          name: 'Здоровые (М)',
-          type: 'bar',
-          stack: 'male',
-          barWidth: 30,
-          data: data.map(item => item.healthyMale),
-          itemStyle: { color: CHART_COLORS.blueMed }
-        },
-        {
-          name: 'Диагностированные (М)',
-          type: 'bar',
-          stack: 'male',
-          data: data.map(item => item.diagnosedMale),
-          itemStyle: { color: CHART_COLORS.primaryBlue, borderRadius: [2, 2, 0, 0] }
-        },
-        {
-          name: 'Здоровые (Ж)',
-          type: 'bar',
-          stack: 'female',
-          barWidth: 30,
-          data: data.map(item => item.healthyFemale),
-          itemStyle: { color: CHART_COLORS.lightRed }
-        },
-        {
-          name: 'Диагностированные (Ж)',
-          type: 'bar',
-          stack: 'female',
-          data: data.map(item => item.diagnosedFemale),
-          itemStyle: { color: CHART_COLORS.red, borderRadius: [2, 2, 0, 0] }
-        }
-      ]
-    };
-  });
+  const chartAlcohol = computed(() => pie(stats.value?.alcohol ?? []))
+  const chartGender = computed(() => pie(stats.value?.genderDistribution ?? []))
+  const chartLung = computed(() => pie(stats.value?.lungDisease ?? []))
+  const chartWeight = computed(() => bars(
+    (stats.value?.bmi ?? []).filter(item => item.name !== 'Нет данных' || item.count > 0), true,
+  ))
+  const chartProfessions = computed(() => bars(stats.value?.professions ?? []))
+  const chartDistricts = computed(() => bars(stats.value?.districts ?? []))
+  const chartAgeGender = computed(() => ({
+    tooltip: COMMON_TOOLTIP,
+    legend: { bottom: 0, textStyle: AXIS_STYLE.labelRegular },
+    grid: { top: 10, left: 10, right: 10, bottom: 45, containLabel: true },
+    xAxis: { type: 'category', data: stats.value?.ageGender.map(item => item.ageGroup) ?? [], axisLabel: AXIS_STYLE.labelRegular },
+    yAxis: { type: 'value', minInterval: 1, axisLabel: AXIS_STYLE.labelRegular, splitLine: AXIS_STYLE.splitLine },
+    series: [
+      { name: 'Мужчины', type: 'bar', data: stats.value?.ageGender.map(item => item.maleCount) ?? [], itemStyle: { color: CHART_COLORS.primaryBlue } },
+      { name: 'Женщины', type: 'bar', data: stats.value?.ageGender.map(item => item.femaleCount) ?? [], itemStyle: { color: CHART_COLORS.lightRed } },
+    ],
+  }))
+  const chartLabs = computed(() => ({
+    tooltip: COMMON_TOOLTIP,
+    legend: { bottom: 0, textStyle: AXIS_STYLE.labelRegular },
+    grid: { top: 10, left: 0, right: 10, bottom: 40, containLabel: true },
+    xAxis: { type: 'value', minInterval: 1, axisLabel: AXIS_STYLE.labelRegular, splitLine: AXIS_STYLE.splitLine },
+    yAxis: { type: 'category', inverse: true, data: stats.value?.labCoverage.map(item => item.label) ?? [], axisLabel: AXIS_STYLE.labelRegular },
+    series: [
+      { name: 'Заполнено', type: 'bar', stack: 'coverage', data: stats.value?.labCoverage.map(item => item.filledCount) ?? [], itemStyle: { color: CHART_COLORS.primaryBlue } },
+      { name: 'Нет данных', type: 'bar', stack: 'coverage', data: stats.value?.labCoverage.map(item => item.missingCount) ?? [], itemStyle: { color: CHART_COLORS.lightRed } },
+    ],
+  }))
 
-  // Вес и ССЗ
-  const chartWeight = computed(() => {
-    const data = stats.value?.weightBmi ?? [];
-    return {
-      renderer: 'svg',
-      tooltip: {
-        ...TOOLTIP_ALT,
-        formatter: function (params: any) {
-          let res = `<div style="margin-bottom: 8px; font-size: 16px;">
-                        <strong>${params[0].axisValue}</strong>
-                      </div>`;
-          params.forEach((item: any) => {
-            res += `<div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
-                      <span>${item.marker} ${item.seriesName}</span>
-                      <span style="font-weight: 700;">${item.value}</span>
-                    </div>`;
-          });
-          return res;
-        }
-      },
-      grid: COMMON_GRID,
-      xAxis: [
-        {
-          type: 'value',
-          name: 'число пациентов',
-          nameLocation: 'center',
-          nameGap: 40,
-          nameTextStyle: AXIS_STYLE.nameTextStyle,
-          axisLabel: AXIS_STYLE.labelRegular,
-          splitLine: AXIS_STYLE.splitLine
-        }
-      ],
-      yAxis: {
-        type: 'category',
-        z: 10,
-        data: data.map(item => item.category),
-        axisLabel: AXIS_STYLE.labelBold,
-        axisLine: { lineStyle: AXIS_STYLE.lineStyle }
-      },
-      series: [
-        {
-          name: 'Здоровые',
-          type: 'bar',
-          stack: 'total',
-          barWidth: 30,
-          data: data.map(item => item.healthyCount),
-          itemStyle: { color: CHART_COLORS.blueMed }
-        },
-        {
-          name: 'С диагнозом',
-          type: 'bar',
-          stack: 'total',
-          data: data.map(item => item.diagnosedCount),
-          itemStyle: { color: CHART_COLORS.coldRed },
-          label: {
-            show: true,
-            position: 'right',
-            distance: 4,
-            formatter: (params: any) => {
-              const item = data[params.dataIndex];
-              return item ? item.diagnosedPercent + '%' : '';
-            },
-            color: CHART_COLORS.darkBlue,
-            fontWeight: 600,
-            fontSize: 16
-          }
-        }
-      ]
-    };
-  });
-
-  // Профессии
-  const chartProfessions = computed(() => {
-    const data = stats.value?.topProfessions ?? [];
-    return {
-      renderer: 'svg',
-      tooltip: {
-        ...COMMON_TOOLTIP,
-        formatter: (params: any) => {
-          const item = data[params[0].dataIndex];
-          if (!item) return '';
-          return `
-            <div style="margin-bottom: 8px; font-size: 15px;"><strong>${item.profName}</strong></div>
-            <div style="display: flex; justify-content: space-between; gap: 20px; margin-bottom: 4px;">
-              <span>Диагностировано:</span>
-              <span style="font-weight: 700;">${item.diagnosedCount} чел.</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; gap: 20px;">
-              <span>% имеющих ССЗ от общего числа:</span>
-              <span style="font-weight: 700; color: ${CHART_COLORS.red};">${item.diagnosedPercent}%</span>
-            </div>
-          `;
-        }
-      },
-      grid: COMMON_GRID,
-      xAxis: {
-        type: 'value',
-        name: 'число пациентов',
-        nameLocation: 'center',
-        nameGap: 40,
-        nameTextStyle: AXIS_STYLE.nameTextStyle,
-        splitLine: AXIS_STYLE.splitLine,
-        axisLabel: AXIS_STYLE.labelRegular,
-      },
-      yAxis: {
-        type: 'category',
-        inverse: true,
-        z: 10,
-        data: data.map(item => item.profName),
-        axisLabel: AXIS_STYLE.labelBold,
-        axisLine: { lineStyle: AXIS_STYLE.lineStyle },
-        axisTick: { show: false }
-      },
-      series: [{
-        name: 'случаев ССЗ',
-        type: 'bar',
-        data: data.map(item => item.diagnosedCount),
-        itemStyle: { color: CHART_COLORS.red, borderRadius: [0, 2, 2, 0] },
-        barWidth: 30,
-        label: {
-          show: true,
-          position: 'right',
-          formatter: '{c}',
-          color: CHART_COLORS.darkBlue,
-          fontWeight: 600,
-          fontSize: 16
-        }
-      }]
-    };
-  });
-
-  // Районы
-  const chartDistricts = computed(() => {
-    const data = stats.value?.districts ?? [];
-    return {
-      renderer: 'svg',
-      tooltip: { ...COMMON_TOOLTIP },
-      grid: { top: '0%', left: '0%', right: '0%', bottom: '0%', containLabel: true },
-      xAxis: { type: 'value', splitLine: AXIS_STYLE.splitLine, axisLabel: AXIS_STYLE.labelRegular },
-      yAxis: {
-        type: 'category',
-        z: 10,
-        inverse: true,
-        data: data.map(item => item.name),
-        axisLabel: AXIS_STYLE.labelBold,
-        axisLine: { lineStyle: AXIS_STYLE.lineStyle },
-        axisTick: { show: false }
-      },
-      series: [{
-        name: 'Диагнозы',
-        type: 'bar',
-        data: data.map(item => item.numberOfDiagnoses),
-        itemStyle: { color: CHART_COLORS.primaryBlue, borderRadius: [0, 2, 2, 0] }
-      }]
-    };
-  });
-
-  return { stats, errorMessage, chartAlcohol, chartDiagnoses, chartAgeGender, chartWeight, chartProfessions, chartDistricts };
+  return { stats, modelKind, loading, errorMessage, load, chartAlcohol, chartGender, chartLung,
+    chartAgeGender, chartWeight, chartProfessions, chartDistricts, chartLabs }
 }

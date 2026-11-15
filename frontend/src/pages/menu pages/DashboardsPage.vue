@@ -1,113 +1,58 @@
 <template>
-  <Sidebar/>
-  <div class="dashboards-grid-container">
-    <p v-if="errorMessage" class="col-6" role="alert">{{ errorMessage }}</p>
-
-    <div class="kpi-column col-1 row-2">
-      <div class="dashboard-card kpi-card">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18.3333 26.6667V35H8.33333C7.49237 35.0003 6.68239 34.6827 6.06575 34.1108C5.44912 33.539 5.07141 32.7553 5.00833 31.9167L5 31.6667V26.6667H18.3333ZM35 26.6667V31.6667C35.0003 32.5076 34.6827 33.3176 34.1108 33.9342C33.539 34.5509 32.7553 34.9286 31.9167 34.9917L31.6667 35H21.6667V26.6667H35ZM18.3333 16.6667V23.3333H5V16.6667H18.3333ZM35 16.6667V23.3333H21.6667V16.6667H35ZM18.3333 5V13.3333H5V8.33333C4.99973 7.49237 5.31734 6.68239 5.88916 6.06575C6.46098 5.44912 7.24474 5.07141 8.08333 5.00833L8.33333 5H18.3333ZM31.6667 5C32.5507 5 33.3986 5.35119 34.0237 5.97631C34.6488 6.60143 35 7.44928 35 8.33333V13.3333H21.6667V5H31.6667Z" fill="#0f356e"/>
-            </svg>
-          </div>
-          <div class="card-title">Всего записей</div>
-        </div>
-        <span class="card-number-total-records">{{ stats?.totalPatients ?? '—' }}</span>
-      </div>
-
-      <div class="dashboard-card kpi-card">
-        <div class="card-header">
-          <div class="card-icon">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#0f356e"/>
-            </svg>
-          </div>
-          <div class="card-title">Пациентов с ССЗ</div>
-        </div>
-        <div class="card-two-numbers">
-          <div class="percentage">
-            <span class="card-number color-blue">{{ stats?.genderDiagnoses.malePercent ?? '—' }}%</span>
-            <span class="sub-label color-blue">{{ stats?.genderDiagnoses.maleDiagnosed ?? '—' }} чел (М)</span>
-          </div>
-          <div class="percentage">
-            <span class="card-number color-pink">{{ stats?.genderDiagnoses.femalePercent ?? '—' }}%</span>
-            <span class="sub-label color-pink">{{ stats?.genderDiagnoses.femaleDiagnosed ?? '—' }} чел (Ж)</span>
-          </div>
-        </div>
-      </div>
+  <Sidebar />
+  <div class="dashboards-grid-container" :aria-busy="loading">
+    <div class="dashboard-card dashboard-controls col-6">
+      <div class="card-title">Аналитика обследований</div>
+      <label for="dashboard-model">Тип записей:
+        <select id="dashboard-model" v-model="modelKind">
+          <option value="city">City — отдельные обследования</option>
+          <option value="region">Region — сводные записи</option>
+        </select>
+      </label>
+      <p>Показатели относятся к выбранному типу записей. Количество записей не равно количеству уникальных людей.</p>
+      <p v-if="loading" role="status">Загрузка данных…</p>
+      <p v-else-if="errorMessage" role="alert">{{ errorMessage }} <button type="button" @click="load">Повторить</button></p>
+      <p v-else-if="stats?.totalRecords === 0" role="status">Для выбранного типа пока нет обследований.</p>
     </div>
 
-    <ChartCard title="Употребление алкоголя" :option="chartAlcohol" gridClass="col-2 row-2">
-      <template #legend-doughnut>
-        <div class="doughnut-legend">
-          <div class="legend-item"><span class="dot" style="background-color: #EA566F;"></span><span>Регулярно</span></div>
-          <div class="legend-item"><span class="dot" style="background-color: #ff8095;"></span><span>Ранее</span></div>
-          <div class="legend-item"><span class="dot" style="background-color: #1567E2;"></span><span>Никогда</span></div>
-        </div>
-      </template>
-    </ChartCard>
+    <div class="kpi-column col-3 row-2">
+      <div class="dashboard-card kpi-card">
+        <div class="card-header"><div class="card-title">Всего записей</div></div>
+        <span class="card-number-total-records">{{ stats?.totalRecords ?? '—' }}</span>
+      </div>
+      <div class="dashboard-card kpi-card">
+        <div class="card-header"><div class="card-title">Средний возраст</div></div>
+        <span class="card-number-total-records">{{ stats?.averageAge == null ? '—' : stats.averageAge.toFixed(1) }}</span>
+        <span class="sub-label"></span>
+      </div>
+    </div>
+    <ChartCard title="Распределение по полу" :option="chartGender" :empty-text="emptyChart" gridClass="col-3 row-2" />
 
-    <ChartCard title="Частые диагнозы" :option="chartDiagnoses" gridClass="col-3 row-2" />
-
-    <ChartCard title="Профессии и Риск ССЗ" :option="chartProfessions" gridClass="col-6 row-2" />
-
-    <ChartCard title="Корреляция веса и ССЗ" :option="chartWeight" gridClass="col-3 row-2">
-      <template #legend>
-        <div class="custom-legend">
-          <span style="color: #1567E2">●</span> Здоровые
-          <span style="color: #DF2242; margin-left: 10px">●</span> ССЗ
-        </div>
-      </template>
-    </ChartCard>
-
-    <ChartCard title="Возрастно-половая структура" :option="chartAgeGender" gridClass="col-3 row-2">
-      <template #legend>
-        <div class="custom-legend">
-          <span class="legend-men">м</span>
-          <span class="legend-divider">-</span>
-          <span class="legend-women">ж</span>
-        </div>
-      </template>
-    </ChartCard>
-
-    <!-- <ChartCard title="Районы и Экология" :option="chartDistricts" gridClass="col-6 row-2">
-      <template #legend>
-        <div class="custom-legend-ecology">
-          <span class="legend-diagnoses-label">диагнозы</span>
-          <span class="legend-divider"> / </span>
-          <span class="legend-ecology-label">экология</span>
-        </div>
-      </template>
-    </ChartCard> -->
-    <ChartCard title="Районы" :option="chartDistricts" gridClass="col-6 row-2" />
-
+    <ChartCard title="Возрастно-половая структура" :option="chartAgeGender" :empty-text="emptyChart" gridClass="col-3 row-2" />
+    <ChartCard title="Распределение ИМТ" :option="chartWeight" :empty-text="emptyChart" gridClass="col-3 row-2" />
+    <ChartCard title="Употребление алкоголя" :option="chartAlcohol" :empty-text="emptyChart" gridClass="col-3 row-2" />
+    <ChartCard title="Хронические заболевания лёгких" :option="chartLung" :empty-text="emptyChart" gridClass="col-3 row-2" />
+    <ChartCard title="Распределение по профессиям" :option="chartProfessions" :empty-text="emptyChart" gridClass="col-6 row-2" />
+    <ChartCard title="Распределение по районам" :option="chartDistricts" :empty-text="emptyChart" gridClass="col-3 row-2" />
+    <ChartCard title="Заполненность лабораторных данных" :option="chartLabs" :empty-text="emptyChart" gridClass="col-3 row-2" />
   </div>
 </template>
 
 <script setup lang="ts">
-import Sidebar from '@/components/Sidebar.vue';
-import ChartCard from '@/components/dashboards/ChartCard.vue';
-import { useDashboardCharts } from '@/composables/useDashboardsCharts';
+import { computed } from 'vue'
+import Sidebar from '@/components/Sidebar.vue'
+import ChartCard from '@/components/dashboards/ChartCard.vue'
+import { useDashboardCharts } from '@/composables/useDashboardsCharts'
+import { use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+import { BarChart, PieChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 
-// ECharts
-import { use } from 'echarts/core';
-import { SVGRenderer } from 'echarts/renderers';
-import { BarChart, PieChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components';
-
-use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent]);
-
-const {
-  stats,
-  errorMessage,
-  chartAlcohol,
-  chartDiagnoses,
-  chartAgeGender,
-  chartWeight,
-  chartProfessions,
-  chartDistricts
-} = useDashboardCharts();
+use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent])
+const { stats, modelKind, loading, errorMessage, load, chartAlcohol, chartGender, chartLung,
+  chartAgeGender, chartWeight, chartProfessions, chartDistricts, chartLabs } = useDashboardCharts()
+const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorMessage.value
+  ? 'Данные не загружены.' : !stats.value || stats.value.totalRecords === 0 ? 'Нет данных.' : undefined)
 </script>
 
 <style scoped lang="scss">
@@ -139,15 +84,17 @@ const {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
 
-  grid-auto-rows: 180px;
+  grid-auto-rows: minmax(180px, auto);
 
   grid-auto-flow: dense;
   align-content: start;
   min-height: 100vh;
+  box-sizing: border-box;
+  width: calc(100% - 240px);
+  max-width: 1600px;
   margin-left: 240px;
   padding: 40px;
   gap: 24px;
-  max-width: 1600px;
 
   & > * {
     min-height: 0;
@@ -260,5 +207,24 @@ const {
   display: flex; gap: 10px; font-size: 1.1rem; font-weight: 700; color: $color-blue-dark;
   .legend-ecology-label { color: $color-ecology-dark; }
   .legend-diagnoses-label { color: $color-accent; }
+}
+.dashboard-controls {
+  gap: 12px;
+  select {
+    max-width: 100%;
+    min-width: 0;
+    padding: 8px 12px;
+    margin-left: 8px;
+    background: rgba($color-white, 0.5);
+    border: 1.5px solid rgba($color-secondary, 0.5);
+    border-radius: 100px;
+    font: inherit;
+    color: $color-text;
+    text-align: left;
+    outline: none;
+    transition: border-color 0.2s;
+    &:focus { border-color: $color-accent; }
+  }
+  p { margin: 0; }
 }
 </style>

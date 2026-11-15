@@ -1,5 +1,6 @@
 package com.medical.cardio.controller
 
+import com.medical.cardio.entity.AdminSection
 import com.medical.cardio.entity.AdminUserEntity
 import com.medical.cardio.entity.Role
 import com.medical.cardio.repository.AdminUserRepository
@@ -8,139 +9,59 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.get
 
 class DashboardControllerTest : ControllerTestBase() {
-
-    @Autowired
-    private lateinit var adminUserRepository: AdminUserRepository
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
-
-    private lateinit var testUser: AdminUserEntity
+    @Autowired private lateinit var users: AdminUserRepository
+    private lateinit var user: AdminUserEntity
 
     @BeforeEach
-    fun setUp() {
-        testUser = adminUserRepository.save(
-            AdminUserEntity(
-                email = "dashboard-test@cardio.ru",
-                passwordHash = passwordEncoder.encode("ValidPass@2000"),
-                role = Role.DOCTOR,
-                allowedSections = mutableSetOf(com.medical.cardio.entity.AdminSection.DASHBOARDS)
-            )
-        )
+    fun createUser() {
+        user = users.save(AdminUserEntity(email = "dashboard-http@test.invalid", passwordHash = "unused-test-hash",
+            allowedSections = mutableSetOf(AdminSection.DASHBOARDS)))
     }
 
     @AfterEach
-    fun tearDown() {
-        adminUserRepository.delete(testUser)
-    }
+    fun deleteUser() { users.deleteById(user.id) }
 
     @Test
-    fun `getStats with DOCTOR token returns 200`() {
-        val cookie = authCookie(testUser)
-        mockMvc.get("/api/admin/dashboard") {
-            cookie(cookie)
-        }.andExpect {
+    fun `doctor gets new observation contract with default city`() {
+        mockMvc.get("/api/admin/dashboard") { cookie(authCookie(user)) }.andExpect {
             status { isOk() }
-            jsonPath("$.totalPatients") { exists() }
-        }
-    }
-
-    @Test
-    fun `getStats without token returns 401`() {
-        mockMvc.get("/api/admin/dashboard").andExpect {
-            status { isUnauthorized() }
-        }
-    }
-
-    @Test
-    fun `getStats response contains all expected top-level fields`() {
-        val cookie = authCookie(testUser)
-        mockMvc.get("/api/admin/dashboard") {
-            cookie(cookie)
-        }.andExpect {
-            status { isOk() }
-            jsonPath("$.totalPatients") { exists() }
-            jsonPath("$.genderDistribution") { exists() }
-            jsonPath("$.genderDiagnoses") { exists() }
-            jsonPath("$.genderDiagnoses.maleDiagnosed") { exists() }
-            jsonPath("$.genderDiagnoses.femaleDiagnosed") { exists() }
-            jsonPath("$.ageGender") { isArray() }
-            jsonPath("$.weightBmi") { isArray() }
-            jsonPath("$.alcohol") { isArray() }
-            jsonPath("$.topProfessions") { isArray() }
-            jsonPath("$.topDiagnoses") { isArray() }
-            jsonPath("$.districts") { isArray() }
-        }
-    }
-
-    @Test
-    fun `getStats with SUPER_ADMIN token returns 200`() {
-        val extUser = adminUserRepository.save(
-            AdminUserEntity(
-                email = "dashboard-ext-test@cardio.ru",
-                passwordHash = passwordEncoder.encode("ValidPass@2024"),
-                role = Role.SUPER_ADMIN
-            )
-        )
-        try {
-            val cookie = authCookie(extUser)
-            mockMvc.get("/api/admin/dashboard") {
-                cookie(cookie)
-            }.andExpect {
-                status { isOk() }
-            }
-        } finally {
-            adminUserRepository.delete(extUser)
-        }
-    }
-
-    @Test
-    fun `getStats ageGender always returns all 6 age groups in order`() {
-        val cookie = authCookie(testUser)
-        mockMvc.get("/api/admin/dashboard") {
-            cookie(cookie)
-        }.andExpect {
-            status { isOk() }
+            jsonPath("$.modelKind") { value("city") }
+            jsonPath("$.totalRecords") { exists() }
+            jsonPath("$.genderDistribution") { isArray() }
+            jsonPath("$.bmi.length()") { value(5) }
             jsonPath("$.ageGender.length()") { value(6) }
-            jsonPath("$.ageGender[0].ageGroup") { value("<30") }
-            jsonPath("$.ageGender[1].ageGroup") { value("30-39") }
-            jsonPath("$.ageGender[2].ageGroup") { value("40-49") }
-            jsonPath("$.ageGender[3].ageGroup") { value("50-59") }
-            jsonPath("$.ageGender[4].ageGroup") { value("60-69") }
-            jsonPath("$.ageGender[5].ageGroup") { value("70+") }
+            jsonPath("$.lungDisease.length()") { value(3) }
+            jsonPath("$.labCoverage.length()") { value(5) }
+            jsonPath("$.genderDiagnoses") { doesNotExist() }
+            jsonPath("$.healthyCount") { doesNotExist() }
         }
     }
 
     @Test
-    fun `getStats weightBmi always returns all 4 BMI categories in order`() {
-        val cookie = authCookie(testUser)
-        mockMvc.get("/api/admin/dashboard") {
-            cookie(cookie)
-        }.andExpect {
+    fun `region can be selected and unknown model is rejected`() {
+        mockMvc.get("/api/admin/dashboard?modelKind=region") { cookie(authCookie(user)) }.andExpect {
             status { isOk() }
-            jsonPath("$.weightBmi.length()") { value(4) }
-            jsonPath("$.weightBmi[0].category") { value("Недостаточный") }
-            jsonPath("$.weightBmi[1].category") { value("Нормальный") }
-            jsonPath("$.weightBmi[2].category") { value("Избыточный") }
-            jsonPath("$.weightBmi[3].category") { value("Ожирение") }
+            jsonPath("$.modelKind") { value("region") }
+        }
+        mockMvc.get("/api/admin/dashboard?modelKind=unknown") { cookie(authCookie(user)) }.andExpect {
+            status { isBadRequest() }
         }
     }
 
     @Test
-    fun `getStats alcohol always returns all 3 categories in order`() {
-        val cookie = authCookie(testUser)
-        mockMvc.get("/api/admin/dashboard") {
-            cookie(cookie)
-        }.andExpect {
-            status { isOk() }
-            jsonPath("$.alcohol.length()") { value(3) }
-            jsonPath("$.alcohol[0].category") { value("Употребляю") }
-            jsonPath("$.alcohol[1].category") { value("Употреблял ранее") }
-            jsonPath("$.alcohol[2].category") { value("Никогда не употреблял") }
-        }
+    fun `anonymous request requires authentication`() {
+        mockMvc.get("/api/admin/dashboard").andExpect { status { isUnauthorized() } }
+    }
+
+    @Test
+    fun `super admin does not need explicit dashboard grant`() {
+        val admin = users.save(AdminUserEntity(email = "dashboard-super@test.invalid", passwordHash = "unused-test-hash", role = Role.SUPER_ADMIN))
+        try {
+            mockMvc.get("/api/admin/dashboard?modelKind=region") { cookie(authCookie(admin)) }
+                .andExpect { status { isOk() } }
+        } finally { users.deleteById(admin.id) }
     }
 }

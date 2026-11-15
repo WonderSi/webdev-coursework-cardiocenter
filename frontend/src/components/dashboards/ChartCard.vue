@@ -6,7 +6,8 @@
     </div>
     <slot name="legend-doughnut"></slot>
     <div class="chart-container">
-      <v-chart class="chart" :option="option" autoresize />
+      <p v-if="emptyText" class="chart-empty">{{ emptyText }}</p>
+      <v-chart v-else class="chart" :option="option" autoresize />
     </div>
   </div>
 </template>
@@ -18,6 +19,7 @@ defineProps<{
   title: string;
   option: any;
   gridClass?: string;
+  emptyText?: string;
 }>();
 </script>
 
@@ -74,5 +76,13 @@ defineProps<{
     height: 100%;
     width: 100%;
   }
+}
+.chart-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-blue-dark;
+  text-align: center;
 }
 </style>
