@@ -12,7 +12,7 @@ defineProps<{
     aria-hidden="true" focusable="false"
   >
     <rect x="5" y="4" width="14" height="17" rx="2" />
-    <rect x="9" y="2" width="6" height="4" rx="1" />
+    <rect x="9" y="2" width="6" height="4" rx="1" fill="currentColor" />
     <path d="M9 11h6M9 16h6" />
   </svg>
   <svg
