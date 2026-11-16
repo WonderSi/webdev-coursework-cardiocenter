@@ -23,8 +23,8 @@ const accessPages = {
   questionnaire: { page: 'questionnaire', label: 'Получить прогноз' },
   data: { page: 'view-data', label: 'Просмотр данных' },
   dashboards: { page: 'dashboards', label: 'Аналитика' },
-  upload: { page: 'upload-data', label: 'Загрузка данных' },
-  training: { page: 'model-training', label: 'Обучение модели' },
+  upload: { page: 'upload-data', label: 'Внесение данных' },
+  training: { page: 'model-training', label: 'Модели' },
 } as const
 
 export const accessGuide = [

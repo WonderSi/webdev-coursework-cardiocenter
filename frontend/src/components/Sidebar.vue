@@ -53,26 +53,26 @@
         v-if="userStore.canAccessSection('UPLOAD_DATA')"
         to="/upload-data"
         class="menu-item"
-        aria-label="Загрузка данных"
-        title="Загрузка данных"
+        aria-label="Внесение данных"
+        title="Внесение данных"
       >
         <div class="icon">
           <SidebarPageIcon page="upload-data" />
         </div>
-        <span class="menu-label">Загрузка данных</span>
+        <span class="menu-label">Внесение данных</span>
       </router-link>
       
       <router-link
         v-if="userStore.canAccessSection('MODEL_TRAINING')"
         to="/model-training"
         class="menu-item"
-        aria-label="Обучение модели"
-        title="Обучение модели"
+        aria-label="Модели"
+        title="Модели"
       >
         <div class="icon">
           <SidebarPageIcon page="model-training" />
         </div>
-        <span class="menu-label">Обучение модели</span>
+        <span class="menu-label">Модели</span>
       </router-link>
 
       <router-link
