@@ -1,5 +1,6 @@
 <template>
-  <div class="results-page">
+  <Sidebar v-if="doctor" />
+  <div class="results-page" :class="{ 'doctor-results': doctor }">
     <div class="logo-container">
       <router-link to="/" class="logo-link">
         <img src="@/assets/logo.png" alt="logo" class="logo" />
@@ -34,7 +35,19 @@
         </div>
       </div>
       
-      <button class="btn-home-page" @click="goHome">На главную</button>
+      <div v-if="doctor && userStore.canAccessSection('UPLOAD_DATA')" class="save-patient-actions">
+        <button
+          class="btn-home-page"
+          type="button"
+          :disabled="store.savingPatient || store.patientSaved"
+          @click="store.savePatient()"
+        >
+          {{ store.patientSaved ? 'Сохранено в базу данных' : store.savingPatient ? 'Сохранение...' : 'Сохранить в базу данных' }}
+        </button>
+        <p v-if="store.patientSaved" role="status">Пациент сохранён.</p>
+        <p v-if="store.patientError" class="save-patient-error" role="alert">{{ store.patientError }}</p>
+      </div>
+      <button class="btn-home-page" @click="goHome">{{ doctor ? 'Новая анкета' : 'На главную' }}</button>
     </div>
   </div>
 </template>
@@ -42,16 +55,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSurveyStore } from '@/stores/survey.store'
+import { useSurveyStore, useDoctorSurveyStore } from '@/stores/survey.store'
+import { useUserStore } from '@/stores/user.store'
+import Sidebar from '@/components/Sidebar.vue'
 
 const router = useRouter()
-const store = useSurveyStore()
+const { doctor = false } = defineProps<{ doctor?: boolean }>()
+const store = doctor ? useDoctorSurveyStore() : useSurveyStore()
+const userStore = useUserStore()
 
 const prediction = computed(() => store.predictions[0])
 
 const goHome = () => {
   store.reset()
-  router.push('/')
+  router.push(doctor ? '/questionnaire' : '/')
 }
 
 </script>
@@ -292,5 +309,36 @@ const goHome = () => {
   @media (max-width: 480px) {
     width: 100%;
   }
+}
+.doctor-results {
+  box-sizing: border-box;
+  width: calc(100% - 240px);
+  margin-left: 240px;
+  min-width: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+.save-patient-actions {
+  display: grid;
+  gap: 12px;
+  max-width: 100%;
+}
+
+.save-patient-error {
+  color: $color-red;
+  overflow-wrap: anywhere;
+}
+
+.btn-home-page:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-home-page:focus-visible {
+  @include focus-ring;
 }
 </style>

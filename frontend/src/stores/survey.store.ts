@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import { buildPatientPayload, createPatient, type PatientPayload } from '@/api/patients.api'
+import { useUserStore } from '@/stores/user.store'
 import { SURVEY_CONFIG } from '@/config/survey.config'
 
 export interface GlossaryOption {
@@ -69,9 +71,14 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 // Создание store с названием survey
-export const useSurveyStore = defineStore('survey', () => {
+function createSurveyState() {
+  const patientSnapshot = ref<PatientPayload | null>(null)
+  const patientSaved = ref(false)
+  const savingPatient = ref(false)
+  const patientError = ref('')
+  let generation = 0
   const config = ref<SurveyConfig | null>(null)
-  const answers = reactive<Record<string, any>>({})
+  const answers = reactive<Record<string, string | number | null>>({})
   const loading = ref(false)
   const predictions = ref<DiseasePrediction[]>([])
   const submitted = ref(false)
@@ -91,14 +98,20 @@ export const useSurveyStore = defineStore('survey', () => {
   }
 
   async function submit(): Promise<boolean> {
+    if (loading.value) return false
+    const request = generation
     loading.value = true
     try {
       const data = buildPayload()
+      const snapshot = buildPatientPayload(answers)
       const response = await apiFetch<SurveyResponse>('/survey/submit', {
         method: 'POST',
         body: JSON.stringify(data),
       })
-      predictions.value = response.predictions ?? []
+      if (request !== generation) return false
+      if (!response.predictions?.length) throw new Error('Prediction missing')
+      patientSnapshot.value = snapshot
+      predictions.value = response.predictions
       modelVersion.value = response.modelVersion ?? null
       submitted.value = true
       return true
@@ -106,17 +119,41 @@ export const useSurveyStore = defineStore('survey', () => {
       console.error('Survey submit failed:', e)
       return false
     } finally {
-      loading.value = false
+      if (request === generation) loading.value = false
     }
   }
 
   function reset() {
+    generation++
+    loading.value = false
+    patientSnapshot.value = null
+    patientSaved.value = false
+    patientError.value = ''
     for (const key of Object.keys(answers)) {
       answers[key] = null
     }
     predictions.value = []
     modelVersion.value = null
     submitted.value = false
+  }
+
+  async function savePatient() {
+    if (savingPatient.value || patientSaved.value || !patientSnapshot.value) return
+    if (!useUserStore().canAccessSection('UPLOAD_DATA')) {
+      patientError.value = 'Недостаточно прав для сохранения пациента.'
+      return
+    }
+    const request = generation
+    savingPatient.value = true
+    patientError.value = ''
+    try {
+      await createPatient(patientSnapshot.value)
+      if (request === generation) patientSaved.value = true
+    } catch (cause) {
+      if (request === generation) patientError.value = cause instanceof Error ? cause.message : 'Не удалось сохранить пациента.'
+    } finally {
+      savingPatient.value = false
+    }
   }
 
   function buildPayload() {
@@ -141,5 +178,15 @@ export const useSurveyStore = defineStore('survey', () => {
     }
   }
 
-  return { config, answers, loading, predictions, modelVersion, submitted, loadConfig, submit, reset }
+  return { config, answers, loading, predictions, modelVersion, submitted, loadConfig, submit, reset,
+    patientSaved, savingPatient, patientError, savePatient }
+}
+
+export const useSurveyStore = defineStore('survey', createSurveyState)
+
+export const useDoctorSurveyStore = defineStore('doctor-survey', () => {
+  const state = createSurveyState()
+  const user = useUserStore()
+  watch(() => user.email, () => state.reset(), { flush: 'sync' })
+  return state
 })

@@ -13,6 +13,17 @@
 
     <nav class="main-menu">
       <router-link
+        v-if="userStore.canAccessClinicalData"
+        to="/questionnaire"
+        class="menu-item"
+        :class="{ 'router-link-active': route.path.startsWith('/questionnaire') }"
+        aria-label="Анкета"
+        title="Анкета"
+      >
+        <div class="icon"><SidebarPageIcon page="questionnaire" /></div>
+        <span class="menu-label">Анкета</span>
+      </router-link>
+      <router-link
         v-if="userStore.canAccessSection('VIEW_DATA')"
         to="/view-data"
         class="menu-item"

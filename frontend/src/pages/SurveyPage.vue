@@ -1,5 +1,6 @@
 <template>
-  <div class="survey-page">
+  <Sidebar v-if="doctor" />
+  <div class="survey-page" :class="{ 'doctor-survey': doctor }">
     <Transition name="fade">
       <div v-if="showErrors && hasErrors" class="error-banner">
         <span>{{ currentErrorMessage }}</span>
@@ -42,6 +43,8 @@
           />
         </div>
 
+        <p v-if="submitError" class="submit-error" role="alert">{{ submitError }}</p>
+
         <SurveyNavigation
           :current-step-index="currentStepIndex"
           :is-last-step="isLastStep"
@@ -58,7 +61,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSurveyStore } from '@/stores/survey.store'
+import { useSurveyStore, useDoctorSurveyStore } from '@/stores/survey.store'
+import Sidebar from '@/components/Sidebar.vue'
 
 import SurveyNavigation from '@/components/survey/SurveyNavigation.vue'
 import Step1 from '@/components/survey/Step1.vue'
@@ -70,8 +74,12 @@ import Step6 from '@/components/survey/Step6.vue'
 import Step7 from '@/components/survey/Step7.vue'
 
 const router = useRouter()
-const store = useSurveyStore()
+const { doctor = false } = defineProps<{ doctor?: boolean }>()
+const store = doctor ? useDoctorSurveyStore() : useSurveyStore()
 const loading = ref(true)
+const submitError = ref('')
+let keyTimer: ReturnType<typeof setTimeout> | undefined
+let active = true
 
 const currentStepIndex = ref(0)
 const showErrors = ref(false)
@@ -90,24 +98,15 @@ const isLastStep = computed(() =>
   store.config ? currentStepIndex.value === store.config.groups.length - 1 : false
 )
 
-const stepComponent = computed(() => {
-  const map: Record<number, any> = {
-    0: Step1,
-    1: Step2,
-    2: Step3,
-    3: Step4,
-    4: Step5,
-    5: Step6,
-    6: Step7,
-  }
-  return map[currentStepIndex.value] ?? Step1
-})
+const steps = [Step1, Step2, Step3, Step4, Step5, Step6, Step7]
+const stepComponent = computed(() => steps[currentStepIndex.value] ?? Step1)
 
 // Имитируем анимацию нажатия при нажатии на клавиатуру (переход Назад / Далее)
 const activeKeyBtn = ref<'next' | 'prev' | null>(null)
 const triggerVisualClick = (btn: 'next' | 'prev') => {
   activeKeyBtn.value = btn
-  setTimeout(() => {
+  clearTimeout(keyTimer)
+  keyTimer = setTimeout(() => {
     activeKeyBtn.value = null
   }, 150)
 }
@@ -179,23 +178,16 @@ const currentErrorMessage = computed(() => {
 
 // Если пользователь начал что-то менять, проверяем:
 // Если ошибок больше нет (hasErrors = false), скрываем баннер и разблокируем кнопку
-watch(() => store.answers, () => {
-  if (!hasErrors.value) {
-    showErrors.value = false
-  }
-}, { deep: true })
-
-// Логика блокировки кнопки "Далее"
-const isNextDisabled = computed(() => {
-  // Кнопка заблокирована ТОЛЬКО если пользователь уже нажал "Далее", 
-  // вылезла ошибка (showErrors = true) и данные до сих пор невалидны (hasErrors = true).
-  // Во всех остальных случаях даем возможность кликнуть, чтобы отловить ошибку.
-  if (showErrors.value && hasErrors.value) return true
-  
-  return false
+watch(hasErrors, invalid => {
+  if (!invalid) showErrors.value = false
 })
 
+// Логика блокировки кнопки "Далее"
+const isNextDisabled = computed(() => showErrors.value && hasErrors.value)
+
 const handleNext = async () => {
+  if (store.loading) return
+  submitError.value = ''
   // Если есть незаполненные обязательные поля или неверный формат
   if (hasErrors.value) {
     showErrors.value = true // Показываем баннер и (computed выше) блокируем кнопку
@@ -204,10 +196,11 @@ const handleNext = async () => {
 
   if (isLastStep.value) {
     const success = await store.submit()
+    if (!active) return
     if (success) {
-      router.push('/results')
+      router.push(doctor ? '/questionnaire/results' : '/results')
     } else {
-      alert('Ошибка при отправке. Попробуйте ещё раз.')
+      submitError.value = 'Ошибка при отправке. Попробуйте ещё раз.'
     }
   } else {
     currentStepIndex.value++
@@ -226,6 +219,7 @@ const handleKeyDown = (event: KeyboardEvent) => {
   const activeElement = document.activeElement
   if (event.defaultPrevented || event.repeat || activeElement?.tagName === 'SELECT') return
   if (event.key === 'Enter' && activeElement && ['BUTTON', 'A'].includes(activeElement.tagName)) return
+  if (activeElement?.getAttribute('role') === 'combobox') return
   const isInputFocused = activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)
 
   if (event.key === 'Enter' || (event.key === 'ArrowRight' && !isInputFocused)) {
@@ -249,6 +243,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  active = false
+  clearTimeout(keyTimer)
   window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
@@ -365,5 +361,22 @@ onUnmounted(() => {
 @keyframes fadeIn {
   0% { opacity: 0; transform: translateY(-8px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+.submit-error {
+  color: $color-red;
+  line-height: 1.5;
+}
+
+.doctor-survey {
+  width: calc(100% - 240px);
+  margin-left: 240px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
 }
 </style>

@@ -225,6 +225,7 @@ import { ref, reactive, computed, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import AppSelect from '@/components/ui/AppSelect.vue'
 import { apiFetch } from '@/api/client'
+import { buildPatientPayload, createPatient } from '@/api/patients.api'
 import { SURVEY_CONFIG } from '@/config/survey.config'
 import { PROFESSIONS } from '@/config/professions'
 
@@ -370,25 +371,7 @@ async function submitSinglePatient() {
   showPatientErrors.value = false
 
   try {
-    const payload = Object.fromEntries(
-      Object.entries(singlePatient).map(([k, v]) => [k, (v as unknown) === '' ? null : v])
-    )
-
-    const res = await apiFetch('/api/admin/patients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, year: singlePatient.modelKind === 'city' ? 2021 : null }),
-    })
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => null)
-      patientBackendError.value = res.status === 403
-        ? 'Доступ запрещён'
-        : res.status === 401 ? 'Сессия истекла — войдите заново'
-        : body?.detail ?? body?.error ?? `Ошибка при сохранении пациента (${res.status})`
-      showPatientErrors.value = true
-      return
-    }
+    await createPatient(buildPatientPayload(singlePatient))
 
     Object.assign(singlePatient, {
       modelKind: null, chronicLungDisease: null,
@@ -400,8 +383,8 @@ async function submitSinglePatient() {
     patientBackendError.value = null
     patientSuccess.value = true
     setTimeout(() => { patientSuccess.value = false }, 3000)
-  } catch {
-    patientBackendError.value = 'Ошибка соединения с сервером'
+  } catch (cause) {
+    patientBackendError.value = cause instanceof Error ? cause.message : 'Ошибка соединения с сервером'
     showPatientErrors.value = true
   } finally {
     submittingPatient.value = false

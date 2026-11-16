@@ -5,6 +5,94 @@ import router from '@/router'
 import { useUserStore } from '@/stores/user.store'
 import { apiFetch } from '@/api/client'
 import { adminSections, type AuthUser } from '@/types/admin-section'
+import { useDoctorSurveyStore, useSurveyStore } from '@/stores/survey.store'
+
+test('doctor questionnaire saves the submitted snapshot once and keeps public answers independent', async () => {
+  useUserStore().setUser({ ...current, allowedSections: ['UPLOAD_DATA'] })
+  const doctor = useDoctorSurveyStore()
+  const publicSurvey = useSurveyStore()
+  doctor.loadConfig()
+  publicSurvey.loadConfig()
+  Object.assign(doctor.answers, {
+    modelKind: 'city', gender: 1, age: 45, height: 180, weight: 80,
+    alcohol: 1, profession: 2, region: 1, chronicLungDisease: 0,
+  })
+  const writes: Record<string, unknown>[] = []
+  globalThis.fetch = async (input, init) => {
+    if (String(input).endsWith('/survey/submit')) return response({
+      predictions: [{ probability: 12, name: 'Risk', modelKind: 'city', prediction: 0 }],
+      modelVersion: 'test',
+    })
+    if (String(input).endsWith('/patients')) {
+      writes.push(JSON.parse(String(init?.body)))
+      return new Response(null, { status: 200 })
+    }
+    return response(current)
+  }
+  assert.equal(await doctor.submit(), true)
+  assert.equal(publicSurvey.submitted, false)
+  assert.equal(publicSurvey.answers.age, null)
+  doctor.answers.age = 99
+  await Promise.all([doctor.savePatient(), doctor.savePatient()])
+  assert.equal(writes.length, 1)
+  assert.equal(writes[0]?.age, 45)
+  assert.equal(writes[0]?.year, 2021)
+  assert.equal(writes[0]?.gender, 1)
+  assert.equal('genderId' in writes[0]!, false)
+  assert.equal(doctor.patientSaved, true)
+  await doctor.savePatient()
+  assert.equal(writes.length, 1)
+  useUserStore().clearUser()
+  assert.equal(doctor.submitted, false)
+  assert.equal(doctor.patientSaved, false)
+})
+
+test('doctor questionnaire guards direct results and saving without upload permission', async () => {
+  useUserStore().setUser(current)
+  await router.push('/questionnaire/results')
+  assert.equal(router.currentRoute.value.path, '/questionnaire')
+  const doctor = useDoctorSurveyStore()
+  doctor.loadConfig()
+  Object.assign(doctor.answers, { modelKind: 'region', age: 50 })
+  globalThis.fetch = async () => response({ predictions: [{ probability: 10 }] })
+  assert.equal(await doctor.submit(), true)
+  let writes = 0
+  globalThis.fetch = async () => { writes++; return response({}) }
+  await doctor.savePatient()
+  assert.equal(writes, 0)
+  assert.equal(doctor.patientSaved, false)
+  assert.match(doctor.patientError, /прав/)
+})
+
+test('questionnaire preserves results after a failed save and ignores a prediction after reset', async () => {
+  current = { ...current, allowedSections: ['UPLOAD_DATA'] }
+  useUserStore().setUser(current)
+  const doctor = useDoctorSurveyStore()
+  doctor.loadConfig()
+  Object.assign(doctor.answers, { modelKind: 'region', age: 50 })
+  globalThis.fetch = async () => response({ predictions: [{ probability: 10 }] })
+  await doctor.submit()
+  globalThis.fetch = async () => response({ detail: 'Test failure' }, 400)
+  await doctor.savePatient()
+  assert.equal(doctor.patientSaved, false)
+  assert.equal(doctor.submitted, true)
+  assert.equal(doctor.predictions[0]?.probability, 10)
+  assert.equal(doctor.patientError, 'Test failure')
+  globalThis.fetch = async () => new Response(null, { status: 200 })
+  await doctor.savePatient()
+  assert.equal(doctor.patientSaved, true)
+  assert.equal(doctor.patientError, '')
+  doctor.loadConfig()
+  doctor.answers.modelKind = 'city'
+  let finish!: (response: Response) => void
+  globalThis.fetch = () => new Promise(resolve => { finish = resolve })
+  const pending = doctor.submit()
+  doctor.reset()
+  finish(response({ predictions: [{ probability: 99 }] }))
+  assert.equal(await pending, false)
+  assert.equal(doctor.submitted, false)
+  assert.equal(doctor.predictions.length, 0)
+})
 
 let current: AuthUser
 let requests: { path: string; init?: RequestInit }[]

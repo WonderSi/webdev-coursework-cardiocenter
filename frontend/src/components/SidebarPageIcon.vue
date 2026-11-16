@@ -1,12 +1,22 @@
 <script setup lang="ts">
 defineProps<{
-  page: 'view-data' | 'dashboards' | 'upload-data' | 'model-training'
+  page: 'view-data' | 'dashboards' | 'upload-data' | 'model-training' | 'questionnaire'
 }>()
 </script>
 
 <template>
   <svg
-    v-if="page === 'view-data'"
+    v-if="page === 'questionnaire'"
+    width="24" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+    aria-hidden="true" focusable="false"
+  >
+    <rect x="5" y="4" width="14" height="17" rx="2" />
+    <rect x="9" y="2" width="6" height="4" rx="1" />
+    <path d="M9 11h6M9 15h6M9 18h3" />
+  </svg>
+  <svg
+    v-else-if="page === 'view-data'"
     aria-hidden="true"
     focusable="false"
     width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

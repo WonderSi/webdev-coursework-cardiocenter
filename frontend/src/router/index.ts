@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
-import { useSurveyStore } from '@/stores/survey.store'
+import { useSurveyStore, useDoctorSurveyStore } from '@/stores/survey.store'
 import HomePage from '@/pages/HomePage.vue'
 import type { AdminSection } from '@/types/admin-section'
 
@@ -13,6 +13,8 @@ const UploadDataPage = () => import('@/pages/menu pages/UploadDataPage.vue')
 const ModelTrainingPage = () => import('@/pages/menu pages/ModelTrainingPage.vue')
 const DoctorsPage = () => import('@/pages/menu pages/DoctorsPage.vue')
 const EmptyPanelPage = () => import('@/pages/menu pages/EmptyPanelPage.vue')
+const DoctorSurveyPage = () => import('@/pages/menu pages/DoctorSurveyPage.vue')
+const DoctorResultsPage = () => import('@/pages/menu pages/DoctorResultsPage.vue')
 
 type AppRole = 'ROLE_DOCTOR' | 'ROLE_SUPER_ADMIN'
 
@@ -33,6 +35,8 @@ const router = createRouter({
     { path: '/survey',         component: SurveyPage },
     { path: '/results',        component: ResultsPage },
     { path: '/login',          component: LoginPage },
+    { path: '/questionnaire', component: DoctorSurveyPage, meta: { requiresAuth: true, roles: clinicalRoles } },
+    { path: '/questionnaire/results', component: DoctorResultsPage, meta: { requiresAuth: true, roles: clinicalRoles } },
     { path: '/panel',          component: EmptyPanelPage,    meta: { requiresAuth: true, roles: clinicalRoles } },
     { path: '/dashboards',     component: DashboardsPage,    meta: { requiresAuth: true, roles: clinicalRoles, section: 'DASHBOARDS' } },
     { path: '/view-data',      component: ViewDataPage,      meta: { requiresAuth: true, roles: clinicalRoles, section: 'VIEW_DATA' } },
@@ -55,6 +59,7 @@ router.beforeEach(async (to) => {
   if (allowedRoles?.length && !allowedRoles.some((role) => role === userStore.role)) return { path: '/' }
   if (to.meta.section && !userStore.canAccessSection(to.meta.section)) return { path: '/panel' }
   if (to.path === '/login' && userStore.isAuthenticated) return { path: userStore.canAccessClinicalData ? '/dashboards' : '/' }
+  if (to.path === '/questionnaire/results' && !useDoctorSurveyStore().submitted) return { path: '/questionnaire' }
   if (to.path === '/results' && !useSurveyStore().submitted) return { path: '/' }
 })
 
