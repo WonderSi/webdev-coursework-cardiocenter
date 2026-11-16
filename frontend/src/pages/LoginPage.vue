@@ -272,7 +272,7 @@ const handleLogin = async () => {
     padding-right: 40px;
   }
 
-  // Fade the text before the icon without fading the field border.
+  // Фейд текста перед иконкой
   &::after {
     content: '';
     position: absolute;
@@ -317,17 +317,6 @@ const handleLogin = async () => {
     justify-content: center;
     color: $color-secondary;
     &:hover { opacity: 1; }
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 100%;
-      bottom: 0;
-      width: 24px;
-      background: linear-gradient(to right, transparent, var(--password-surface));
-      pointer-events: none;
-    }
 
     &:focus-visible {
       outline: 1px solid $color-accent;
