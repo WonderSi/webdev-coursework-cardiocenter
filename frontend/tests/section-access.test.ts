@@ -83,6 +83,24 @@ test('login and refresh replace permissions from server responses', async () => 
     { 'X-XSRF-TOKEN': 'test-csrf' })
 })
 
+test('login distinguishes invalid credentials, denied access, rate limits and unavailable service', async () => {
+  const user = useUserStore()
+  for (const [status, message] of [
+    [401, 'Неверный логин или пароль'],
+    [403, 'Вход для этой учётной записи запрещён.'],
+    [429, 'Слишком много попыток входа. Попробуйте позже.'],
+    [502, 'Сервис входа временно недоступен. Попробуйте позже.'],
+  ] as const) {
+    globalThis.fetch = async () => response({}, status)
+    await assert.rejects(user.login(current.email, 'UnusedTestPassword123!'), { message })
+    assert.equal(user.isAuthenticated, false)
+  }
+  globalThis.fetch = async () => { throw new TypeError('Failed to fetch') }
+  await assert.rejects(user.login(current.email, 'UnusedTestPassword123!'), {
+    message: 'Не удалось связаться с сервером. Попробуйте позже.',
+  })
+})
+
 test('API 403 returns the error to the caller and never retries or navigates away', async () => {
   useUserStore().setUser(current)
   const routeBefore = router.currentRoute.value.fullPath

@@ -24,8 +24,10 @@ async function handleLogin() {
   try {
     await userStore.login(email.value.trim(), password.value)
     if (active) await router.push('/dashboards')
-  } catch {
-    if (active) error.value = 'Неверный логин или пароль'
+  } catch (cause) {
+    if (active) error.value = cause instanceof Error
+      ? cause.message
+      : 'Не удалось войти. Попробуйте ещё раз.'
   } finally {
     if (active) loading.value = false
   }

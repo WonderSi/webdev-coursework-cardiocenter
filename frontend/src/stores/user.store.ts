@@ -32,13 +32,21 @@ export const useUserStore = defineStore('user', () => {
   )
 
   async function login(emailInput: string, password: string, rememberMe = false): Promise<void> {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailInput, password, rememberMe }),
-    })
+    let res: Response
+    try {
+      res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput, password, rememberMe }),
+      })
+    } catch {
+      throw new Error('Не удалось связаться с сервером. Попробуйте позже.')
+    }
 
-    if (!res.ok) throw new Error('Неверный логин или пароль')
+    if (res.status === 400 || res.status === 401) throw new Error('Неверный логин или пароль')
+    if (res.status === 403) throw new Error('Вход для этой учётной записи запрещён.')
+    if (res.status === 429) throw new Error('Слишком много попыток входа. Попробуйте позже.')
+    if (!res.ok) throw new Error('Сервис входа временно недоступен. Попробуйте позже.')
 
     const data = await res.json()
     setUser(data)
