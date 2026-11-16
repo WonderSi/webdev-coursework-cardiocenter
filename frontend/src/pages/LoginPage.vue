@@ -31,7 +31,14 @@
                 class="login-input"
                 placeholder="••••••••"
               />
-              <button class="eye-btn" @click="togglePasswordVisibility" type="button">
+              <button
+                class="eye-btn"
+                type="button"
+                :aria-label="isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'"
+                :aria-pressed="isPasswordVisible"
+                aria-controls="password"
+                @click="togglePasswordVisibility"
+              >
                 <span v-if="isPasswordVisible" v-html="eyeOpenSvg"></span>
                 <span v-else v-html="eyeClosedSvg"></span>
               </button>
@@ -256,21 +263,80 @@ const handleLogin = async () => {
 }
 
 .password-wrapper {
+  --password-surface: #{$color-white};
   position: relative;
   display: flex;
   align-items: center;
 
+  .login-input {
+    padding-right: 40px;
+  }
+
+  // Fade the text before the icon without fading the field border.
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 36px;
+    bottom: 2px;
+    width: 32px;
+    background: linear-gradient(to right, transparent, var(--password-surface));
+    pointer-events: none;
+  }
+
+  &:has(input:autofill) {
+    --password-surface: #{$color-ui-surface-hover};
+  }
+
+  &:has(input:-webkit-autofill) {
+    --password-surface: #{$color-ui-surface-hover};
+  }
+
+  input:autofill {
+    box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
+  }
+
+  input:-webkit-autofill {
+    -webkit-text-fill-color: $color-text;
+    box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
+  }
+
   .eye-btn {
     position: absolute;
-    right: 13px;
-    top: 13px;
-    background: none;
+    right: 2px;
+    top: 2px;
+    bottom: 2px;
+    width: 36px;
+    padding: 0;
+    border-radius: 0 14px 14px 0;
+    background: var(--password-surface);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     color: $color-secondary;
     &:hover { opacity: 1; }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 100%;
+      bottom: 0;
+      width: 24px;
+      background: linear-gradient(to right, transparent, var(--password-surface));
+      pointer-events: none;
+    }
+
+    &:focus-visible {
+      outline: 1px solid $color-accent;
+      outline-offset: -4px;
+    }
+
+    span {
+      display: flex;
+    }
   }
 }
 
