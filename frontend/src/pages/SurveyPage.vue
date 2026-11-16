@@ -404,6 +404,7 @@ onUnmounted(() => {
 }
 
 .question-description {
+  white-space: pre-line;
   max-width: 100%;
   overflow-wrap: anywhere;
   text-align: center;

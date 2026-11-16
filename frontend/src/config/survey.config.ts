@@ -114,7 +114,7 @@ export const SURVEY_CONFIG: SurveyConfig = {
     {
       id: 6,
       title: 'Ваши лабораторные параметры',
-      description: 'Заполните только известные значения. Неизвестные показатели можно пропустить.',
+      description: 'Заполните только известные значения.\nНеизвестные показатели можно пропустить.',
       requiredFields: [],
       fields: [
         { key: 'glucose', type: 'number', label: 'Глюкоза', unit: 'ммоль/л', placeholder: '4,5', validation: { min: 0 } },
