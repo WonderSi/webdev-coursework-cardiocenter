@@ -3,3 +3,7 @@
 /docker/.env
 /docker/.env.preview
 /frontend/.env
+AGENTS.md
+skills-lock.json
+.agents
+/docs/temporary

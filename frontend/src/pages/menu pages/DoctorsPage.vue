@@ -1,150 +1,341 @@
+<script setup lang="ts">
+import { shallowRef, useTemplateRef, watch } from 'vue'
+import Sidebar from '@/components/Sidebar.vue'
+import DoctorsHelpPanel from '@/components/doctors/DoctorsHelpPanel.vue'
+import DoctorsDirectory from '@/components/doctors/DoctorsDirectory.vue'
+import DoctorEditorDialog from '@/components/doctors/DoctorEditorDialog.vue'
+import DoctorBlockDialog from '@/components/doctors/DoctorBlockDialog.vue'
+import { fetchDoctors } from '@/api/doctors.api'
+import { useDoctorsDirectory } from '@/composables/useDoctorsDirectory'
+import { useUserStore } from '@/stores/user.store'
+import type { Doctor } from '@/types/doctor'
+
+const userStore = useUserStore()
+const { doctors, capabilities, loading, loaded, error, loadDoctors, upsertDoctor } = useDoctorsDirectory(
+  () => userStore.isSuperAdmin,
+  fetchDoctors,
+)
+const directory = useTemplateRef<InstanceType<typeof DoctorsDirectory>>('directory')
+const helpButton = useTemplateRef<HTMLButtonElement>('helpButton')
+const isHelpOpen = shallowRef(false)
+const editorOpen = shallowRef(false)
+const editingDoctor = shallowRef<Doctor | null>(null)
+const blockingDoctor = shallowRef<Doctor | null>(null)
+
+watch(() => userStore.isSuperAdmin, allowed => {
+  if (!allowed) {
+    closeEditor()
+    blockingDoctor.value = null
+    isHelpOpen.value = false
+  }
+})
+
+function closeHelp() {
+  isHelpOpen.value = false
+  helpButton.value?.focus()
+}
+
+function openEditor(doctor: Doctor | null = null) {
+  if (!userStore.isSuperAdmin) return
+  editingDoctor.value = doctor
+  editorOpen.value = true
+}
+
+function closeEditor() {
+  editorOpen.value = false
+  editingDoctor.value = null
+}
+
+function onDoctorSaved(doctor: Doctor) {
+  upsertDoctor(doctor, editingDoctor.value?.id)
+  closeEditor()
+  directory.value?.resetFilters()
+  void directory.value?.focusFallback()
+}
+
+function onDoctorBlocked(doctor: Doctor) {
+  upsertDoctor(doctor)
+  blockingDoctor.value = null
+  void directory.value?.focusFallback()
+}
+</script>
+
 <template>
-  <Sidebar />
-
+  <Sidebar class="doctors-sidebar" />
   <main class="doctors-page">
-    <h1>Врачи</h1>
-
-    <form class="doctor-form" @submit.prevent="createDoctor">
-      <h2>Создать врача</h2>
-      <label>Email <input v-model.trim="email" type="email" required maxlength="255" /></label>
-      <label>Пароль <input v-model="password" type="password" required minlength="12" maxlength="100" autocomplete="new-password" /></label>
-      <fieldset :disabled="creating">
-        <legend>Доступные разделы</legend>
-        <label v-for="section in adminSections" :key="section.code">
-          <input v-model="newSections" type="checkbox" :value="section.code" /> {{ section.label }}
-        </label>
-      </fieldset>
-      <button :disabled="creating || loading" type="submit">{{ creating ? 'Создание…' : 'Создать' }}</button>
-      <p v-if="createError" role="alert">{{ createError }}</p>
-    </form>
-
-    <p v-if="loading">Загрузка...</p>
-    <p v-else-if="error" role="alert">{{ error }}</p>
-
-    <template v-else>
-      <p v-if="doctors.length === 0">Врачей пока нет.</p>
-
-      <ul v-else class="doctor-list">
-        <li v-for="doctor in doctors" :key="doctor.id">
-          <h2>{{ doctor.email }}</h2>
-          <p v-if="doctor.isBlocked">Аккаунт заблокирован</p>
-          <fieldset :disabled="saving === doctor.id">
-            <legend>Доступные разделы</legend>
-            <label v-for="section in adminSections" :key="section.code">
-              <input v-model="doctor.allowedSections" type="checkbox" :value="section.code" /> {{ section.label }}
-            </label>
-          </fieldset>
-          <button type="button" :disabled="saving !== null" @click="saveSections(doctor)">
-            {{ saving === doctor.id ? 'Сохранение…' : 'Сохранить доступ' }}
-          </button>
-          <p v-if="messages[doctor.id]" role="status">{{ messages[doctor.id] }}</p>
-        </li>
-      </ul>
-    </template>
+    <section class="page-main-card" aria-labelledby="doctors-page-title">
+      <header class="page-header">
+        <h1 id="doctors-page-title" class="page-title">Управление аккаунтами врачей</h1>
+        <button
+          ref="helpButton"
+          type="button"
+          class="info-btn"
+          :aria-expanded="isHelpOpen"
+          aria-controls="doctors-page-help"
+          @click="isHelpOpen = !isHelpOpen"
+        >
+          <svg
+            class="info-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+            />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <circle
+              cx="12"
+              cy="17"
+              r="0.75"
+              fill="currentColor"
+              stroke="none"
+            />
+          </svg>
+          <span>Справка (как пользоваться страницей)</span>
+        </button>
+      </header>
+      <DoctorsHelpPanel v-if="isHelpOpen" @close="closeHelp" />
+      <section
+        v-if="!userStore.isSuperAdmin"
+        class="directory-card state-panel"
+        aria-labelledby="access-denied-title"
+      >
+        <h2 id="access-denied-title" class="state-title">Доступ ограничен</h2>
+        <p class="state-description">Управлять учётными записями врачей может только суперадминистратор.</p>
+        <RouterLink to="/dashboards" class="text-link">Перейти к аналитике</RouterLink>
+      </section>
+      <template v-else>
+        <DoctorsDirectory
+          ref="directory"
+          :doctors="doctors"
+          :capabilities="capabilities"
+          :loading="loading"
+          :loaded="loaded"
+          :error="error"
+          @refresh="loadDoctors"
+          @create="openEditor()"
+          @edit="openEditor"
+          @block="blockingDoctor = $event"
+        />
+        <DoctorEditorDialog
+          v-if="editorOpen"
+          :doctor="editingDoctor"
+          :capabilities="capabilities"
+          @close="closeEditor"
+          @saved="onDoctorSaved"
+          @updated="upsertDoctor"
+        />
+        <DoctorBlockDialog
+          v-if="blockingDoctor"
+          :doctor="blockingDoctor"
+          @close="blockingDoctor = null"
+          @updated="onDoctorBlocked"
+        />
+      </template>
+    </section>
   </main>
 </template>
 
-<script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { apiFetch } from '@/api/client'
-import Sidebar from '@/components/Sidebar.vue'
-import { adminSections, type AdminSection } from '@/types/admin-section'
+<style scoped lang="scss">
+@use '@/styles/variables' as *;
 
-interface Doctor {
-  id: number
-  email: string
-  isBlocked: boolean
-  allowedSections: AdminSection[]
-}
-
-const doctors = ref<Doctor[]>([])
-const loading = ref(true)
-const error = ref('')
-const email = ref('')
-const password = ref('')
-const newSections = ref<AdminSection[]>([])
-const creating = ref(false)
-const createError = ref('')
-const saving = ref<number | null>(null)
-const messages = ref<Record<number, string>>({})
-
-async function responseError(response: Response, fallback: string): Promise<Error> {
-  if (response.status === 401) return new Error('Сессия завершена. Войдите снова.')
-  if (response.status === 403) return new Error('Доступ запрещён')
-  const body = await response.json().catch(() => null)
-  return new Error(body?.detail ?? fallback)
-}
-
-async function createDoctor(): Promise<void> {
-  creating.value = true
-  createError.value = ''
-  try {
-    const response = await apiFetch('/api/admin/super-admin/doctors', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value, allowedSections: newSections.value }),
-    })
-    if (!response.ok) throw await responseError(response, 'Не удалось создать врача.')
-    doctors.value.push(await response.json())
-    email.value = ''
-    password.value = ''
-    newSections.value = []
-  } catch (cause) {
-    createError.value = cause instanceof Error ? cause.message : 'Не удалось создать врача.'
-  } finally { creating.value = false }
-}
-
-async function saveSections(doctor: Doctor): Promise<void> {
-  saving.value = doctor.id
-  messages.value[doctor.id] = ''
-  try {
-    const response = await apiFetch(`/api/admin/super-admin/doctors/${doctor.id}/sections`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ allowedSections: doctor.allowedSections }),
-    })
-    if (!response.ok) throw await responseError(response, 'Не удалось сохранить доступ.')
-    const saved: Doctor = await response.json()
-    doctor.allowedSections = saved.allowedSections
-    messages.value[doctor.id] = 'Доступ сохранён.'
-  } catch (cause) {
-    messages.value[doctor.id] = cause instanceof Error ? cause.message : 'Не удалось сохранить доступ.'
-  } finally { saving.value = null }
-}
-
-onMounted(async () => {
-  try {
-    const response = await apiFetch('/api/admin/super-admin/doctors')
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Сессия завершена. Войдите снова.')
-      }
-
-      if (response.status === 403) {
-        throw new Error('Недостаточно прав для просмотра врачей.')
-      }
-
-      throw new Error('Не удалось загрузить список врачей.')
-    }
-
-    doctors.value = await response.json()
-  } catch (cause) {
-    error.value =
-      cause instanceof Error ? cause.message : 'Ошибка загрузки.'
-  } finally {
-    loading.value = false
-  }
-})
-</script>
-
-<style scoped>
 .doctors-page {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-self: flex-start;
+  width: calc(100% - 240px);
+  min-width: 0;
   margin-left: 240px;
-  padding: 32px;
+  padding: 28px 32px;
 }
-.doctor-form, .doctor-list li { max-width: 640px; margin-bottom: 24px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
-.doctor-form > label, fieldset label { display: block; margin: 8px 0; }
-.doctor-form > label input { display: block; width: 100%; box-sizing: border-box; padding: 8px; }
-fieldset { margin: 12px 0; }
-button { padding: 8px 16px; cursor: pointer; }
-.doctor-list { list-style: none; padding: 0; }
+
+.page-main-card {
+  flex: 1;
+  min-width: 0;
+  min-height: calc(100dvh - 56px);
+  padding: 24px;
+  border: 1px solid rgba($color-white, 0.5);
+  border-radius: $radius-glass-card;
+  background: rgba($color-white, 0.65);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  min-width: 0;
+  color: $color-text;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.info-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: $radius-rect-buttons;
+  background: $color-white;
+  color: $color-blue-dark;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.info-btn:hover {
+  background: $color-ui-surface-hover;
+}
+
+.info-icon {
+  display: block;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.info-btn:focus-visible {
+  @include focus-ring(3px, 3px);
+}
+
+.doctors-sidebar :deep(.username) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.doctors-sidebar :deep(.user-profile > .icon),
+.doctors-sidebar :deep(.logout-btn) {
+  flex-shrink: 0;
+}
+
+.directory-card {
+  overflow: hidden;
+  background: rgba($color-glass-white, 0.92);
+  border: 1px solid rgba($color-white, 0.5);
+  border-radius: $radius-glass-card;
+}
+
+.text-link {
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+  color: $color-accent;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-underline-offset: 3px;
+}
+
+.state-panel {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  padding: 56px 28px;
+}
+
+.state-title {
+  color: $color-blue-dark;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.state-description {
+  color: $color-secondary-text;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 55ch;
+}
+
+.text-link:focus-visible {
+  @include focus-ring(3px, 3px);
+}
+
+@media (max-width: 768px) {
+  .doctors-sidebar.sidebar-glass {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    border-right: 0;
+    border-bottom: 1px solid rgba($color-white, 0.5);
+  }
+
+  .doctors-sidebar :deep(.divider) {
+    margin: 16px 0;
+  }
+
+  .doctors-sidebar :deep(.main-menu) {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .doctors-sidebar :deep(.sidebar-footer) {
+    margin: 24px 0 0;
+  }
+
+  .doctors-sidebar :deep(.user-profile) {
+    justify-content: flex-start;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .doctors-sidebar :deep(.username) {
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+
+  .doctors-page {
+    width: 100%;
+    margin-left: 0;
+    padding: 16px;
+  }
+
+  .page-main-card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-main-card {
+    padding: 16px;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+}
 </style>

@@ -24,6 +24,7 @@ $radius-glass-card: 32px;
 $radius-glass-card-dashboards: 24px;
 $radius-basic-card: 20px;
 $radius-rect-buttons: 10px;
+$radius-round: 999px;
 
 // HomePage
 $font-size-nii: 48px;
@@ -54,3 +55,18 @@ $color-secondary-text: #565c66;
 // --- Additional colors; models
 $color-true-nehative-bg: #BEEAC1;
 $color-true-positive-bg: #F0D1D1;
+
+// --- Additional colors; doctors
+$color-edit-tag-bg: #cce9ff;
+$color-view-tag-bg: #c4f5df;
+$color-view-tag-text: #128350;
+
+// Shared UI surfaces, borders and account status.
+$color-ui-border: #c6cedd;
+$color-ui-divider: #dce4ef;
+$color-ui-surface-hover: #edf4ff;
+$color-field-border: rgba($color-secondary, 0.55);
+$color-status-active-bg: #e4f2e9;
+$color-status-active-text: #176936;
+$color-status-blocked-bg: #fce8ed;
+$color-status-blocked-text: #ad1d37;

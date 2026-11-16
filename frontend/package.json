@@ -8,7 +8,8 @@
     "build": "vue-tsc -b && vite build",
     "test:access": "node scripts/test-section-access.mjs",
     "test:dashboard": "node scripts/test-section-access.mjs --dashboard",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:doctors": "node tests/doctors.mjs"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
