@@ -13,7 +13,7 @@ defineProps<{
   >
     <rect x="5" y="4" width="14" height="17" rx="2" />
     <rect x="9" y="2" width="6" height="4" rx="1" />
-    <path d="M9 11h6M9 15h6M9 18h3" />
+    <path d="M9 11h6M9 16h6" />
   </svg>
   <svg
     v-else-if="page === 'view-data'"
