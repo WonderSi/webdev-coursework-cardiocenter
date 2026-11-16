@@ -182,10 +182,10 @@ onScopeDispose(() => {
   width: 100%;
   min-height: 43px;
   padding: 10px 14px;
-  border: 1px solid $color-ui-border;
+  border: 1px solid $color-accent-lighter;
   border-radius: 10px;
   background: rgba($color-white, 0.75);
-  color: $color-text;
+  color: $color-blue-dark;
   font: inherit;
   font-size: 0.875rem;
   text-align: left;
@@ -253,7 +253,7 @@ onScopeDispose(() => {
   gap: 8px;
   padding: 10px 8px;
   border-radius: 6px;
-  color: $color-text;
+  color: $color-blue-dark;
   font-size: 0.875rem;
   line-height: 1.4;
   cursor: pointer;

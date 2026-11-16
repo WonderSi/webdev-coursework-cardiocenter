@@ -227,7 +227,9 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
 }
 .dashboard-controls {
   gap: 12px;
+  color: $color-blue-dark;
   p { margin: 0; }
+
 }
 
 .model-filter {
