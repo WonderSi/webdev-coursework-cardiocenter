@@ -24,6 +24,12 @@ defineProps<{
 @use '@/styles/variables' as *;
 
 .step-container {
+  min-width: 0;
+
+  > div {
+    min-width: 0;
+    max-width: 100%;
+  }
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -31,12 +37,16 @@ defineProps<{
 }
 
 .radio-group-vertical {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .radio-label {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -55,6 +65,8 @@ defineProps<{
   }
 
   span {
+    min-width: 0;
+    overflow-wrap: anywhere;
     flex: 1;
   }
 }

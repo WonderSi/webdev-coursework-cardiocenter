@@ -50,6 +50,7 @@ defineEmits<{
 @use '@/styles/variables' as *;
 
 .actions {
+  min-width: 0;
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -156,6 +157,26 @@ defineEmits<{
   &.disabled {
     background: $color-accent-lighter;
     cursor: not-allowed;
+  }
+}
+
+@container survey-card (max-width: 300px) {
+  .actions {
+    flex-direction: column;
+    gap: 12px;
+    height: auto;
+  }
+
+  .prev-btn,
+  .next-btn,
+  .finish-btn {
+    width: 100%;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .prev-btn.hidden {
+    display: none;
   }
 }
 </style>

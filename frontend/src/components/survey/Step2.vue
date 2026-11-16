@@ -37,6 +37,7 @@ defineProps<{
 @use '@/styles/variables' as *;
 
 .step-container {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -46,6 +47,8 @@ defineProps<{
 }
 
 .form-row {
+  gap: 12px;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -55,11 +58,13 @@ defineProps<{
   font-size: 0.95rem;
   font-weight: 700;
   color: $color-text;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   min-width: 100px;
 }
 
 .input-group {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -110,7 +115,7 @@ defineProps<{
   }
 }
 
-@media (max-width: 400px) {
+@container survey-card (max-width: 440px) {
   .form-row {
     flex-direction: column;
     align-items: flex-start;

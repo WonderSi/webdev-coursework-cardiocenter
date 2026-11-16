@@ -256,7 +256,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  min-width: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   padding: 40px 20px;
   box-sizing: border-box;
@@ -264,6 +267,7 @@ onUnmounted(() => {
 }
 
 .survey-card {
+  container: survey-card / inline-size;
   box-sizing: border-box;
   background: $color-white;
   border-radius: 24px;
@@ -275,6 +279,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   min-height: 0;
+  min-width: 0;
   overflow-y: auto;
 
   @media (max-width: 600px) {
@@ -285,6 +290,8 @@ onUnmounted(() => {
 }
 
 .title {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-size: 1.2rem;
   font-weight: 700;
   text-align: center;
@@ -315,6 +322,8 @@ onUnmounted(() => {
 
 .step-content {
   width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -323,12 +332,16 @@ onUnmounted(() => {
 }
 
 .question-text {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   text-align: center;
   font-size: 1.1rem;
   color: $color-text;
 }
 
 .question-description {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   text-align: center;
   font-size: 0.95rem;
   line-height: 1.4;
@@ -376,6 +389,40 @@ onUnmounted(() => {
     margin-left: 0;
     height: auto;
     min-height: 100dvh;
+    overflow: visible;
+  }
+}
+
+// Let the document scroll on phones, short viewports and below the mobile sidebar.
+@media (max-width: 600px), (max-height: 600px) {
+  .survey-page {
+    padding-top: 16px;
+    gap: 12px;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .smaller-logo-container .logo {
+    display: block;
+    width: 64px;
+    height: 64px;
+  }
+
+  .progress-bar .step {
+    border-right-width: 4px;
+  }
+
+  .survey-card {
+    flex-shrink: 0;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .doctor-survey .survey-card {
+    flex-shrink: 0;
     overflow: visible;
   }
 }

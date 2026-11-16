@@ -31,6 +31,7 @@ defineProps<{
 @use '@/styles/variables' as *;
 
 .step-container {
+  min-width: 0;
   width: 100%;
   max-width: 400px;
 }
@@ -44,6 +45,9 @@ defineProps<{
 }
 
 .question-text {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
   padding: 0;
   margin-bottom: 16px;
   font-weight: 700;
@@ -67,6 +71,7 @@ defineProps<{
   color: $color-text;
 
   input[type="radio"] {
+    flex-shrink: 0;
     accent-color: $color-accent;
     width: 18px;
     height: 18px;

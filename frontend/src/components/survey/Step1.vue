@@ -55,6 +55,7 @@ defineProps<{
 @use '@/styles/variables' as *;
 
 .step-container {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -75,6 +76,7 @@ defineProps<{
 }
 
 .field-label {
+  overflow-wrap: anywhere;
   font-size: 0.95rem;
   font-weight: 700;
   color: $color-text;
@@ -83,6 +85,7 @@ defineProps<{
 }
 
 .input-group {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -114,12 +117,16 @@ defineProps<{
 }
 
 .radio-group-horizontal {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
 }
 
 .radio-label {
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -128,10 +135,13 @@ defineProps<{
   color: $color-text;
 
   span {
+    min-width: 0;
+    overflow-wrap: anywhere;
     order: 1;
   }
 
   input[type="radio"] {
+    flex-shrink: 0;
     order: 2;
     accent-color: $color-accent;
     width: 18px;
@@ -165,8 +175,9 @@ defineProps<{
   }
 }
 
-@media (max-width: 400px) {
+@container survey-card (max-width: 440px) {
   .form-row {
+    width: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
@@ -175,5 +186,6 @@ defineProps<{
   .field-label {
     min-width: auto;
   }
+
 }
 </style>
