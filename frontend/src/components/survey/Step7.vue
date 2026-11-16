@@ -1,9 +1,16 @@
 <template>
   <div class="step-container">
     <fieldset class="question-block" v-for="field in group.fields" :key="field.key">
-      <legend class="question-text">{{ field.label }}</legend>
+      <legend :id="`${field.key}-label`" class="question-text">{{ field.label }}</legend>
 
-      <div class="radio-group-horizontal">
+      <div
+        class="radio-group-horizontal"
+        :class="{ 'radio-error': errors[field.key] }"
+        role="radiogroup"
+        :aria-labelledby="`${field.key}-label`"
+        :aria-invalid="!!errors[field.key] || undefined"
+        :aria-describedby="errors[field.key] ? `${field.key}-error` : undefined"
+      >
         <label class="radio-label">
           <span>Нет</span>
           <input type="radio" :name="field.key" :value="0" :required="group.requiredFields.includes(field.key)" v-model="answers[field.key]" />
@@ -13,6 +20,7 @@
           <input type="radio" :name="field.key" :value="1" :required="group.requiredFields.includes(field.key)" v-model="answers[field.key]" />
         </label>
       </div>
+      <span v-if="errors[field.key]" :id="`${field.key}-error`" class="survey-field-error">{{ errors[field.key] }}</span>
     </fieldset>
   </div>
 </template>
@@ -76,6 +84,21 @@ defineProps<{
     width: 18px;
     height: 18px;
     cursor: pointer;
+  }
+}
+@container survey-card (max-width: 440px) {
+  .question-text {
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .radio-group-horizontal {
+    gap: 12px;
+  }
+
+  .radio-label {
+    min-height: 36px;
+    line-height: 1.4;
   }
 }
 </style>

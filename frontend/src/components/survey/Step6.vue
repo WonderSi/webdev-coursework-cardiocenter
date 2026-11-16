@@ -8,6 +8,8 @@
           type="number"
           :id="field.key"
           :name="field.key"
+          :aria-invalid="!!errors[field.key] || undefined"
+          :aria-describedby="errors[field.key] ? `${field.key}-error` : undefined"
           :min="field.validation?.min"
           step="any"
           class="input-field"
@@ -18,6 +20,7 @@
         <span class="unit">{{ field.unit }}</span>
       </div>
 
+      <span v-if="errors[field.key]" :id="`${field.key}-error`" class="survey-field-error">{{ errors[field.key] }}</span>
     </div>
   </div>
 </template>
@@ -107,7 +110,7 @@ defineProps<{
 
   .field-label {
     min-width: 80px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .input-group .input-field {
@@ -116,6 +119,10 @@ defineProps<{
 }
 
 @container survey-card (max-width: 440px) {
+  .step-container {
+    gap: 12px;
+  }
+
   .form-row {
     flex-direction: column;
     align-items: flex-start;
@@ -124,6 +131,22 @@ defineProps<{
 
   .field-label {
     min-width: auto;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .input-group {
+    width: auto;
+  }
+
+  .input-group .input-field {
+    min-height: 36px;
+    width: 76px;
+    font-size: 1rem;
+  }
+
+  .input-group .unit {
+    font-size: 0.875rem;
   }
 }
 </style>

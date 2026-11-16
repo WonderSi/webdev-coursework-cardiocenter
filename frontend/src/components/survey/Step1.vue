@@ -7,12 +7,22 @@
         v-if="field.type === 'select'"
         class="select-field"
         :labelledby="`${field.key}-label`"
+        :describedby="errors[field.key] ? `${field.key}-error` : undefined"
+        :invalid="!!errors[field.key]"
         :options="(field.options ?? []).map(option => ({ value: option.valueId, label: option.label }))"
         v-model="answers[field.key]"
       />
 
       <!-- Radio -->
-      <div v-else-if="field.type === 'radio'" class="radio-group-horizontal">
+      <div
+        v-else-if="field.type === 'radio'"
+        class="radio-group-horizontal"
+        :class="{ 'radio-error': errors[field.key] }"
+        role="radiogroup"
+        :aria-labelledby="`${field.key}-label`"
+        :aria-invalid="!!errors[field.key] || undefined"
+        :aria-describedby="errors[field.key] ? `${field.key}-error` : undefined"
+      >
         <label v-for="opt in field.options" :key="opt.valueId" class="radio-label">
           <span>{{ opt.label }}</span>
           <input type="radio" :name="field.key" :value="opt.valueId" v-model="answers[field.key]" />
@@ -25,6 +35,8 @@
           type="number"
           :name="field.key"
           :aria-labelledby="`${field.key}-label`"
+          :aria-invalid="!!errors[field.key] || undefined"
+          :aria-describedby="errors[field.key] ? `${field.key}-error` : undefined"
           :min="field.validation?.min"
           :max="field.validation?.max"
           :step="field.validation?.integer ? 1 : 'any'"
@@ -36,6 +48,7 @@
         <span class="unit">{{ field.unit }}</span>
       </div>
 
+      <span v-if="errors[field.key]" :id="`${field.key}-error`" class="survey-field-error">{{ errors[field.key] }}</span>
     </div>
   </div>
 </template>
@@ -171,21 +184,49 @@ defineProps<{
   }
 
   .radio-label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 }
 
 @container survey-card (max-width: 440px) {
+  .step-container {
+    gap: 12px;
+  }
+
   .form-row {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
   }
 
   .field-label {
     min-width: auto;
+    font-size: 0.95rem;
+    line-height: 1.4;
   }
 
+  .input-group .input-field {
+    min-height: 36px;
+    width: 76px;
+    font-size: 1rem;
+  }
+
+  .input-group .unit {
+    font-size: 0.875rem;
+  }
+
+  .select-field :deep(.filter-select) {
+    min-height: 36px;
+    padding: 8px 10px;
+    gap: 8px;
+    font-size: 0.875rem;
+  }
+
+  .radio-label {
+    min-height: 36px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
 }
 </style>

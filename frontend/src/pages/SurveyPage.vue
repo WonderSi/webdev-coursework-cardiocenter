@@ -2,7 +2,7 @@
   <Sidebar v-if="doctor" />
   <div class="survey-page" :class="{ 'doctor-survey': doctor }">
     <Transition name="fade">
-      <div v-if="showErrors && hasErrors" class="error-banner">
+      <div v-if="submitError || (showErrors && hasErrors)" class="error-banner" role="alert" aria-atomic="true">
         <span>{{ currentErrorMessage }}</span>
       </div>
     </Transition>
@@ -13,7 +13,7 @@
 
     <div class="survey-card">
       <h1 class="title">
-        Прогнозирование риска развития<br/>сердечно-сосудистых заболеваний
+        Прогнозирование риска развития<br/> сердечно-сосудистых заболеваний
       </h1>
 
       <div v-if="loading" class="loading">
@@ -42,8 +42,6 @@
             :errors="showErrors ? fieldErrors : {}"
           />
         </div>
-
-        <p v-if="submitError" class="submit-error" role="alert">{{ submitError }}</p>
 
         <SurveyNavigation
           :current-step-index="currentStepIndex"
@@ -122,7 +120,7 @@ const fieldErrors = computed<Record<string, string>>(() => {
 
     // Required
     if (group.requiredFields.includes(field.key) && isEmpty) {
-      errors[field.key] = 'Обязательное поле'
+      errors[field.key] = `Заполните поле «${field.label}».`
       continue
     }
 
@@ -130,13 +128,13 @@ const fieldErrors = computed<Record<string, string>>(() => {
     if (field.type === 'number' && !isEmpty && field.validation) {
       const num = Number(value)
       if (!Number.isFinite(num)) {
-        errors[field.key] = 'Введите число'
+        errors[field.key] = `${field.label}: введите число.`
       } else if (field.validation.integer && !Number.isInteger(num)) {
-        errors[field.key] = 'Введите корректное значение'
+        errors[field.key] = `${field.label}: введите целое число.`
       } else if (field.validation.min !== undefined && num < field.validation.min) {
-        errors[field.key] = `Введите корректное значение`
+        errors[field.key] = `${field.label}: значение должно быть не меньше ${field.validation.min}.`
       } else if (field.validation.max !== undefined && num > field.validation.max) {
-        errors[field.key] = `Введите корректное значение`
+        errors[field.key] = `${field.label}: значение должно быть не больше ${field.validation.max}.`
       }
     }
 
@@ -172,6 +170,7 @@ const fieldErrors = computed<Record<string, string>>(() => {
 const hasErrors = computed(() => Object.keys(fieldErrors.value).length > 0)
 
 const currentErrorMessage = computed(() => {
+  if (submitError.value) return submitError.value
   const errorsList = Object.values(fieldErrors.value)
   return errorsList.length > 0 ? errorsList[0] : 'Пожалуйста, проверьте введённые данные'
 })
@@ -210,6 +209,7 @@ const handleNext = async () => {
 
 const prevStep = () => {
   if (currentStepIndex.value > 0) {
+    submitError.value = ''
     currentStepIndex.value-- 
     showErrors.value = false
   }
@@ -283,7 +283,7 @@ onUnmounted(() => {
   overflow-y: auto;
 
   @media (max-width: 600px) {
-    padding: 24px 20px;
+    padding: 16px;
   }
 
   @include custom-scrollbar;
@@ -299,6 +299,70 @@ onUnmounted(() => {
   margin-bottom: 32px;
   line-height: 1.4;
   flex-shrink: 0;
+}
+
+// Share radio states across the survey steps without affecting other forms.
+.survey-card :deep(.radio-label input[type='radio']) {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1.5px solid $color-accent-lighter2;
+  border-radius: 50%;
+  background: $color-white;
+
+  &::before {
+    content: '';
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    background: $color-accent;
+    transform: scale(0);
+  }
+
+  &:checked {
+    border-color: $color-accent;
+
+    &::before {
+      transform: scale(1);
+    }
+  }
+
+  &:focus-visible {
+    @include focus-ring(2px, 3px);
+  }
+}
+
+.survey-card :deep(.radio-error) {
+  border-radius: 6px;
+  outline: 1.5px solid $color-red;
+  outline-offset: 4px;
+  background: $color-red-bg;
+}
+
+.survey-card :deep(.radio-error .radio-label input[type='radio']) {
+  border-color: $color-red;
+  background: $color-red-bg;
+}
+
+.survey-card :deep(.survey-field-error) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  .survey-card :deep(.radio-label input[type='radio']) {
+    appearance: auto;
+
+    &::before {
+      display: none;
+    }
+  }
 }
 
 .progress-bar {
@@ -375,11 +439,6 @@ onUnmounted(() => {
   0% { opacity: 0; transform: translateY(-8px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-.submit-error {
-  color: $color-red;
-  line-height: 1.5;
-}
-
 .doctor-survey {
   width: calc(100% - 240px);
   margin-left: 240px;
@@ -393,11 +452,48 @@ onUnmounted(() => {
   }
 }
 
+@container survey-card (max-width: 440px) {
+  .title {
+    font-size: 1rem;
+    line-height: 1.35;
+    margin-bottom: 16px;
+  }
+
+  .title br {
+    display: none;
+  }
+
+  .progress-bar {
+    margin-bottom: 16px;
+  }
+
+  .progress-bar .step {
+    height: 6px;
+    border-right-width: 4px;
+  }
+
+  .step-content {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .question-text {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .question-description {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+}
+
 // Let the document scroll on phones, short viewports and below the mobile sidebar.
 @media (max-width: 600px), (max-height: 600px) {
   .survey-page {
-    padding-top: 16px;
-    gap: 12px;
+    padding: 12px;
+    gap: 8px;
     height: auto;
     min-height: 100vh;
     min-height: 100dvh;
@@ -406,8 +502,12 @@ onUnmounted(() => {
 
   .smaller-logo-container .logo {
     display: block;
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
+  }
+
+  .error-banner {
+    padding: 10px 12px;
   }
 
   .progress-bar .step {

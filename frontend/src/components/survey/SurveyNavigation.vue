@@ -160,10 +160,31 @@ defineEmits<{
   }
 }
 
-@container survey-card (max-width: 300px) {
+@container survey-card (max-width: 440px) {
+  .actions {
+    gap: 8px;
+    height: 40px;
+  }
+
+  .prev-btn,
+  .next-btn,
+  .finish-btn {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+    padding: 0 12px;
+    font-size: 0.9375rem;
+    letter-spacing: 0;
+  }
+
+  .prev-btn.hidden {
+    display: none;
+  }
+}
+
+@container survey-card (max-width: 250px) {
   .actions {
     flex-direction: column;
-    gap: 12px;
     height: auto;
   }
 
@@ -171,12 +192,8 @@ defineEmits<{
   .next-btn,
   .finish-btn {
     width: 100%;
-    height: 48px;
-    flex-shrink: 0;
-  }
-
-  .prev-btn.hidden {
-    display: none;
+    height: 40px;
+    flex: none;
   }
 }
 </style>

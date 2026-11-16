@@ -2,10 +2,11 @@
 import { computed, nextTick, onMounted, onScopeDispose, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 const value = defineModel<T>({ required: true })
-const { options, label, labelledby, id, placeholder = 'Выберите вариант', disabled = false, invalid = false } = defineProps<{
+const { options, label, labelledby, describedby, id, placeholder = 'Выберите вариант', disabled = false, invalid = false } = defineProps<{
   options: readonly { value: T; label: string }[]
   label?: string
   labelledby?: string
+  describedby?: string
   id?: string
   placeholder?: string
   disabled?: boolean
@@ -114,6 +115,7 @@ onScopeDispose(() => {
       role="combobox"
       :aria-label="label"
       :aria-labelledby="labelledby"
+      :aria-describedby="describedby"
       :aria-invalid="invalid || undefined"
       aria-haspopup="listbox"
       :aria-expanded="open"
@@ -200,6 +202,7 @@ onScopeDispose(() => {
 
 .filter-select[aria-invalid='true'] {
   border-color: $color-red;
+  background: $color-red-bg;
 }
 
 .filter-select:disabled {
