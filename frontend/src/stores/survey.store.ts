@@ -62,12 +62,37 @@ export interface SurveyResponse {
 const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '')
 
 async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json', ...init?.headers },
-    ...init,
-  })
-  if (!res.ok) throw new Error(`API ${url}: ${res.status} ${res.statusText}`)
-  return res.json() as Promise<T>
+  let res: Response
+  try {
+    res = await fetch(`${API_BASE}${url}`, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', ...init?.headers },
+    })
+  } catch {
+    throw new Error('Не удалось связаться с сервером. Проверьте подключение и повторите попытку.')
+  }
+
+  if (!res.ok) {
+    const problem = await res.json().catch(() => null)
+    if (problem?.code === 'ML_SERVICE_ERROR' || res.status === 502 || res.status === 503 || res.status === 504) {
+      throw new Error('Сервис прогнозирования временно недоступен. Попробуйте позже.')
+    }
+    if (res.status === 400 || res.status === 422) {
+      throw new Error(typeof problem?.detail === 'string'
+        ? problem.detail
+        : 'Сервер отклонил данные анкеты. Проверьте заполненные поля.')
+    }
+    if (res.status === 403) {
+      throw new Error('Сервер запретил получение прогноза. Проверьте адрес приложения или обратитесь к администратору.')
+    }
+    throw new Error('Не удалось получить прогноз. Попробуйте ещё раз.')
+  }
+
+  try {
+    return await res.json() as T
+  } catch {
+    throw new Error('Сервис вернул некорректный ответ. Попробуйте позже.')
+  }
 }
 
 // Создание store с названием survey
@@ -80,6 +105,7 @@ function createSurveyState() {
   const config = ref<SurveyConfig | null>(null)
   const answers = reactive<Record<string, string | number | null>>({})
   const loading = ref(false)
+  const submitError = ref('')
   const predictions = ref<DiseasePrediction[]>([])
   const submitted = ref(false)
   const modelVersion = ref<string | null>(null)
@@ -101,6 +127,7 @@ function createSurveyState() {
     if (loading.value) return false
     const request = generation
     loading.value = true
+    submitError.value = ''
     try {
       const data = buildPayload()
       const snapshot = buildPatientPayload(answers)
@@ -109,13 +136,17 @@ function createSurveyState() {
         body: JSON.stringify(data),
       })
       if (request !== generation) return false
-      if (!response.predictions?.length) throw new Error('Prediction missing')
+      if (!Array.isArray(response?.predictions) || !response.predictions.length) {
+        throw new Error('Сервис вернул пустой прогноз. Попробуйте позже.')
+      }
       patientSnapshot.value = snapshot
       predictions.value = response.predictions
       modelVersion.value = response.modelVersion ?? null
       submitted.value = true
       return true
     } catch (e) {
+      if (request !== generation) return false
+      submitError.value = e instanceof Error ? e.message : 'Не удалось получить прогноз. Попробуйте ещё раз.'
       console.error('Survey submit failed:', e)
       return false
     } finally {
@@ -126,6 +157,7 @@ function createSurveyState() {
   function reset() {
     generation++
     loading.value = false
+    submitError.value = ''
     patientSnapshot.value = null
     patientSaved.value = false
     patientError.value = ''
@@ -178,7 +210,7 @@ function createSurveyState() {
     }
   }
 
-  return { config, answers, loading, predictions, modelVersion, submitted, loadConfig, submit, reset,
+  return { config, answers, loading, submitError, predictions, modelVersion, submitted, loadConfig, submit, reset,
     patientSaved, savingPatient, patientError, savePatient }
 }
 

@@ -199,7 +199,7 @@ const handleNext = async () => {
     if (success) {
       router.push(doctor ? '/questionnaire/results' : '/results')
     } else {
-      submitError.value = 'Ошибка при отправке. Попробуйте ещё раз.'
+      submitError.value = store.submitError || 'Не удалось получить прогноз. Попробуйте ещё раз.'
     }
   } else {
     currentStepIndex.value++

@@ -11,7 +11,8 @@ try {
   const output = join(temporary, 'tests.mjs')
   await build({
     absWorkingDir: root,
-    entryPoints: [process.argv.includes('--dashboard') ? 'tests/dashboard.test.ts' : 'tests/section-access.test.ts'],
+    entryPoints: [process.argv.includes('--survey') ? 'tests/survey.test.ts'
+      : process.argv.includes('--dashboard') ? 'tests/dashboard.test.ts' : 'tests/section-access.test.ts'],
     outfile: output,
     bundle: true,
     platform: 'node',
