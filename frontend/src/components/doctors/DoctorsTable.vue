@@ -49,7 +49,7 @@ const emit = defineEmits<{
             </div>
           </td>
           <td data-label="Email (логин)">
-            <span class="doctor-login">{{ doctor.email }}</span>
+            <span class="doctor-login" :title="doctor.email">{{ doctor.email }}</span>
           </td>
           <td class="password-cell" data-label="Пароль">
             <button

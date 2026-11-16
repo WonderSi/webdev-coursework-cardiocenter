@@ -65,7 +65,7 @@ function onDoctorBlocked(doctor: Doctor) {
 </script>
 
 <template>
-  <Sidebar class="doctors-sidebar" />
+  <Sidebar />
   <main class="doctors-page">
     <section class="page-main-card" aria-labelledby="doctors-page-title">
       <header class="page-header">
@@ -282,40 +282,6 @@ function onDoctorBlocked(doctor: Doctor) {
 }
 
 @media (max-width: 768px) {
-  .doctors-sidebar.sidebar-glass {
-    position: relative;
-    width: 100%;
-    height: auto;
-    padding: 20px;
-    border-right: 0;
-    border-bottom: 1px solid rgba($color-white, 0.5);
-  }
-
-  .doctors-sidebar :deep(.divider) {
-    margin: 16px 0;
-  }
-
-  .doctors-sidebar :deep(.main-menu) {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .doctors-sidebar :deep(.sidebar-footer) {
-    margin: 24px 0 0;
-  }
-
-  .doctors-sidebar :deep(.user-profile) {
-    justify-content: flex-start;
-    gap: 12px;
-    min-width: 0;
-  }
-
-  .doctors-sidebar :deep(.username) {
-    overflow-wrap: anywhere;
-    min-width: 0;
-  }
-
   .doctors-page {
     width: 100%;
     margin-left: 0;

@@ -102,6 +102,14 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
   }
 }
 
+@media (max-width: 768px) {
+  .dashboards-grid-container {
+    width: 100%;
+    margin-left: 0;
+    padding: 16px;
+  }
+}
+
 // KPI КОЛОНКА И КАРТОЧКИ
 .kpi-column {
   display: flex;
