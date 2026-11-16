@@ -17,11 +17,11 @@
         to="/questionnaire"
         class="menu-item"
         :class="{ 'router-link-active': route.path.startsWith('/questionnaire') }"
-        aria-label="Анкета"
-        title="Анкета"
+        aria-label="Получить прогноз"
+        title="Получить прогноз"
       >
         <div class="icon"><SidebarPageIcon page="questionnaire" /></div>
-        <span class="menu-label">Анкета</span>
+        <span class="menu-label">Получить прогноз</span>
       </router-link>
       <router-link
         v-if="userStore.canAccessSection('VIEW_DATA')"

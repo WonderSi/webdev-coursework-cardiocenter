@@ -47,7 +47,7 @@
         <p v-if="store.patientSaved" role="status">Пациент сохранён.</p>
         <p v-if="store.patientError" class="save-patient-error" role="alert">{{ store.patientError }}</p>
       </div>
-      <button class="btn-home-page" @click="goHome">{{ doctor ? 'Новая анкета' : 'На главную' }}</button>
+      <button class="btn-home-page" @click="goHome">{{ doctor ? 'Новый прогноз' : 'На главную' }}</button>
     </div>
   </div>
 </template>

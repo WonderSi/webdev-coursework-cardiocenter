@@ -20,7 +20,7 @@ export function sameSections(a: readonly AdminSection[], b: readonly AdminSectio
 
 // Вкладки перечислены в том же порядке, что и в Sidebar
 const accessPages = {
-  questionnaire: { page: 'questionnaire', label: 'Анкета' },
+  questionnaire: { page: 'questionnaire', label: 'Получить прогноз' },
   data: { page: 'view-data', label: 'Просмотр данных' },
   dashboards: { page: 'dashboards', label: 'Аналитика' },
   upload: { page: 'upload-data', label: 'Загрузка данных' },
