@@ -37,4 +37,8 @@ defineProps<{
     background-color: rgba($color-white, 0.25); 
   }
 }
+// Sidebar is slotted route content, so its element has a different scope attribute.
+:global(.background:has(> .sidebar-glass)) {
+  justify-content: flex-start;
+}
 </style>

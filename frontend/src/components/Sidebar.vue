@@ -12,35 +12,65 @@
     <div class="divider"></div>
 
     <nav class="main-menu">
-      <router-link v-if="userStore.canAccessSection('VIEW_DATA')" to="/view-data" class="menu-item">
+      <router-link
+        v-if="userStore.canAccessSection('VIEW_DATA')"
+        to="/view-data"
+        class="menu-item"
+        aria-label="Просмотр данных"
+        title="Просмотр данных"
+      >
         <div class="icon">
           <SidebarPageIcon page="view-data" />
         </div>
-        <span>Просмотр данных</span>
+        <span class="menu-label">Просмотр данных</span>
       </router-link>
       <!-- ИСКЛЮЧАЕМ. ФУНКЦИЯ НЕ ГОТОВА -->
-      <router-link v-if="userStore.canAccessSection('DASHBOARDS')" to="/dashboards" class="menu-item">
+      <router-link
+        v-if="userStore.canAccessSection('DASHBOARDS')"
+        to="/dashboards"
+        class="menu-item"
+        aria-label="Аналитика"
+        title="Аналитика"
+      >
         <div class="icon">
           <SidebarPageIcon page="dashboards" />
         </div>
-        <span>Аналитика</span>
+        <span class="menu-label">Аналитика</span>
       </router-link>
       
-      <router-link v-if="userStore.canAccessSection('UPLOAD_DATA')" to="/upload-data" class="menu-item">
+      <router-link
+        v-if="userStore.canAccessSection('UPLOAD_DATA')"
+        to="/upload-data"
+        class="menu-item"
+        aria-label="Загрузка данных"
+        title="Загрузка данных"
+      >
         <div class="icon">
           <SidebarPageIcon page="upload-data" />
         </div>
-        <span>Загрузка данных</span>
+        <span class="menu-label">Загрузка данных</span>
       </router-link>
       
-      <router-link v-if="userStore.canAccessSection('MODEL_TRAINING')" to="/model-training" class="menu-item">
+      <router-link
+        v-if="userStore.canAccessSection('MODEL_TRAINING')"
+        to="/model-training"
+        class="menu-item"
+        aria-label="Обучение модели"
+        title="Обучение модели"
+      >
         <div class="icon">
           <SidebarPageIcon page="model-training" />
         </div>
-        <span>Обучение модели</span>
+        <span class="menu-label">Обучение модели</span>
       </router-link>
 
-      <router-link v-if="userStore.isSuperAdmin" to="/doctors" class="menu-item">
+      <router-link
+        v-if="userStore.isSuperAdmin"
+        to="/doctors"
+        class="menu-item"
+        aria-label="Врачи"
+        title="Врачи"
+      >
         <div class="icon" aria-hidden="true">
           <svg
             width="24"
@@ -52,7 +82,7 @@
             <path d="M14.6667 12.8334C15.8478 12.8334 16.9832 13.2895 17.8363 14.1063C18.6894 14.9232 19.1942 16.0378 19.2454 17.2178L19.25 17.4167V18.3334C19.2501 18.7959 19.0755 19.2414 18.761 19.5805C18.4465 19.9197 18.0154 20.1274 17.5542 20.1621L17.4167 20.1667H4.58333C4.12081 20.1669 3.67531 19.9922 3.33616 19.6777C2.99701 19.3632 2.78927 18.9321 2.75458 18.4709L2.75 18.3334V17.4167C2.75007 16.2356 3.20608 15.1001 4.02294 14.2471C4.8398 13.394 5.95444 12.8892 7.13442 12.838L7.33333 12.8334H14.6667ZM11 1.83337C12.2156 1.83337 13.3814 2.31626 14.2409 3.1758C15.1004 4.03534 15.5833 5.20113 15.5833 6.41671C15.5833 7.63228 15.1004 8.79807 14.2409 9.65761C13.3814 10.5172 12.2156 11 11 11C9.78442 11 8.61864 10.5172 7.75909 9.65761C6.89955 8.79807 6.41667 7.63228 6.41667 6.41671C6.41667 5.20113 6.89955 4.03534 7.75909 3.1758C8.61864 2.31626 9.78442 1.83337 11 1.83337Z" />
           </svg>
         </div>
-        <span>Врачи</span>
+        <span class="menu-label">Врачи</span>
       </router-link>
 
       <div class="retrain-model" v-if="userStore.canAccessSection('RETRAIN') && showRetrainBlock">
@@ -111,8 +141,13 @@ async function handleLogout() {
 @use '@/styles/variables' as *;
 
 .sidebar-glass {
+  @include custom-scrollbar;
+
+  flex-shrink: 0;
+  overflow-y: auto;
   width: 240px;
   height: 100vh;
+  height: 100dvh;
   position: fixed;
   left: 0;
   top: 0;
@@ -130,6 +165,7 @@ async function handleLogout() {
 }
 
 .sidebar-header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -172,12 +208,14 @@ async function handleLogout() {
 
 
 .main-menu {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
 .menu-item {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -211,7 +249,20 @@ async function handleLogout() {
   }
 }
 
+.menu-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-item:focus-visible,
+.logout-btn:focus-visible {
+  @include focus-ring;
+}
+
 .sidebar-footer {
+  flex-shrink: 0;
   margin-top: auto; // Прижимает футер к низу
   display: flex;
   flex-direction: column;
@@ -259,6 +310,7 @@ async function handleLogout() {
 
 @media (max-width: 768px) {
   .sidebar-glass {
+    align-self: flex-start;
     position: relative;
     width: 100%;
     height: auto;
@@ -284,6 +336,31 @@ async function handleLogout() {
   .user-profile {
     justify-content: flex-start;
     gap: 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  .main-menu {
+    gap: 8px;
+  }
+
+  .menu-item,
+  .menu-item:hover,
+  .menu-item.router-link-active {
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 10px;
+  }
+
+  .menu-label {
+    display: none;
+  }
+
+  .retrain-model {
+    flex-basis: 100%;
   }
 }
 

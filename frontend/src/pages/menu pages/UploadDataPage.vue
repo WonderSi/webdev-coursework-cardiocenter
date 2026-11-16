@@ -1232,6 +1232,10 @@ input[type="radio"] {
 
 .error-banner {
   margin-left: 240px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 }
 
 // --- СТИЛИ ДЛЯ ПАЦИЕНТА, ДОПОЛНИТЕЛЬНЫЕ

@@ -224,17 +224,6 @@ function onDoctorBlocked(doctor: Doctor) {
   @include focus-ring(3px, 3px);
 }
 
-.doctors-sidebar :deep(.username) {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.doctors-sidebar :deep(.user-profile > .icon),
-.doctors-sidebar :deep(.logout-btn) {
-  flex-shrink: 0;
-}
 
 .directory-card {
   overflow: hidden;

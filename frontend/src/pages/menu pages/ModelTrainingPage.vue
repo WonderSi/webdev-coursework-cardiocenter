@@ -758,6 +758,10 @@ onUnmounted(() => {
 
 .error-banner {
   margin-left: 240px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 }
 
 .fade-enter-active,
