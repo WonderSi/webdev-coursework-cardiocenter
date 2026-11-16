@@ -3,9 +3,15 @@
   <div class="dashboards-grid-container" :aria-busy="loading">
     <div class="dashboard-card dashboard-controls col-6">
       <div class="card-title">Аналитика обследований</div>
-      <label for="dashboard-model">Тип записей:
-        <AppSelect id="dashboard-model" v-model="modelKind" :options="modelOptions" label="Тип записей" />
-      </label>
+      <div class="model-filter">
+        <label for="dashboard-model">Тип записей:</label>
+        <AppSelect
+          id="dashboard-model"
+          v-model="modelKind"
+          :options="modelOptions"
+          label="Тип записей"
+        />
+      </div>
       <p>Показатели относятся к выбранному типу записей. Количество записей не равно количеству уникальных людей.</p>
       <p v-if="loading" role="status">Загрузка данных…</p>
       <p v-else-if="errorMessage" role="alert">{{ errorMessage }} <button type="button" @click="load">Повторить</button></p>
@@ -221,21 +227,12 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
 }
 .dashboard-controls {
   gap: 12px;
-  select {
-    max-width: 100%;
-    min-width: 0;
-    padding: 8px 12px;
-    margin-left: 8px;
-    background: rgba($color-white, 0.5);
-    border: 1.5px solid rgba($color-secondary, 0.5);
-    border-radius: 100px;
-    font: inherit;
-    color: $color-text;
-    text-align: left;
-    outline: none;
-    transition: border-color 0.2s;
-    &:focus { border-color: $color-accent; }
-  }
   p { margin: 0; }
+}
+
+.model-filter {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
 }
 </style>
