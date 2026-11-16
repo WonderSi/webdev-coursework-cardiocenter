@@ -1,287 +1,277 @@
-<template>
-  <div class="login-page">
-    <div class="smaller-logo-container">
-      <img src="@/assets/logo.png" alt="logo" class="logo" />
-    </div>
-    
-    <div class="login-card">
-      <div class="login-card-header">Добро пожаловать</div>
-      <div class="login-card-header-subtext">Войдите, чтобы использовать сервис</div>
-
-      <div class="login-form">
-        <div class="login-fields">
-          <div class="form-field">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              class="login-input"
-              placeholder="doctor@niikpssz.ru"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="password">Пароль</label>
-            <div class="password-wrapper">
-              <input
-                id="password"
-                v-model="password"
-                :type="isPasswordVisible ? 'text' : 'password'"
-                class="login-input"
-                placeholder="••••••••"
-              />
-              <button
-                class="eye-btn"
-                type="button"
-                :aria-label="isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'"
-                :aria-pressed="isPasswordVisible"
-                aria-controls="password"
-                @click="togglePasswordVisibility"
-              >
-                <span v-if="isPasswordVisible" v-html="eyeOpenSvg"></span>
-                <span v-else v-html="eyeClosedSvg"></span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="login-btn-and-error">
-        <p class="login-error">{{ error }}</p>
-
-        <button class="login-btn" :disabled="loading" @click="handleLogin">
-        {{ loading ? 'Вход...' : 'Войти' }}
-        </button>
-      </div>
-      
-      <button class="backToHomePage-btn" @click="goBackHomePage"> 
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-        Вернуться
-      </button>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue'
+﻿<script setup lang="ts">
+import { onScopeDispose, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
 
 const router = useRouter()
 const userStore = useUserStore()
+const email = shallowRef('')
+const password = shallowRef('')
+const isPasswordVisible = shallowRef(false)
+const loading = shallowRef(false)
+const error = shallowRef('')
+let active = true
 
-// Состояния формы
-const email = ref('')
-const password = ref('')
-const isPasswordVisible = ref(false)
-const loading = ref(false)
-const error = ref('')
+onScopeDispose(() => {
+  active = false
+  password.value = ''
+})
 
-const eyeOpenSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 6.5C13.8387 6.49389 15.6419 7.00678 17.2021 7.97973C18.7624 8.95267 20.0164 10.3462 20.82 12C19.17 15.37 15.8 17.5 12 17.5C8.2 17.5 4.83 15.37 3.18 12C3.98362 10.3462 5.23763 8.95267 6.79788 7.97973C8.35813 7.00678 10.1613 6.49389 12 6.5ZM12 4.5C7 4.5 2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C17 19.5 21.27 16.39 23 12C21.27 7.61 17 4.5 12 4.5ZM12 9.5C12.663 9.5 13.2989 9.76339 13.7678 10.2322C14.2366 10.7011 14.5 11.337 14.5 12C14.5 12.663 14.2366 13.2989 13.7678 13.7678C13.2989 14.2366 12.663 14.5 12 14.5C11.337 14.5 10.7011 14.2366 10.2322 13.7678C9.76339 13.2989 9.5 12.663 9.5 12C9.5 11.337 9.76339 10.7011 10.2322 10.2322C10.7011 9.76339 11.337 9.5 12 9.5ZM12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5Z" fill="#8A8FA8"/></svg>`
-const eyeClosedSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75" stroke="#8A8FA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-
-// Логика кнопок
-const goBackHomePage = () => router.push('/')
-
-const togglePasswordVisibility = () => {
-  isPasswordVisible.value = !isPasswordVisible.value
-}
-
-const handleLogin = async () => {
+async function handleLogin() {
+  if (loading.value) return
   error.value = ''
   loading.value = true
   try {
-    await userStore.login(email.value, password.value)
-    router.push('/dashboards')
+    await userStore.login(email.value.trim(), password.value)
+    if (active) await router.push('/dashboards')
   } catch {
-    error.value = 'Неверный логин или пароль'
+    if (active) error.value = 'Неверный логин или пароль'
   } finally {
-    loading.value = false
+    if (active) loading.value = false
   }
 }
-
 </script>
 
-<style scoped lang="scss">
-@use '@/styles/variables' as *;
+<template>
+  <main class="login-page">
+    <img src="@/assets/logo.png" alt="НИИ КПССЗ" class="login-logo" />
+    <section class="login-card" aria-labelledby="login-title">
+      <header class="login-header">
+        <h1 id="login-title" class="login-card-header">Добро пожаловать</h1>
+        <p class="login-card-header-subtext">Войдите, чтобы использовать сервис</p>
+      </header>
 
+      <form class="login-form" :aria-busy="loading" @submit.prevent="handleLogin">
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            v-model="email"
+            type="email"
+            name="email"
+            class="login-input"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            placeholder="doctor@niikpssz.ru"
+            required
+          />
+        </div>
+        <div class="form-field">
+          <label for="password">Пароль</label>
+          <div class="password-wrapper">
+            <input
+              id="password"
+              v-model="password"
+              :type="isPasswordVisible ? 'text' : 'password'"
+              name="password"
+              class="login-input"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              required
+            />
+            <button
+              class="eye-btn"
+              type="button"
+              :aria-label="isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'"
+              :aria-pressed="isPasswordVisible"
+              aria-controls="password"
+              @click="isPasswordVisible = !isPasswordVisible"
+            >
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <template v-if="isPasswordVisible">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="2" />
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+                </template>
+                <path
+                  v-else
+                  d="M15 18L14.278 14.75M2 8C2.74835 10.0508 4.10913 11.8219 5.8979 13.0733C7.68667 14.3247 9.81695 14.9959 12 14.9959C14.1831 14.9959 16.3133 14.3247 18.1021 13.0733C19.8909 11.8219 21.2516 10.0508 22 8M20 15L18.274 12.95M4 15L5.726 12.95M9 18L9.722 14.75"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="login-actions">
+          <p id="login-error" class="login-error" role="alert">{{ error }}</p>
+          <button class="login-btn" type="submit" :disabled="loading">
+            {{ loading ? 'Вход...' : 'Войти' }}
+          </button>
+        </div>
+      </form>
+
+      <RouterLink class="backToHomePage-btn" to="/">
+        <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Вернуться
+      </RouterLink>
+    </section>
+  </main>
+</template>
+
+<style scoped lang="scss">
 .login-page {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-  overflow-y: auto;
-  padding: 20px;
   gap: 24px;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
   box-sizing: border-box;
 }
 
-.login-form {
-  display: flex;
-  flex-direction: column;
-}
-
-.login-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: $color-text;
-  }
-
-  .login-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1.5px solid $color-secondary;
-    border-radius: 16px;
-    font-size: 1rem;
-    font-family: inherit;
-    color: $color-text;
-    background: $color-white;
-    transition: border-color 0.2s ease;
-    box-sizing: border-box;
-
-    &:focus {
-      outline: none;
-      border-color: $color-accent;
-    }
-
-    &::placeholder {
-      color: rgba($color-secondary, 0.6);
-    }
-  }
+.login-logo {
+  display: block;
+  flex-shrink: 0;
+  width: clamp(72px, 14vh, 100px);
+  height: auto;
 }
 
 .login-card {
+  box-sizing: border-box;
   width: 100%;
   max-width: 420px;
-  display: flex;
-  flex-direction: column;
-
-  background: $color-white;
+  min-width: 0;
+  padding: clamp(24px, 5vw, 40px) clamp(20px, 7vw, 50px);
   border-radius: $radius-basic-card;
-  padding: 40px 50px;
-  filter: drop-shadow(0 5 20 rgba(7, 14, 44, 0.2));
-  box-sizing: border-box;
+  background: $color-white;
+  color: $color-text;
+}
+
+.login-header {
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .login-card-header {
-  font-size: 1.5rem;
+  font-size: clamp(1.25rem, 5vw, 1.5rem);
   font-weight: 700;
-  color: $color-text;
-  text-align: center;
+  line-height: 1.3;
 }
 
 .login-card-header-subtext {
-  font-weight: 300;
-  padding-top: 10px;
-  padding-bottom: 40px;
-  font-size: 1.1rem;
+  margin-top: 10px;
   color: $color-secondary;
-  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 300;
+  line-height: 1.4;
 }
 
-
-.login-card-text {
+.login-form,
+.form-field {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  min-width: 0;
+}
 
-  p {
+.login-form {
+  gap: 8px;
+}
+
+.form-field + .form-field {
+  margin-top: 24px;
+}
+
+.form-field {
+  gap: 8px;
+
+  label {
     font-size: 0.9rem;
-    line-height: 1.6;
-    color: $color-text;
-    text-align: justify;
-  }
-}
-
-// error
-
-.login-btn-and-error {
-  margin-bottom: 36px;  // от ошибки: 17.5 + 10.5 + 8 = 36
-  margin-top: 8px;
-  .login-error {
-    color: $color-red;
-    font-size: 0.875rem;
-    text-align: center;
-    min-height: 17.5px;
-    margin-bottom: 10.5px;
-  }
-
-  .login-btn {
-    width: 100%;
-    border: none;
-    padding: 13px;
-    border-radius: $radius-rect-buttons;
-    background: $color-accent;
-    color: $color-white;
-    font-size: 1rem;
     font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.2s ease;
-
-    &:hover {
-      background: $color-accent-lighter;
-    }
   }
 }
 
+.login-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 12px 16px;
+  border: 1.5px solid $color-secondary;
+  border-radius: 16px;
+  background: $color-white;
+  color: $color-text;
+  font: inherit;
+  font-size: 1rem;
 
-// buttons
+  &:focus {
+    border-color: $color-accent;
+    outline: none;
+  }
+
+  &::placeholder {
+    color: rgba($color-secondary, 0.6);
+  }
+}
+
+.login-error {
+  min-height: 18px;
+  margin-bottom: 10px;
+  color: $color-red;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.login-btn {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px;
+  border: 0;
+  border-radius: $radius-rect-buttons;
+  background: $color-accent;
+  color: $color-white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: $color-accent-lighter;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
 
 .backToHomePage-btn {
   display: flex;
+  align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
-  border: none;
-  background: transparent;
+  min-height: 44px;
+  margin-top: 24px;
   color: $color-accent;
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
+  text-decoration: none;
+}
 
-  &:hover {
-    opacity: 0.7;
-  }
+.back-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.login-btn:focus-visible,
+.backToHomePage-btn:focus-visible {
+  @include focus-ring;
 }
 
 .password-wrapper {
   --password-surface: #{$color-white};
   position: relative;
-  display: flex;
-  align-items: center;
+  min-width: 0;
 
   .login-input {
-    padding-right: 40px;
-  }
-
-  // Фейд текста перед иконкой
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    right: 36px;
-    bottom: 2px;
-    width: 32px;
-    background: linear-gradient(to right, transparent, var(--password-surface));
-    pointer-events: none;
+    padding-right: 44px;
   }
 
   &:has(input:autofill) {
@@ -291,82 +281,74 @@ const handleLogin = async () => {
   &:has(input:-webkit-autofill) {
     --password-surface: #{$color-ui-surface-hover};
   }
+}
 
-  input:autofill {
-    box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
-  }
+.login-input:autofill {
+  color: $color-text;
+  box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
+}
 
-  input:-webkit-autofill {
-    -webkit-text-fill-color: $color-text;
-    box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
-  }
+.login-input:-webkit-autofill {
+  -webkit-text-fill-color: $color-text;
+  box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
+}
 
-  .eye-btn {
+.eye-btn {
+  position: absolute;
+  inset: 2px 2px 2px auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 0 14px 14px 0;
+  background: var(--password-surface);
+  color: $color-secondary;
+  cursor: pointer;
+
+  &::before {
+    content: '';
     position: absolute;
-    right: 2px;
-    top: 2px;
-    bottom: 2px;
-    width: 36px;
-    padding: 0;
-    border-radius: 0 14px 14px 0;
-    background: var(--password-surface);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: $color-secondary;
-    &:hover { opacity: 1; }
+    inset: 0 100% 0 auto;
+    width: 24px;
+    background: linear-gradient(to right, transparent, var(--password-surface));
+    pointer-events: none;
+  }
 
-    &:focus-visible {
-      outline: 1px solid $color-accent;
-      outline-offset: -4px;
-    }
-
-    span {
-      display: flex;
-    }
+  &:focus-visible {
+    outline: 1px solid $color-accent;
+    outline-offset: -4px;
   }
 }
 
-.remember-me {
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: $color-secondary;
-    cursor: pointer;
-    
-    input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 1.5px solid $color-secondary;
-      border-radius: 4px;
-      background-color: transparent;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
+.eye-icon {
+  width: 24px;
+  height: 24px;
+}
 
-      &:checked {
-        background-color: $color-accent;
-        border-color: $color-accent; 
-
-        &::after {
-          content: '';
-          position: absolute;
-          left: 4.2px;
-          top: 1.25px;
-          width: 5px;
-          height: 9px;
-          border: solid $color-white;
-          border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
-        }
-      }
-    }
+@media (max-height: 600px) {
+  .login-page {
+    gap: 16px;
   }
 
+  .login-logo {
+    width: 64px;
+  }
+
+  .login-card {
+    padding-block: 24px;
+  }
+
+  .login-header {
+    margin-bottom: 24px;
+  }
+
+  .form-field + .form-field {
+    margin-top: 16px;
+  }
+
+  .backToHomePage-btn {
+    margin-top: 16px;
+  }
+}
 </style>
