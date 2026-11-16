@@ -275,7 +275,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   @media (max-width: 600px) {
     padding: 24px 20px;
