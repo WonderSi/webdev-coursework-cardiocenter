@@ -842,19 +842,22 @@ async function downloadTemplate() {
   gap: 24px;
   flex-shrink: 0;
 
-  .cancel-all-btn {
+  > button {
     justify-content: center;
     align-items: center;
-    color: $color-accent;
     width: 100%;
     display: flex;
     padding: 13px;
-    background: transparent;
-    border: 2px solid $color-accent;
     border-radius: $radius-rect-buttons;
     white-space: nowrap;
     font-weight: 600;
     font-size: 1rem;
+  }
+
+  .cancel-all-btn {
+    color: $color-accent;
+    background: transparent;
+    border: 2px solid $color-accent;
     &:hover {
       background: $color-accent;
       color: $color-white;
@@ -863,17 +866,9 @@ async function downloadTemplate() {
   }
 
   .upload-btn {
-    justify-content: center;
-    display: flex;
-    padding: 13px;
-    width: 100%;
     background: $color-accent;
-    white-space: nowrap;
     border: none;
-    border-radius: $radius-rect-buttons;
     color: $color-white;
-    font-weight: 600;
-    font-size: 1rem;
     &:hover {
       background: $color-accent-lighter;
       cursor: pointer;
@@ -1189,7 +1184,7 @@ input[type="radio"] {
   width: 18px; 
   height: 18px;
   
-  border: 2px solid rgba($color-secondary, 0.5); 
+  border: 1.5px solid rgba($color-secondary, 0.5);
   border-radius: 50%;
   cursor: pointer;
   position: relative;
@@ -1352,6 +1347,7 @@ input[type="radio"] {
 
   .upload-btn {
     justify-content: center;
+    align-items: center;
     display: flex;
     padding: 13px;
     width: 50%;

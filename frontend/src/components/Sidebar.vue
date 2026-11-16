@@ -2,10 +2,10 @@
   <aside class="sidebar-glass">
     <div class="sidebar-header">
       <router-link to="/" class="logo-link">
-      <div class="logo">
-        <img src="@/assets/logo-sidebar.png" alt="logo"/>
-      </div>
-      <div class="nii-text">НИИ КПССЗ</div>
+        <div class="logo">
+          <img src="@/assets/logo-sidebar.png" alt="logo"/>
+        </div>
+        <div class="nii-text">НИИ КПССЗ</div>
       </router-link>
     </div>
 
@@ -96,12 +96,12 @@
         <span class="menu-label">Врачи</span>
       </router-link>
 
-      <div class="retrain-model" v-if="userStore.canAccessSection('RETRAIN') && showRetrainBlock">
-        <p class="retrain-text">Переобучение из интерфейса временно недоступно.</p>
-        <button class="retrain-btn" disabled>Переобучить</button>
-      </div>
-      
     </nav>
+
+    <div class="retrain-model" v-if="userStore.canAccessSection('RETRAIN') && showRetrainBlock">
+      <p class="retrain-text">Переобучение из интерфейса временно недоступно.</p>
+      <button class="retrain-btn" disabled>Переобучить</button>
+    </div>
 
     <div class="sidebar-footer">
       <p v-if="logoutError" role="alert">{{ logoutError }}</p>
@@ -194,12 +194,6 @@ async function handleLogout() {
     }
   }
 
-  .sidebar-logo {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-  }
-
   .nii-text {
     font-size: 1.3rem;
     font-weight: 700;
@@ -211,7 +205,7 @@ async function handleLogout() {
 .divider {
   width: 100%;
   height: 0;
-  border-radius: 10;
+  border-radius: 10px;
   border-top: 2px solid rgba($color-glass-white, 0.7);
   margin-top: 24px;
   margin-bottom: 32px;
@@ -230,7 +224,6 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba($color-glass-white, 0.7);
   transition: all 0.2s ease;
 
   text-decoration: none;
@@ -239,6 +232,7 @@ async function handleLogout() {
   font-size: 0.95rem;
 
   .icon {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -337,24 +331,58 @@ async function handleLogout() {
   .main-menu {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .sidebar-header {
+    justify-content: center;
+  }
+
+  .logo-link {
+    max-width: 100%;
+  }
+
+  .menu-item,
+  .menu-item:hover,
+  .menu-item.router-link-active {
+    max-width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    justify-content: center;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .menu-label {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
   }
 
   .sidebar-footer {
     margin: 24px 0 0;
+    align-items: center;
   }
 
   .user-profile {
-    justify-content: flex-start;
+    width: max-content;
+    max-width: 100%;
+    justify-content: center;
     gap: 12px;
+  }
+
+  .retrain-model {
+    align-self: center;
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
   }
 }
 
 @media (max-width: 560px) {
-  .main-menu {
-    gap: 8px;
-  }
-
   .menu-item,
   .menu-item:hover,
   .menu-item.router-link-active {
@@ -370,12 +398,10 @@ async function handleLogout() {
     display: none;
   }
 
-  .retrain-model {
-    flex-basis: 100%;
-  }
 }
 
 .retrain-model {
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
   padding: 12px;
