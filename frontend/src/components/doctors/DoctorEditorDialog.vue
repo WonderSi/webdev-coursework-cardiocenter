@@ -8,9 +8,10 @@ import { adminSections } from '@/types/admin-section'
 import { saveDoctor, doctorErrorMessage } from '@/services/doctors'
 import type { Doctor, DoctorCapabilities, DoctorDraft } from '@/types/doctor'
 
-const { doctor, capabilities } = defineProps<{
+const { doctor, capabilities, occupiedEmails = [] } = defineProps<{
   doctor: Doctor | null
   capabilities: DoctorCapabilities
+  occupiedEmails?: readonly string[]
 }>()
 const emit = defineEmits<{
   close: []
@@ -66,6 +67,10 @@ function validationMessage(input: HTMLInputElement): string {
     return input.name === 'email' ? 'Укажите email для входа.' : 'Укажите пароль.'
   }
   if (input.validity.typeMismatch) return 'Введите корректный email с символом @.'
+  if (input.name === 'email' && !savedDoctor.value
+    && occupiedEmails.some(email => email.toLowerCase() === input.value.trim().toLowerCase())) {
+    return 'Этот email уже используется. Укажите другой адрес для нового врача.'
+  }
   if (input.name === 'password' && input.value) {
     if (input.value.length < 12) return 'Пароль должен содержать не менее 12 символов.'
     if (input.value.length > 100) return 'Пароль должен содержать не более 100 символов.'
@@ -432,6 +437,26 @@ async function submit() {
 
 .text-input:focus {
   border-color: $color-accent;
+}
+
+.text-input:autofill {
+  color: $color-text;
+  caret-color: $color-text;
+  box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
+}
+
+.text-input:-webkit-autofill {
+  -webkit-text-fill-color: $color-text;
+  caret-color: $color-text;
+  box-shadow: 0 0 0 1000px $color-ui-surface-hover inset;
+}
+
+.password-field:has(.text-input:autofill) {
+  background: $color-ui-surface-hover;
+}
+
+.password-field:has(.text-input:-webkit-autofill) {
+  background: $color-ui-surface-hover;
 }
 
 .text-input::placeholder {

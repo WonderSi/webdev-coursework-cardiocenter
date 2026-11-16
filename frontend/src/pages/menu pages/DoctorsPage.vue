@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import DoctorsHelpPanel from '@/components/doctors/DoctorsHelpPanel.vue'
 import DoctorsDirectory from '@/components/doctors/DoctorsDirectory.vue'
@@ -21,6 +21,10 @@ const isHelpOpen = shallowRef(false)
 const editorOpen = shallowRef(false)
 const editingDoctor = shallowRef<Doctor | null>(null)
 const blockingDoctor = shallowRef<Doctor | null>(null)
+const occupiedEmails = computed(() => [
+  userStore.email ?? '',
+  ...doctors.value.map(doctor => doctor.persistedEmail ?? doctor.email),
+])
 
 watch(() => userStore.isSuperAdmin, allowed => {
   if (!allowed) {
@@ -130,6 +134,7 @@ function onDoctorBlocked(doctor: Doctor) {
           :doctor="editingDoctor"
           :capabilities="capabilities"
           @close="closeEditor"
+          :occupied-emails="occupiedEmails"
           @saved="onDoctorSaved"
           @updated="upsertDoctor"
         />
