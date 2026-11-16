@@ -1,0 +1,6 @@
+@use 'mixins' as *;
+
+// One appearance for document, cards, dropdowns and horizontal scroll areas.
+* {
+  @include custom-scrollbar;
+}

@@ -113,10 +113,15 @@
             <div class="input-row">
               <label for="patient-model" class="patient-subheader">Модель:</label>
               <div class="input-group model-input">
-                <select id="patient-model" v-model="singlePatient.modelKind" class="select-field" :class="{ 'field-error': showPatientErrors && patientFieldErrors.modelKind }">
-                  <option :value="null" disabled>Выберите модель</option>
-                  <option v-for="option in MODEL_OPTIONS" :key="option.valueId" :value="option.valueId">{{ option.label }}</option>
-                </select>
+                <AppSelect
+                  id="patient-model"
+                  v-model="singlePatient.modelKind"
+                  class="model-select"
+                  :options="modelOptions"
+                  :invalid="Boolean(showPatientErrors && patientFieldErrors.modelKind)"
+                  placeholder="Выберите модель"
+                  label="Модель пациента"
+                />
               </div>
             </div>
             <div class="input-row">
@@ -218,12 +223,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import { apiFetch } from '@/api/client'
 import { SURVEY_CONFIG } from '@/config/survey.config'
 import { PROFESSIONS } from '@/config/professions'
 
 const formFields = SURVEY_CONFIG.groups.flatMap(group => group.fields)
 const MODEL_OPTIONS = formFields.find(field => field.key === 'modelKind')?.options ?? []
+const modelOptions = MODEL_OPTIONS.map(option => ({ value: option.valueId, label: option.label }))
 const REGIONS = formFields.find(field => field.key === 'region')?.options ?? []
 const PERSONAL_FIELDS = [
   { key: 'age', label: 'Возраст', unit: 'лет', placeholder: '27', min: 18, max: 120, step: '1' },
@@ -746,13 +753,7 @@ async function downloadTemplate() {
       overflow-y: auto;
       padding-right: 16px;
 
-      &::-webkit-scrollbar { width: 10px; }
-      &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
-      &::-webkit-scrollbar-thumb {
-        background: rgba($color-secondary, 0.8);
-        border-radius: 10px;
-        &:hover { background: rgba($color-secondary, 1); }
-      }
+      @include custom-scrollbar;
     
       // СТИЛЬ ОДНОГО ФАЙЛА
       .file-item {
@@ -1110,13 +1111,7 @@ async function downloadTemplate() {
       
       max-height: 360px;
 
-      &::-webkit-scrollbar { width: 10px; }
-      &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
-      &::-webkit-scrollbar-thumb {
-        background: rgba($color-secondary, 0.8);
-        border-radius: 10px;
-        &:hover { background: rgba($color-secondary, 1); }
-      }
+      @include custom-scrollbar;
     }
   }
 }
@@ -1144,7 +1139,7 @@ async function downloadTemplate() {
   align-items: center;
   gap: 10px;
 
-  .input-field, .select-field {
+  .input-field {
     width: 60px;
     height: 24px;
     padding: 8px 12px;
@@ -1174,11 +1169,9 @@ async function downloadTemplate() {
     }
   }
 
-  .select-field {
+  .model-select {
     width: 100%;
     min-width: 0;
-    height: auto;
-    text-align: left;
   }
 
   &.model-input {
@@ -1258,13 +1251,7 @@ input[type="radio"] {
   padding-right: 16px;
   max-height: 360px;
 
-  &::-webkit-scrollbar { width: 10px; }
-  &::-webkit-scrollbar-track { background: rgba($color-secondary, 0.3); border-radius: 10px; margin-bottom: 24px; }
-  &::-webkit-scrollbar-thumb {
-    background: rgba($color-secondary, 0.8);
-    border-radius: 10px;
-    &:hover { background: rgba($color-secondary, 1); }
-  }
+  @include custom-scrollbar;
 }
 
 .lab-inputs {

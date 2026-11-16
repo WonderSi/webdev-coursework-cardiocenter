@@ -4,10 +4,7 @@
     <div class="dashboard-card dashboard-controls col-6">
       <div class="card-title">Аналитика обследований</div>
       <label for="dashboard-model">Тип записей:
-        <select id="dashboard-model" v-model="modelKind">
-          <option value="city">City — отдельные обследования</option>
-          <option value="region">Region — сводные записи</option>
-        </select>
+        <AppSelect id="dashboard-model" v-model="modelKind" :options="modelOptions" label="Тип записей" />
       </label>
       <p>Показатели относятся к выбранному типу записей. Количество записей не равно количеству уникальных людей.</p>
       <p v-if="loading" role="status">Загрузка данных…</p>
@@ -41,12 +38,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
+import AppSelect from '@/components/ui/AppSelect.vue'
 import ChartCard from '@/components/dashboards/ChartCard.vue'
 import { useDashboardCharts } from '@/composables/useDashboardsCharts'
 import { use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
 import { BarChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
+
+const modelOptions = [
+  { value: 'city' as const, label: 'City — отдельные обследования' },
+  { value: 'region' as const, label: 'Region — сводные записи' },
+]
 
 use([SVGRenderer, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent])
 const { stats, modelKind, loading, errorMessage, load, chartAlcohol, chartGender, chartLung,

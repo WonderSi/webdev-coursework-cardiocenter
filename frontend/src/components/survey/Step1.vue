@@ -3,18 +3,13 @@
     <div class="form-row" v-for="field in group.fields" :key="field.key">
       <span :id="`${field.key}-label`" class="field-label">{{ field.label }}:</span>
 
-      <select
+      <AppSelect
         v-if="field.type === 'select'"
         class="select-field"
-        :name="field.key"
-        :aria-labelledby="`${field.key}-label`"
+        :labelledby="`${field.key}-label`"
+        :options="(field.options ?? []).map(option => ({ value: option.valueId, label: option.label }))"
         v-model="answers[field.key]"
-      >
-        <option :value="null" disabled>Выберите вариант</option>
-        <option v-for="opt in field.options" :key="opt.valueId" :value="opt.valueId">
-          {{ opt.label }}
-        </option>
-      </select>
+      />
 
       <!-- Radio -->
       <div v-else-if="field.type === 'radio'" class="radio-group-horizontal">
@@ -46,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import AppSelect from '@/components/ui/AppSelect.vue'
 import type { SurveyGroup } from '@/stores/survey.store'
 
 defineProps<{
@@ -76,12 +72,6 @@ defineProps<{
 .select-field {
   width: 100%;
   min-width: 0;
-  padding: 10px 12px;
-  border: 1.5px solid $color-accent-lighter2;
-  border-radius: 10px;
-  background: $color-white;
-  color: $color-text;
-  font: inherit;
 }
 
 .field-label {

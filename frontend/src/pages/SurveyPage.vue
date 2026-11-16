@@ -285,16 +285,7 @@ onUnmounted(() => {
     padding: 24px 20px;
   }
 
-  &::-webkit-scrollbar { width: 6px; color: $color-accent; }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-    margin: 20px 0;
-    }
-  &::-webkit-scrollbar-thumb {
-    background-color: $color-accent;
-    border-radius: 10px;
-    }
-  &::-webkit-scrollbar-thumb:hover { background-color: $color-accent; }
+  @include custom-scrollbar;
 }
 
 .title {
