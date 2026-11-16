@@ -305,6 +305,9 @@ onUnmounted(() => {
 }
 
 .model-training-page {
+  container: training-layout / inline-size;
+  max-width: 2400px;
+  min-width: 0;
   margin-left: 240px;
   padding-inline: 80px;
   box-sizing: border-box;
@@ -646,66 +649,6 @@ onUnmounted(() => {
   }
 }
 
-// --- АДАПТИВНОСТЬ
-
-@media (max-width: 1024px) {
-
-  .disease-card .card-content {
-    flex-direction: column;
-    gap: 32px;
-    padding: 24px;
-    
-    .col {
-      width: 100%;
-      flex: none;
-    }
-
-    .div-line {
-      width: 100%;
-      height: 2px;
-      margin-inline: 0;
-    }
-  }
-}
-
-@media (max-width: 1500px) {
-
-  .one-stat-ratio {
-    .diseased-healthy {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      justify-content: space-between;
-      width: 100%;
-
-      .span-container {
-        display: flex;
-        flex-direction: row;
-        gap: 16px;
-      }
-    }
-  }
-}
-
-@media (max-width: 1000px) {
-
-  .one-stat-ratio {
-    .diseased-healthy {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      width: 100%;
-
-      .span-container {
-        display: flex;
-        flex-direction: row;
-        gap: 16px;
-      }
-    }
-  }
-}
-
-
 // анимация сворачивания
 .collapse-enter-active,
 .collapse-leave-active {
@@ -772,6 +715,61 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+
+// Reflow against the content width remaining beside the sidebar.
+.disease-card,
+.disease-card .card-header,
+.disease-card .card-content,
+.one-stat .icon-and-name,
+.weights-note .note-content { min-width: 0; max-width: 100%; }
+.disease-card .card-content {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2px minmax(0, 0.925fr) 2px minmax(0, 1.4fr);
+  column-gap: 32px;
+}
+.disease-card .card-content .div-line { margin-inline: 0; }
+.disease-card .card-header { align-items: center; }
+.disease-card .card-header .header-icon,
+.one-stat .icon-and-name svg,
+.one-stat .icon-and-name .circle-icon { flex-shrink: 0; }
+.disease-card .card-header .disease-name,
+.disease-card .card-content .subheader span,
+.one-stat-name,
+.weights-note { overflow-wrap: anywhere; }
+.one-stat { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+.stat-number { overflow-wrap: anywhere; }
+.disease-card .card-content .confusion-matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+.matrix-cell { min-width: 0; overflow-wrap: anywhere; }
+
+@container training-layout (max-width: 1200px) {
+  .disease-card .card-content { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; padding: 24px; }
+  .disease-card .card-content .div-line { display: none; }
+  .disease-card .card-content .col { width: 100%; }
+  .disease-card .card-content .third-col { grid-column: 1 / -1; }
+  .disease-card .card-content .matrix-container { min-height: 320px; }
+  .one-stat-ratio .diseased-healthy { flex-direction: column; gap: 6px; }
+  .weights-note .note-content .two-weights-span { width: 100%; gap: 12px; flex-wrap: wrap; }
+}
+
+@container training-layout (max-width: 700px) {
+  .disease-card .card-content { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+  .disease-card .card-header { padding: 16px; gap: 12px; }
+  .disease-card .card-header .disease-name { font-size: clamp(1.25rem, 4vw, 2rem); }
+  .disease-card .card-content .col.first-col .stats-list { gap: 20px; }
+  .disease-card .card-content .subheader { margin-bottom: 16px; }
+  .disease-card .card-content .subheader.smaller { margin-top: 24px; }
+  .disease-card .card-content .confusion-matrix .matrix-cell { padding: 12px 8px; }
+  .disease-card .card-content .confusion-matrix .matrix-cell .cell-label { font-size: clamp(1rem, 4vw, 1.5rem); }
+  .disease-card .card-content .matrix-container .matrix-label-top,
+  .disease-card .card-content .matrix-container .matrix-content .matrix-label-left { font-size: 1rem; }
+  .loading-state .loading-text-container { max-width: calc(100% - 32px); padding: 16px; }
+}
+
+@media (max-width: 768px) {
+  .model-training-page { margin-block: 16px; gap: 24px; }
 }
 
 </style>

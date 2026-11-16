@@ -643,8 +643,12 @@ async function downloadTemplate() {
 
 // -------------------------- КОНТЕЙНЕР СТРАНИЦЫ
 .upload-page {
+  container: upload-layout / inline-size;
+  width: calc(100% - 240px);
+  max-width: 2200px;
+  min-width: 0;
   margin-left: 240px;
-  padding-inline: 200px;
+  padding-inline: 40px;
   box-sizing: border-box;
 
   display: flex;
@@ -656,6 +660,7 @@ async function downloadTemplate() {
     padding-inline: 40px;
   }
   @media (max-width: 768px) {
+    width: 100%;
     margin-left: 0;
     padding-inline: 16px;
   }
@@ -663,7 +668,7 @@ async function downloadTemplate() {
 
 .upload-duo-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 32px;
   width: 100%;
@@ -681,7 +686,8 @@ async function downloadTemplate() {
 .section-header {
   font-size: 1.25rem;
   font-weight: 600;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   color: $color-text;
   margin-bottom: 24px;
 }
@@ -1224,7 +1230,7 @@ input[type="radio"] {
 
 .part-two-columns {
   display: grid;
-  grid-template-columns: 0.85fr 1.5fr 2fr;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr) minmax(0, 2fr);
   gap: 32px;
   align-items: start;
 }
@@ -1361,6 +1367,89 @@ input[type="radio"] {
       cursor: pointer;
     }
   }
+}
+
+
+// Reflow against the content area left by the sidebar, rather than the monitor.
+.upload-duo-cards > *,
+.one-patient-input-card,
+.input-patient-part-one > *,
+.part-two-columns > *,
+.input-row,
+.bottom-card-text-block {
+  min-width: 0;
+}
+
+.one-patient-input-card .patient-subheader,
+.lab-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.one-patient-input-card .input-patient-part-one {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 32px;
+}
+
+.input-row { gap: 12px; }
+.input-group:not(.model-input) { flex-shrink: 0; }
+.radio-group-horizontal { flex-wrap: wrap; }
+.file-icon { flex-shrink: 0; }
+
+@container upload-layout (max-width: 1200px) {
+  .part-two-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .part-two-col3 { grid-column: 1 / -1; }
+  .upload-card .upload-card-bottom-part {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .upload-card .download-template-btn { align-self: flex-start; }
+  .upload-card .upload-card-upper-part .upload-border { padding: 24px; }
+  .lab-inputs .input-row { flex-wrap: wrap; }
+}
+
+@container upload-layout (max-width: 880px) {
+  .upload-duo-cards { grid-template-columns: minmax(0, 1fr); }
+  .upload-duo-cards > .files-list-card { min-height: 320px; }
+  .one-patient-input-card .input-patient-part-one { grid-template-columns: minmax(0, 1fr); }
+  .one-patient-input-card .input-patient-part-one .input-patient-one-col1 { flex-basis: auto; }
+  .part-two-columns { grid-template-columns: minmax(0, 1fr); }
+  .part-two-col3 { grid-column: auto; }
+  .one-patient-input-card .input-patient-part-one .list-wrapper { max-height: none; overflow: visible; padding-right: 0; }
+}
+
+@container upload-layout (max-width: 480px) {
+  .upload-duo-cards,
+  .input-patient-part-two,
+  .part-two-columns,
+  .one-patient-input-card .input-patient-part-one { gap: 20px; }
+  .one-patient-input-card,
+  .wrapper_column,
+  .upload-card .upload-card-upper-part { padding: 16px; }
+  .upload-card .upload-card-upper-part .upload-border { padding: 16px 12px; text-align: center; }
+  .upload-card .upload-card-bottom-part { padding: 32px 16px 16px; }
+  .files-list-card .files-list-actions { gap: 8px; }
+  .files-list-card .files-list-actions button { padding: 12px 8px; white-space: normal; }
+  .files-list-card .main-content-files-list .file-list { padding-right: 0; }
+  .files-list-card .main-content-files-list .file-list .file-item .file-item-main { gap: 8px; padding: 8px 0; flex-wrap: wrap; }
+  .files-list-card .main-content-files-list .file-list .file-item .file-item-main .file-right-side { margin-left: auto; gap: 8px; }
+  .one-patient-input-card .input-patient-part-one .input-patient-one-col1 .section-info .input-row,
+  .lab-inputs .input-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .input-group.model-input { width: 100%; margin-left: 0; flex: auto; }
+  .input-group .input-field { width: 76px; min-height: 36px; }
+  .input-group .unit { min-width: 0; text-align: left; }
+  .radio-group-horizontal { gap: 12px; }
+  .radio-group-vertical { gap: 6px; }
+  .radio-label { min-height: 28px; }
+  .submit-patient-action .upload-btn,
+  .patient-form-msg { width: 100%; white-space: normal; }
+  .div-line, .div-line2 { margin-block: 20px; }
+}
+
+@media (max-width: 768px) {
+  .upload-page { margin-block: 16px; gap: 20px; }
 }
 
 </style>

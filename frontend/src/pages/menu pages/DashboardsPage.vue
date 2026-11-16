@@ -68,22 +68,10 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
 @use '@/styles/variables' as *;
 
 // УТИЛИТЫ СЕТКИ
-.col-1 { grid-column: span 1; }
-.col-2 { grid-column: span 2; }
-.col-3 { grid-column: span 3; }
-.col-6 { grid-column: span 6; }
-
+.col-1, .col-2, .col-3 { grid-column: span 1; }
+.col-6 { grid-column: 1 / -1; }
 .row-1 { grid-row: span 1; }
 .row-2 { grid-row: span 2; }
-
-@media (max-width: 1400px) {
-  .col-3 { grid-column: span 6; } 
-  .col-1 { grid-column: span 3; }
-  .col-2 { grid-column: span 6; }
-}
-@media (max-width: 1024px) {
-  .col-1, .col-2, .col-3, .col-6 { grid-column: span 6; }
-}
 
 .color-blue { color: $color-accent !important; }
 .color-pink { color: $color-pink-women !important; }
@@ -91,7 +79,7 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
 
 .dashboards-grid-container {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
   grid-auto-rows: minmax(180px, auto);
 
@@ -100,7 +88,7 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
   min-height: 100vh;
   box-sizing: border-box;
   width: calc(100% - 240px);
-  max-width: 1600px;
+  max-width: 2200px;
   margin-left: 240px;
   padding: 40px;
   gap: 24px;
@@ -237,4 +225,22 @@ const emptyChart = computed(() => loading.value ? 'Загрузка…' : errorM
   gap: 12px;
   min-width: 0;
 }
+
+.dashboards-grid-container { min-width: 0; }
+.card-header { flex-wrap: wrap; min-width: 0; }
+.card-title, .dashboard-controls p { overflow-wrap: anywhere; }
+.model-filter { max-width: 520px; width: 100%; }
+@media (min-width: 2100px) {
+  .dashboards-grid-container { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1100px) {
+  .dashboards-grid-container { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .dashboards-grid-container { padding: 12px; gap: 16px; grid-auto-rows: auto; }
+  .dashboard-card { padding: 16px; }
+  .kpi-column { gap: 16px; }
+  .kpi-card { min-height: 150px; }
+}
+
 </style>
