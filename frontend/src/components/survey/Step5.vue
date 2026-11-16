@@ -32,6 +32,7 @@ defineProps<{
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/survey-scale' as survey;
 
 .step-container {
   min-width: 0;
@@ -43,7 +44,7 @@ defineProps<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: survey.size(12);
   width: 100%;
 }
 
@@ -52,7 +53,7 @@ defineProps<{
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: survey.size(10);
 }
 
 .radio-label {
@@ -60,15 +61,15 @@ defineProps<{
   max-width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: survey.size(10);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: survey.text(0.9);
   color: $color-text;
 
   input[type="radio"] {
     accent-color: $color-accent;
-    width: 18px;
-    height: 18px;
+    width: survey.size(18);
+    height: survey.size(18);
     cursor: pointer;
     flex-shrink: 0;
   }

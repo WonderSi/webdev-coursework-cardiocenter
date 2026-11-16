@@ -38,19 +38,20 @@ defineProps<{
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/survey-scale' as survey;
 
 .step-container {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: survey.size(24);
   width: 100%;
-  max-width: 250px;
+  max-width: survey.size(250);
   margin: 0 auto;
 }
 
 .form-row {
-  gap: 12px;
+  gap: survey.size(12);
   min-width: 0;
   display: flex;
   align-items: center;
@@ -58,12 +59,12 @@ defineProps<{
 }
 
 .field-label {
-  font-size: 0.95rem;
+  font-size: survey.text(0.95);
   font-weight: 700;
   color: $color-text;
   white-space: normal;
   overflow-wrap: anywhere;
-  min-width: 100px;
+  min-width: survey.size(100);
 }
 
 .input-group {
@@ -71,15 +72,16 @@ defineProps<{
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  width: 100px;
+  gap: survey.size(8);
+  width: survey.size(100);
 
   .input-field {
-    width: 55px;
-    padding: 6px 10px;
+    height: var(--survey-input-height, 24px);
+    width: survey.size(55);
+    padding: survey.size(6) survey.size(10);
     border: 1.5px solid $color-accent-lighter2;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    border-radius: survey.size(10);
+    font-size: survey.text(0.95);
     color: $color-text;
     outline: none;
     transition: border-color 0.2s;
@@ -95,9 +97,9 @@ defineProps<{
 
   .unit {
     color: $color-text;
-    font-size: 0.85rem;
+    font-size: survey.text(0.85);
     white-space: nowrap;
-    width: 20px;
+    width: survey.size(20);
     text-align: left;
   }
 }
@@ -105,16 +107,16 @@ defineProps<{
 @media (max-width: 600px) {
   .step-container {
     max-width: 100%;
-    gap: 16px;
+    gap: survey.size(16);
   }
 
   .field-label {
-    min-width: 80px;
-    font-size: 0.95rem;
+    min-width: survey.size(80);
+    font-size: survey.text(0.95);
   }
 
   .input-group .input-field {
-    width: 55px;
+    width: survey.size(55);
   }
 }
 

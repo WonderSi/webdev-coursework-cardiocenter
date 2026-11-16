@@ -31,6 +31,7 @@ function positionPopup() {
   const height = Math.max(40, Math.min(200, upwards ? above : below))
   const top = upwards ? rect.top - height - 6 : rect.bottom + 6
   popupStyle.value = {
+    fontSize: getComputedStyle(trigger.value).fontSize,
     left: Math.max(8, Math.min(rect.left, innerWidth - rect.width - 8)) + 'px',
     width: Math.min(rect.width, innerWidth - 16) + 'px',
     maxHeight: height + 'px',
@@ -180,16 +181,16 @@ onScopeDispose(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--app-select-gap, 12px);
   width: 100%;
-  min-height: 43px;
-  padding: 10px 14px;
+  min-height: var(--app-select-height, 43px);
+  padding: var(--app-select-padding, 10px 14px);
   border: 1px solid $color-accent-lighter;
   border-radius: 10px;
   background: rgba($color-white, 0.75);
   color: $color-blue-dark;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--app-select-font-size, 0.875rem);
   text-align: left;
   cursor: pointer;
 }
@@ -217,9 +218,9 @@ onScopeDispose(() => {
 }
 
 .filter-chevron {
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
+  flex: 0 0 var(--app-select-chevron, 18px);
+  width: var(--app-select-chevron, 18px);
+  height: var(--app-select-chevron, 18px);
   color: $color-accent;
 }
 
@@ -257,7 +258,7 @@ onScopeDispose(() => {
   padding: 10px 8px;
   border-radius: 6px;
   color: $color-blue-dark;
-  font-size: 0.875rem;
+  font-size: inherit;
   line-height: 1.4;
   cursor: pointer;
 }

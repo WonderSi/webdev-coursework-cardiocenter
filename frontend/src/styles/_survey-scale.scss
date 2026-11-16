@@ -1,0 +1,8 @@
+// SurveyPage sets these inherited units for large viewports only.
+@function size($pixels) {
+  @return calc(#{$pixels} * var(--survey-unit, 1px));
+}
+
+@function text($rems) {
+  @return calc(#{$rems} * var(--survey-font, 1rem));
+}

@@ -48,14 +48,15 @@ defineEmits<{
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/survey-scale' as survey;
 
 .actions {
   min-width: 0;
   display: flex;
   justify-content: space-between;
   width: 100%;
-  max-width: 360px;
-  height: 48px;
+  max-width: survey.size(360);
+  height: survey.size(48);
   flex-shrink: 0;
 }
 
@@ -63,16 +64,16 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding-top: 2px;
-  padding-right: 12px;
-  width: 130px;
+  gap: survey.size(8);
+  padding-top: survey.size(2);
+  padding-right: survey.size(12);
+  width: survey.size(130);
   height: 100%;
   background: transparent;
   color: $color-accent;
   border: 1.5px solid $color-accent;
   border-radius: $radius-rect-buttons;
-  font-size: 1rem;
+  font-size: survey.text(1);
   font-weight: 600;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -101,16 +102,16 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding-top: 2px;
-  padding-left: 12px;
-  width: 130px;
+  gap: survey.size(8);
+  padding-top: survey.size(2);
+  padding-left: survey.size(12);
+  width: survey.size(130);
   height: 100%;
   background: $color-accent;
   color: $color-white;
   border: none;
   border-radius: $radius-rect-buttons;
-  font-size: 1rem;
+  font-size: survey.text(1);
   font-weight: 600;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -137,13 +138,13 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 130px;
+  width: survey.size(130);
   height: 100%;
   background: $color-accent;
   color: $color-white;
   border: none;
   border-radius: $radius-rect-buttons;
-  font-size: 1rem;
+  font-size: survey.text(1);
   font-weight: 600;
   letter-spacing: 0.5px;
   cursor: pointer;
@@ -158,6 +159,12 @@ defineEmits<{
     background: $color-accent-lighter;
     cursor: not-allowed;
   }
+}
+
+.actions svg {
+  width: survey.size(20);
+  height: survey.size(20);
+  flex-shrink: 0;
 }
 
 @container survey-card (max-width: 440px) {

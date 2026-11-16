@@ -66,49 +66,56 @@ defineProps<{
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/survey-scale' as survey;
 
 .step-container {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: survey.size(24);
   width: 100%;
-  max-width: 400px;
+  max-width: survey.size(400);
 }
 
 .form-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: survey.size(16);
   flex-wrap: wrap;
 }
 
 .select-field {
+  --app-select-font-size: #{survey.text(0.875)};
+  --app-select-height: #{survey.size(43)};
+  --app-select-padding: #{survey.size(10)} #{survey.size(14)};
+  --app-select-gap: #{survey.size(12)};
+  --app-select-chevron: #{survey.size(18)};
   width: 100%;
   min-width: 0;
 }
 
 .field-label {
   overflow-wrap: anywhere;
-  font-size: 0.95rem;
+  font-size: survey.text(0.95);
   font-weight: 700;
   color: $color-text;
   white-space: normal;
-  min-width: 80px;
+  min-width: survey.size(80);
 }
 
 .input-group {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: survey.size(8);
 
   .input-field {
-    width: 70px;
-    padding: 8px 12px;
+    height: var(--survey-input-height, 24px);
+    width: survey.size(70);
+    padding: survey.size(8) survey.size(12);
     border: 1.5px solid $color-accent-lighter2;
-    border-radius: 10px;
-    font-size: 1rem;
+    border-radius: survey.size(10);
+    font-size: survey.text(1);
     color: $color-text;
     outline: none;
     transition: border-color 0.2s;
@@ -124,7 +131,7 @@ defineProps<{
 
   .unit {
     color: $color-text;
-    font-size: 0.9rem;
+    font-size: survey.text(0.9);
     white-space: nowrap;
   }
 }
@@ -133,7 +140,7 @@ defineProps<{
   min-width: 0;
   max-width: 100%;
   display: flex;
-  gap: 20px;
+  gap: survey.size(20);
   flex-wrap: wrap;
 }
 
@@ -142,9 +149,9 @@ defineProps<{
   max-width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: survey.size(8);
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: survey.text(0.95);
   color: $color-text;
 
   span {
@@ -157,8 +164,8 @@ defineProps<{
     flex-shrink: 0;
     order: 2;
     accent-color: $color-accent;
-    width: 18px;
-    height: 18px;
+    width: survey.size(18);
+    height: survey.size(18);
     cursor: pointer;
   }
 }
@@ -167,24 +174,24 @@ defineProps<{
 @media (max-width: 600px) {
   .step-container {
     max-width: 100%;
-    gap: 20px;
+    gap: survey.size(20);
   }
 
   .form-row {
-    gap: 12px;
+    gap: survey.size(12);
   }
 
   .field-label {
-    min-width: 70px;
-    font-size: 0.95rem;
+    min-width: survey.size(70);
+    font-size: survey.text(0.95);
   }
 
   .radio-group-horizontal {
-    gap: 16px;
+    gap: survey.size(16);
   }
 
   .radio-label {
-    font-size: 0.95rem;
+    font-size: survey.text(0.95);
   }
 }
 

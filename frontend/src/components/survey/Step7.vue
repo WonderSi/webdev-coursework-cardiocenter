@@ -37,11 +37,12 @@ defineProps<{
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/survey-scale' as survey;
 
 .step-container {
   min-width: 0;
   width: 100%;
-  max-width: 400px;
+  max-width: survey.size(400);
 }
 
 .question-block {
@@ -57,32 +58,32 @@ defineProps<{
   white-space: normal;
   overflow-wrap: anywhere;
   padding: 0;
-  margin-bottom: 16px;
+  margin-bottom: survey.size(16);
   font-weight: 700;
   color: $color-text;
-  font-size: 1rem;
+  font-size: survey.text(1);
   line-height: 1.3;
 }
 
 .radio-group-horizontal {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
+  gap: survey.size(24);
 }
 
 .radio-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: survey.size(10);
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: survey.text(0.95);
   color: $color-text;
 
   input[type="radio"] {
     flex-shrink: 0;
     accent-color: $color-accent;
-    width: 18px;
-    height: 18px;
+    width: survey.size(18);
+    height: survey.size(18);
     cursor: pointer;
   }
 }

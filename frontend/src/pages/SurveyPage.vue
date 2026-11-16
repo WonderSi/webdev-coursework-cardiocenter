@@ -251,6 +251,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 @use '@/styles/variables' as *;
+@use '@/styles/survey-scale' as survey;
 
 .survey-page {
   display: flex;
@@ -261,18 +262,18 @@ onUnmounted(() => {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  padding: 40px 20px;
+  padding: survey.size(40) survey.size(20);
   box-sizing: border-box;
-  gap: 24px;
+  gap: survey.size(24);
 }
 
 .survey-card {
   container: survey-card / inline-size;
   box-sizing: border-box;
   background: $color-white;
-  border-radius: 24px;
-  padding: 32px 60px;
-  width: 750px;
+  border-radius: survey.size(24);
+  padding: survey.size(32) survey.size(60);
+  width: survey.size(750);
   max-width: 100%;
   box-shadow: 0 10px 30px rgba(7, 14, 44, 0.1);
   display: flex;
@@ -292,11 +293,11 @@ onUnmounted(() => {
 .title {
   max-width: 100%;
   overflow-wrap: anywhere;
-  font-size: 1.2rem;
+  font-size: survey.text(1.2);
   font-weight: 700;
   text-align: center;
   color: $color-text;
-  margin-bottom: 32px;
+  margin-bottom: survey.size(32);
   line-height: 1.4;
   flex-shrink: 0;
 }
@@ -334,7 +335,7 @@ onUnmounted(() => {
 }
 
 .survey-card :deep(.radio-error) {
-  border-radius: 6px;
+  border-radius: survey.size(6);
   outline: 1.5px solid $color-red;
   outline-offset: 4px;
   background: $color-red-bg;
@@ -368,18 +369,18 @@ onUnmounted(() => {
 .progress-bar {
   display: flex;
   width: 95%;
-  margin-bottom: 24px;
+  margin-bottom: survey.size(24);
   gap: 0;
   flex-shrink: 0;
   .step {
     flex: 1;
-    height: 8px;
+    height: survey.size(8);
     background-color: $color-accent-lighter2;
     transition: background-color 0.3s ease;
     border-radius: 0;
     border-right: 10px solid $color-white;
-    &:first-child { border-radius: 4px 0 0 4px; }
-    &:last-child { border-radius: 0 4px 4px 0; border-right: none; }
+    &:first-child { border-radius: survey.size(4) 0 0 survey.size(4); }
+    &:last-child { border-radius: 0 survey.size(4) survey.size(4) 0; border-right: none; }
     &.active { background-color: $color-accent; }
   }
 }
@@ -391,15 +392,15 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 40px;
-  gap: 20px;
+  margin-bottom: survey.size(40);
+  gap: survey.size(20);
 }
 
 .question-text {
   max-width: 100%;
   overflow-wrap: anywhere;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: survey.text(1.1);
   color: $color-text;
 }
 
@@ -408,15 +409,15 @@ onUnmounted(() => {
   max-width: 100%;
   overflow-wrap: anywhere;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: survey.text(0.95);
   line-height: 1.4;
   color: $color-text;
 }
 
 .loading {
-  font-size: 1.1rem;
+  font-size: survey.text(1.1);
   color: $color-text;
-  padding: 48px 0;
+  padding: survey.size(48) 0;
 }
 
 .error-banner {
@@ -426,8 +427,8 @@ onUnmounted(() => {
   right: 0;
   background: $color-red;
   color: $color-white;
-  padding: 14px 20px;
-  font-size: 0.9rem;
+  padding: survey.size(14) survey.size(20);
+  font-size: survey.text(0.9);
   font-weight: 600;
   text-align: center;
   z-index: 1000;
@@ -450,6 +451,21 @@ onUnmounted(() => {
     height: auto;
     min-height: 100dvh;
     overflow: visible;
+  }
+}
+
+// Grow beyond FHD, bounded by the shorter viewport dimension and capped for 4K/5K.
+// CSS viewport sizes already account for OS scaling and browser zoom.
+@media (min-width: 1921px) and (min-height: 900px) {
+  .survey-page {
+    --survey-unit: clamp(1px, min(0.0520833333vw, 0.0925925926dvh), 1.5px);
+    --survey-font: clamp(1rem, min(0.8333333333vw, 1.4814814815dvh), 1.5rem);
+    --survey-input-height: calc(60 * var(--survey-unit) - 36px);
+  }
+
+  .smaller-logo-container .logo {
+    width: survey.size(100);
+    height: survey.size(100);
   }
 }
 
