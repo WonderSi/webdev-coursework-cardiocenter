@@ -45,7 +45,7 @@
                     карту или знать результаты своих обследований.
                     </p>
                 </div>
-                <button class="basic-card-main-btn" @click="goToSurvey">Начать</button>
+                <button class="basic-card-main-btn" @click="goToSurvey">Получить прогноз</button>
                 <button class="basic-card-sub-btn"  @click="goToLogin">Войти как врач</button>
          </div>
     </div>
